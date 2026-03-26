@@ -12,6 +12,9 @@ namespace hcmus_shop.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "role in ('Admin','Sale')");
+
             migrationBuilder.CreateTable(
                 name: "brands",
                 columns: table => new
@@ -43,6 +46,24 @@ namespace hcmus_shop.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_categories", x => x.category_id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ck_users_role",
+                schema: "role in ('Admin','Sale')",
+                columns: table => new
+                {
+                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    username = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    password_hash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    full_name = table.Column<string>(type: "text", nullable: false),
+                    role = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "Sale"),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_ck_users_role", x => x.user_id);
                 });
 
             migrationBuilder.CreateTable(
@@ -80,23 +101,6 @@ namespace hcmus_shop.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_promotions", x => x.promotion_id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "users",
-                columns: table => new
-                {
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    username = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    password_hash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    full_name = table.Column<string>(type: "text", nullable: false),
-                    role = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_users", x => x.user_id);
                 });
 
             migrationBuilder.CreateTable(
@@ -156,7 +160,8 @@ namespace hcmus_shop.Data.Migrations
                     table.ForeignKey(
                         name: "fk_orders_users_user_id",
                         column: x => x.user_id,
-                        principalTable: "users",
+                        principalSchema: "role in ('Admin','Sale')",
+                        principalTable: "ck_users_role",
                         principalColumn: "user_id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -238,7 +243,8 @@ namespace hcmus_shop.Data.Migrations
                     table.ForeignKey(
                         name: "fk_inventory_logs_users_user_id",
                         column: x => x.user_id,
-                        principalTable: "users",
+                        principalSchema: "role in ('Admin','Sale')",
+                        principalTable: "ck_users_role",
                         principalColumn: "user_id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -316,6 +322,13 @@ namespace hcmus_shop.Data.Migrations
                         principalColumn: "instance_id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_ck_users_role_username",
+                schema: "role in ('Admin','Sale')",
+                table: "ck_users_role",
+                column: "username",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_inventory_logs_product_id",
@@ -404,12 +417,6 @@ namespace hcmus_shop.Data.Migrations
                 name: "ix_series_brand_id",
                 table: "series",
                 column: "brand_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_users_username",
-                table: "users",
-                column: "username",
-                unique: true);
         }
 
         /// <inheritdoc />
@@ -437,7 +444,8 @@ namespace hcmus_shop.Data.Migrations
                 name: "promotions");
 
             migrationBuilder.DropTable(
-                name: "users");
+                name: "ck_users_role",
+                schema: "role in ('Admin','Sale')");
 
             migrationBuilder.DropTable(
                 name: "products");

@@ -9,7 +9,7 @@ namespace hcmus_shop.Models
         public string Username { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
-        public string Role { get; set; } = "Sale";                      // Admin, Sale, Manager
+        public string Role { get; set; } = "Sale";                      // Admin, Sale
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();
     }

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Color x:Key="LoginRightPanelColor">#F5F0EB</Color>
+    <Color x:Key="LoginPrimaryColor">#7B4F2E</Color>
+    <Color x:Key="LoginOutlineColor">#6F7EFF</Color>
+
+    <SolidColorBrush x:Key="LoginRightPanelBrush" Color="{StaticResource LoginRightPanelColor}" />
+    <SolidColorBrush x:Key="LoginPrimaryBrush" Color="{StaticResource LoginPrimaryColor}" />
+    <SolidColorBrush x:Key="LoginOutlineBrush" Color="{StaticResource LoginOutlineColor}" />
+
+    <Style x:Key="LoginCardBorderStyle" TargetType="Border">
+        <Setter Property="BorderBrush" Value="{StaticResource LoginOutlineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="30" />
+        <Setter Property="Background" Value="#0DFFFFFF" />
+    </Style>
+
+    <Style x:Key="LoginTextBoxStyle" TargetType="TextBox">
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Padding" Value="12,0" />
+    </Style>
+
+    <Style x:Key="LoginPasswordBoxStyle" TargetType="PasswordBox">
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="PasswordRevealMode" Value="Peek" />
+    </Style>
+
+    <Style x:Key="LoginPrimaryButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource LoginPrimaryBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="18,8" />
+        <Setter Property="MinWidth" Value="90" />
+    </Style>
+
+    <Style x:Key="LoginOutlineButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="#2F2F2F" />
+        <Setter Property="BorderBrush" Value="#D1C9C2" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="18,8" />
+        <Setter Property="MinWidth" Value="90" />
+    </Style>
+
+    <Style x:Key="LoginHyperlinkButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource LoginPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+</ResourceDictionary>

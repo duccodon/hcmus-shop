@@ -1,17 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using hcmus_shop.Services;
+using hcmus_shop.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -23,9 +14,48 @@ namespace hcmus_shop
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        private readonly IAuthService _authService;
+
         public MainWindow()
         {
             InitializeComponent();
+            _authService = Ioc.Default.GetRequiredService<IAuthService>();
+            ConfigureNavigationByRole();
+            NavigateTo("Dashboard");
+            AppNavigationView.SelectedItem = DashboardItem;
+        }
+
+        private void ConfigureNavigationByRole()
+        {
+            var isAdmin = _authService.HasRole("Admin");
+            AdminItem.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void AppNavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        {
+            if (args.SelectedItemContainer?.Tag is string target)
+            {
+                NavigateTo(target);
+            }
+        }
+
+        private void NavigateTo(string target)
+        {
+            switch (target)
+            {
+                case "Dashboard":
+                    ContentFrame.Navigate(typeof(DashboardPage));
+                    break;
+                case "Sales":
+                    ContentFrame.Navigate(typeof(SalesPage));
+                    break;
+                case "Admin":
+                    if (_authService.HasRole("Admin"))
+                    {
+                        ContentFrame.Navigate(typeof(AdminPage));
+                    }
+                    break;
+            }
         }
     }
 }
