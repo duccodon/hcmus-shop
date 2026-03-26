@@ -599,13 +599,16 @@ namespace hcmus_shop.Data.Migrations
                         .HasColumnName("username");
 
                     b.HasKey("UserId")
-                        .HasName("pk_ck_users_role");
+                        .HasName("pk_users");
 
                     b.HasIndex("Username")
                         .IsUnique()
-                        .HasDatabaseName("ix_ck_users_role_username");
+                        .HasDatabaseName("ix_users_username");
 
-                    b.ToTable("ck_users_role", "role in ('Admin','Sale')");
+                    b.ToTable("users", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_users_role", "role in ('Admin','Sale')");
+                        });
                 });
 
             modelBuilder.Entity("hcmus_shop.Models.InventoryLog", b =>
