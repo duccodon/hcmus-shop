@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "hcmus-shop (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "hcmus-shop (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
