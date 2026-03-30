@@ -4,6 +4,9 @@ using hcmus_shop.Views;
 using DashboardPageView = hcmus_shop.Views.Dashboard.DashboardPage;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -15,6 +18,17 @@ namespace hcmus_shop
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        private static readonly Dictionary<string, string> TagToFeatureMap = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Dashboard"] = "Dashboard",
+            ["Sales"] = "Sales",
+            ["Products"] = "Sales",
+            ["Store"] = "Sales",
+            ["Messages"] = "Sales",
+            ["Inventory"] = "Sales",
+            ["Admin"] = "Admin"
+        };
+
         private readonly IAuthService _authService;
         private readonly IFeatureFlagService _featureFlagService;
 
@@ -24,15 +38,22 @@ namespace hcmus_shop
             _authService = Ioc.Default.GetRequiredService<IAuthService>();
             _featureFlagService = Ioc.Default.GetRequiredService<IFeatureFlagService>();
             ConfigureNavigationByFeatureFlag();
-            //NavigateTo("Dashboard");  //test forbidden page
-            NavigateToDefault();
+            NavigateTo("Sales");  //test forbidden page
+            //NavigateToDefault();
         }
 
         private void ConfigureNavigationByFeatureFlag()
         {
-            DashboardItem.Visibility = CanAccessFeature("Dashboard") ? Visibility.Visible : Visibility.Collapsed;
-            SalesItem.Visibility = CanAccessFeature("Sales") ? Visibility.Visible : Visibility.Collapsed;
-            AdminItem.Visibility = CanAccessFeature("Admin") ? Visibility.Visible : Visibility.Collapsed;
+            foreach (var item in AppNavigationView.MenuItems.OfType<NavigationViewItem>())
+            {
+                if (item.Tag is not string tag || !TagToFeatureMap.TryGetValue(tag, out var featureName))
+                {
+                    item.Visibility = Visibility.Visible;
+                    continue;
+                }
+
+                item.Visibility = CanAccessFeature(featureName) ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
 
         private void AppNavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -58,6 +79,10 @@ namespace hcmus_shop
                     }
                     break;
                 case "Sales":
+                case "Products":
+                case "Store":
+                case "Messages":
+                case "Inventory":
                     if (CanAccessFeature("Sales"))
                     {
                         ContentFrame.Navigate(typeof(SalesPage));
@@ -76,6 +101,12 @@ namespace hcmus_shop
                     {
                         ContentFrame.Navigate(typeof(ForbiddenPage));
                     }
+                    break;
+                case "Logout":
+                    _authService.Logout();
+                    var loginWindow = new LoginWindow();
+                    loginWindow.Activate();
+                    Close();
                     break;
             }
         }
@@ -97,7 +128,7 @@ namespace hcmus_shop
             if (CanAccessFeature("Sales"))
             {
                 NavigateTo("Sales");
-                AppNavigationView.SelectedItem = SalesItem;
+                AppNavigationView.SelectedItem = ProductsItem;
                 return;
             }
 

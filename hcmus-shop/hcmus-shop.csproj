@@ -14,19 +14,27 @@
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<Nullable>enable</Nullable>
 
-		<!-- IMPORTANT: Disable default implicit Page items to avoid duplicates -->
+		<!-- Disable default implicit Page items to avoid duplicates -->
 		<EnableDefaultPageItems>false</EnableDefaultPageItems>
 	</PropertyGroup>
 
 	<!-- ==================== FILE INCLUDES ==================== -->
 
-	<!-- Exclude Common folder -->
+	<!-- Exclude Common folder (shared base classes, not standalone pages) -->
 	<ItemGroup>
+		<Compile Remove="Components\**" />
 		<Compile Remove="Views\Pages\Common\**" />
+		<EmbeddedResource Remove="Components\**" />
 		<EmbeddedResource Remove="Views\Pages\Common\**" />
+		<None Remove="Components\**" />
 		<None Remove="Views\Pages\Common\**" />
 		<Page Remove="Views\Pages\Common\**" />
 		<PRIResource Remove="Views\Pages\Common\**" />
+	</ItemGroup>
+
+	<!-- Main Window -->
+	<ItemGroup>
+		<Page Include="MainWindow.xaml" />
 	</ItemGroup>
 
 	<!-- Dashboard Components + Pages -->
@@ -34,7 +42,17 @@
 		<Page Include="Views\Dashboard\**\*.xaml" />
 	</ItemGroup>
 
-	<!-- Other Pages -->
+	<!-- Admin Pages -->
+	<ItemGroup>
+		<Page Include="Views\Pages\Admin\**\*.xaml" />
+	</ItemGroup>
+
+	<!-- Sale Pages -->
+	<ItemGroup>
+		<Page Include="Views\Pages\Sale\**\*.xaml" />
+	</ItemGroup>
+
+	<!-- Top-level Pages -->
 	<ItemGroup>
 		<Page Include="Views\Pages\LoginPage.xaml" />
 		<Page Include="Views\Pages\SalesPage.xaml" />
@@ -45,6 +63,7 @@
 	<!-- Resources -->
 	<ItemGroup>
 		<Page Include="Resources\Styles\ThemeResources.xaml" />
+		<Page Include="Resources\Auth\**\*.xaml" />
 	</ItemGroup>
 
 	<!-- Assets -->
@@ -101,9 +120,8 @@
 		<ProjectReference Include="..\hcmus-shop.Data\hcmus-shop.Data.csproj" />
 	</ItemGroup>
 
-	<!-- Folders -->
+	<!-- Folders (kept for IDE visibility) -->
 	<ItemGroup>
-		<Folder Include="Components\Controls\" />
 		<Folder Include="Resources\Auth\" />
 		<Folder Include="Resources\Styles\" />
 		<Folder Include="Utils\" />
@@ -122,5 +140,9 @@
 	<PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
 		<HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<PRIResource Remove="Components\**" />
+	</ItemGroup>
 
 </Project>

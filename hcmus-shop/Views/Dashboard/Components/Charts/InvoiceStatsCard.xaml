@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
     xmlns:vm="using:hcmus_shop.ViewModels"
-    x:Name="Root">
+    xmlns:local="using:hcmus_shop.Views.Dashboard.Components.Controls">
 
     <Border
         Background="{StaticResource CardBackground}"
@@ -20,12 +20,12 @@
                 <TextBlock Text="Invoice Statistics" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" FontSize="18" />
                 <lvc:PieChart
                     Height="200"
-                    Series="{x:Bind Root.Series, Mode=OneWay}"
+                    Series="{x:Bind Series, Mode=OneWay}"
                     LegendPosition="Hidden" />
             </StackPanel>
 
             <StackPanel Grid.Column="1" Margin="14,28,0,0" Spacing="10">
-                <ItemsControl ItemsSource="{x:Bind Root.Legends, Mode=OneWay}">
+                <ItemsControl ItemsSource="{x:Bind Legends, Mode=OneWay}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:InvoiceLegendItem">
                             <Grid>

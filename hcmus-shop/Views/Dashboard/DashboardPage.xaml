@@ -8,14 +8,7 @@
     xmlns:local="using:hcmus_shop.Views.Dashboard">
 
     <Grid Background="{StaticResource DashboardBackground}">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="260" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-
-        <controls:SidebarNavigation />
-
-        <ScrollViewer Grid.Column="1">
+        <ScrollViewer>
             <Grid Margin="24" RowSpacing="20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />

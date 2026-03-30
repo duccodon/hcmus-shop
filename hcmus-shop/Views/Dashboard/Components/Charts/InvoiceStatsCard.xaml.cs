@@ -2,6 +2,7 @@ using LiveChartsCore;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System.Collections.Generic;
+using hcmus_shop.ViewModels;
 
 namespace hcmus_shop.Views.Dashboard.Components.Charts
 {
@@ -11,7 +12,7 @@ namespace hcmus_shop.Views.Dashboard.Components.Charts
             nameof(Series), typeof(IEnumerable<ISeries>), typeof(InvoiceStatsCard), new PropertyMetadata(null));
 
         public static readonly DependencyProperty LegendsProperty = DependencyProperty.Register(
-            nameof(Legends), typeof(IEnumerable<object>), typeof(InvoiceStatsCard), new PropertyMetadata(null));
+            nameof(Legends), typeof(IEnumerable<InvoiceLegendItem>), typeof(InvoiceStatsCard), new PropertyMetadata(null));
 
         public InvoiceStatsCard()
         {
@@ -24,9 +25,9 @@ namespace hcmus_shop.Views.Dashboard.Components.Charts
             set => SetValue(SeriesProperty, value);
         }
 
-        public IEnumerable<object> Legends
+        public IEnumerable<InvoiceLegendItem> Legends
         {
-            get => (IEnumerable<object>)GetValue(LegendsProperty);
+            get => (IEnumerable<InvoiceLegendItem>)GetValue(LegendsProperty);
             set => SetValue(LegendsProperty, value);
         }
     }

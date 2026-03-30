@@ -24,12 +24,12 @@
                 <NavigationViewItem Content="Products" Icon="AllApps" />
                 <NavigationViewItem Content="Store" Icon="Shop" />
                 <NavigationViewItem Content="Messages" Icon="Mail" />
-                <NavigationViewItem Content="Statistics" Icon="BarChart4" />
+                <!--<NavigationViewItem Content="Statistics" Icon="BarChart4" />
                 <NavigationViewItem Content="Invoices" Icon="Document" />
                 <NavigationViewItem Content="To Deliver" Icon="DeliveryTruck" />
                 <NavigationViewItem Content="Finances" Icon="Money" />
                 <TextBlock Margin="8,16,0,4" Text="HELP & SUPPORT" Foreground="{StaticResource TextSecondary}" FontSize="11" />
-                <NavigationViewItem Content="Help & Center" Icon="Help" />
+                <NavigationViewItem Content="Help & Center" Icon="Help" />-->
                 <NavigationViewItem Content="Settings" Icon="Setting" />
             </StackPanel>
 

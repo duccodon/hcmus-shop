@@ -1,17 +1,18 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using LiveChartsCore;
+using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.SkiaSharpView;
 using Microsoft.UI;
 using Microsoft.UI.Xaml.Media;
-using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace hcmus_shop.ViewModels
 {
     public partial class DashboardViewModel : ObservableObject
     {
         [ObservableProperty]
-        private string welcomeMessage = "Welcome Back👋";
+        private string welcomeMessage = "Welcome Back 👋";
 
         public ObservableCollection<KpiCardItem> KpiCards { get; } = new();
         public ObservableCollection<InvoiceLegendItem> InvoiceLegends { get; } = new();
@@ -19,26 +20,123 @@ namespace hcmus_shop.ViewModels
 
         public IEnumerable<ISeries> InvoiceSeries { get; }
         public IEnumerable<ISeries> SalesSeries { get; }
-        public Axis[] SalesXAxes { get; }
-        public Axis[] SalesYAxes { get; }
+        public IEnumerable<ICartesianAxis> SalesXAxes { get; }
+        public IEnumerable<ICartesianAxis> SalesYAxes { get; }
 
         public DashboardViewModel()
         {
-            KpiCards.Add(new KpiCardItem("Customers", "1,456", "+1.65%", "", true));
-            KpiCards.Add(new KpiCardItem("Revenue", "$3,345", "+2.01%", "", true));
-            KpiCards.Add(new KpiCardItem("Profit", "60%", "+0.35%", "", true));
-            KpiCards.Add(new KpiCardItem("Invoices", "1,135", "-1.52%", "", false));
+            // KPI Cards
+            KpiCards.Add(new KpiCardItem
+            {
+                Title = "Customers",
+                Value = "1,456",
+                DeltaText = "+1.65%",
+                Glyph = "",
+                IsPositive = true
+            });
 
-            InvoiceLegends.Add(new InvoiceLegendItem("Paid", 1135, new SolidColorBrush(ColorHelper.FromArgb(255, 6, 182, 212))));
-            InvoiceLegends.Add(new InvoiceLegendItem("Overdue", 234, new SolidColorBrush(ColorHelper.FromArgb(255, 124, 58, 237))));
-            InvoiceLegends.Add(new InvoiceLegendItem("Unpaid", 514, new SolidColorBrush(ColorHelper.FromArgb(255, 245, 158, 11))));
-            InvoiceLegends.Add(new InvoiceLegendItem("Draft", 345, new SolidColorBrush(ColorHelper.FromArgb(255, 148, 163, 184))));
+            KpiCards.Add(new KpiCardItem
+            {
+                Title = "Revenue",
+                Value = "$3,345",
+                DeltaText = "+2.01%",
+                Glyph = "",
+                IsPositive = true
+            });
 
-            RecentInvoices.Add(new RecentInvoiceItem("#054579", "Derry Vengger", "Air Black Backpack", "21/07/2021 08:21", "Paid", "$190", new SolidColorBrush(ColorHelper.FromArgb(255, 22, 163, 74))));
-            RecentInvoices.Add(new RecentInvoiceItem("#054589", "Levi Ackermann", "Air Trend Backpack", "21/07/2021 08:21", "Pending", "$244", new SolidColorBrush(ColorHelper.FromArgb(255, 217, 119, 6))));
-            RecentInvoices.Add(new RecentInvoiceItem("#054699", "Rikael Brown", "Air Blue Backpack", "21/07/2021 08:21", "Paid", "$121", new SolidColorBrush(ColorHelper.FromArgb(255, 22, 163, 74))));
-            RecentInvoices.Add(new RecentInvoiceItem("#054499", "Norton Rivas", "Air Black Backpack", "21/07/2022 09:21", "Canceled", "$300", new SolidColorBrush(ColorHelper.FromArgb(255, 236, 72, 153))));
+            KpiCards.Add(new KpiCardItem
+            {
+                Title = "Profit",
+                Value = "60%",
+                DeltaText = "+0.35%",
+                Glyph = "",
+                IsPositive = true
+            });
 
+            KpiCards.Add(new KpiCardItem
+            {
+                Title = "Invoices",
+                Value = "1,135",
+                DeltaText = "-1.52%",
+                Glyph = "",
+                IsPositive = false
+            });
+
+            // Invoice Legends
+            InvoiceLegends.Add(new InvoiceLegendItem
+            {
+                Label = "Paid",
+                Value = 1135,
+                MarkerBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 6, 182, 212))
+            });
+
+            InvoiceLegends.Add(new InvoiceLegendItem
+            {
+                Label = "Overdue",
+                Value = 234,
+                MarkerBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 124, 58, 237))
+            });
+
+            InvoiceLegends.Add(new InvoiceLegendItem
+            {
+                Label = "Unpaid",
+                Value = 514,
+                MarkerBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 245, 158, 11))
+            });
+
+            InvoiceLegends.Add(new InvoiceLegendItem
+            {
+                Label = "Draft",
+                Value = 345,
+                MarkerBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 148, 163, 184))
+            });
+
+            // Recent Invoices
+            RecentInvoices.Add(new RecentInvoiceItem
+            {
+                No = "#054579",
+                Customer = "Derry Vengger",
+                Product = "Air Black Backpack",
+                Date = "21/07/2021 08:21",
+                Status = "Paid",
+                Price = "$190",
+                StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 22, 163, 74))
+            });
+
+            RecentInvoices.Add(new RecentInvoiceItem
+            {
+                No = "#054589",
+                Customer = "Levi Ackermann",
+                Product = "Air Trend Backpack",
+                Date = "21/07/2021 08:21",
+                Status = "Pending",
+                Price = "$244",
+                StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 217, 119, 6))
+            });
+
+            RecentInvoices.Add(new RecentInvoiceItem
+            {
+                No = "#054699",
+                Customer = "Rikael Brown",
+                Product = "Air Blue Backpack",
+                Date = "21/07/2021 08:21",
+                Status = "Paid",
+                Price = "$121",
+                StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 22, 163, 74))
+            });
+
+            RecentInvoices.Add(new RecentInvoiceItem
+            {
+                No = "#054499",
+                Customer = "Norton Rivas",
+                Product = "Air Black Backpack",
+                Date = "21/07/2022 09:21",
+                Status = "Canceled",
+                Price = "$300",
+                StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 236, 72, 153))
+            });
+
+            // LiveCharts Series
             InvoiceSeries = new ISeries[]
             {
                 new PieSeries<double> { Values = new[] { 1135d }, Name = "Paid", InnerRadius = 45 },
@@ -58,30 +156,52 @@ namespace hcmus_shop.ViewModels
                 }
             };
 
-            SalesXAxes =
-            [
+            SalesXAxes = new[]
+            {
                 new Axis
                 {
-                    Labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                    LabelsPaint = null
+                    Labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
                 }
-            ];
+            };
 
-            SalesYAxes =
-            [
+            SalesYAxes = new[]
+            {
                 new Axis
                 {
                     MinLimit = 0,
                     MaxLimit = 24,
                     Labeler = value => $"{value:0}k"
                 }
-            ];
+            };
         }
     }
 
-    public sealed record KpiCardItem(string Title, string Value, string DeltaText, string Glyph, bool IsPositive);
+    // ==================== FIXED CLASSES (Mutable) ====================
 
-    public sealed record InvoiceLegendItem(string Label, int Value, Brush MarkerBrush);
+    public class KpiCardItem
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
+        public string DeltaText { get; set; } = string.Empty;
+        public string Glyph { get; set; } = string.Empty;
+        public bool IsPositive { get; set; }
+    }
 
-    public sealed record RecentInvoiceItem(string No, string Customer, string Product, string Date, string Status, string Price, Brush StatusBrush);
+    public class InvoiceLegendItem
+    {
+        public string Label { get; set; } = string.Empty;
+        public int Value { get; set; }
+        public Brush MarkerBrush { get; set; } = new SolidColorBrush(Microsoft.UI.Colors.Gray);
+    }
+
+    public class RecentInvoiceItem
+    {
+        public string No { get; set; } = string.Empty;
+        public string Customer { get; set; } = string.Empty;
+        public string Product { get; set; } = string.Empty;
+        public string Date { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string Price { get; set; } = string.Empty;
+        public Brush StatusBrush { get; set; } = new SolidColorBrush(Microsoft.UI.Colors.Gray);
+    }
 }

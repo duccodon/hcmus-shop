@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
-    x:Name="Root">
+    xmlns:local="using:hcmus_shop.Views.Dashboard.Components.Controls">
 
     <Border
         Background="{StaticResource CardBackground}"
@@ -13,9 +13,9 @@
             <TextBlock Text="Sales Analytics" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" FontSize="18" />
             <lvc:CartesianChart
                 Height="250"
-                Series="{x:Bind Root.Series, Mode=OneWay}"
-                XAxes="{x:Bind Root.XAxes, Mode=OneWay}"
-                YAxes="{x:Bind Root.YAxes, Mode=OneWay}"
+                Series="{x:Bind Series, Mode=OneWay}"
+                XAxes="{x:Bind XAxes, Mode=OneWay}"
+                YAxes="{x:Bind YAxes, Mode=OneWay}"
                 LegendPosition="Hidden" />
         </StackPanel>
     </Border>

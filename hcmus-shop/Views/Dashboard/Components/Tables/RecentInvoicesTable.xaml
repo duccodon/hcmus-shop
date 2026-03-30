@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:hcmus_shop.ViewModels"
-    x:Name="Root">
+    xmlns:local="using:hcmus_shop.Views.Dashboard.Components.Controls">
 
     <Border
         Background="{StaticResource CardBackground}"
@@ -29,7 +29,7 @@
                 <TextBlock Grid.Column="5" Text="Price" Foreground="{StaticResource TextSecondary}" />
             </Grid>
 
-            <ItemsRepeater ItemsSource="{x:Bind Root.ItemsSource, Mode=OneWay}">
+            <ItemsRepeater ItemsSource="{x:Bind ItemsSource, Mode=OneWay}">
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate x:DataType="vm:RecentInvoiceItem">
                         <Grid Padding="0,10">

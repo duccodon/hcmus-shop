@@ -2,7 +2,7 @@
     x:Class="hcmus_shop.Views.Dashboard.Components.Controls.KpiCard"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    x:Name="Root">
+    xmlns:local="using:hcmus_shop.Views.Dashboard.Components.Controls">
 
     <Border
         Background="{StaticResource CardBackground}"
@@ -26,21 +26,21 @@
                     VerticalAlignment="Center"
                     FontFamily="Segoe MDL2 Assets"
                     Foreground="{StaticResource AccentCyan}"
-                    Text="{x:Bind Root.Glyph, Mode=OneWay}" />
+                    Text="{x:Bind Glyph, Mode=OneWay}" />
             </Border>
 
             <StackPanel Grid.Column="1" Spacing="4">
                 <TextBlock
                     Foreground="{StaticResource TextSecondary}"
-                    Text="{x:Bind Root.Title, Mode=OneWay}" />
+                    Text="{x:Bind Title, Mode=OneWay}" />
                 <TextBlock
                     FontSize="22"
                     FontWeight="SemiBold"
                     Foreground="{StaticResource TextPrimary}"
-                    Text="{x:Bind Root.Value, Mode=OneWay}" />
+                    Text="{x:Bind Value, Mode=OneWay}" />
                 <TextBlock
-                    Foreground="{x:Bind Root.DeltaBrush, Mode=OneWay}"
-                    Text="{x:Bind Root.DeltaText, Mode=OneWay}" />
+                    Foreground="{x:Bind DeltaBrush, Mode=OneWay}"
+                    Text="{x:Bind DeltaText, Mode=OneWay}" />
             </StackPanel>
         </Grid>
     </Border>
