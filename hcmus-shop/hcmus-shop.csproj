@@ -1,111 +1,126 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-	<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
-    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <RootNamespace>hcmus_shop</RootNamespace>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Platforms>x86;x64;ARM64</Platforms>
-    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
-    <PublishProfile>win-$(Platform).pubxml</PublishProfile>
-    <UseWinUI>true</UseWinUI>
-    <WinUISDKReferences>false</WinUISDKReferences>
-    <EnableMsixTooling>true</EnableMsixTooling>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-  <ItemGroup>
-    <Page Remove="Views\Pages\AdminPage.xaml" />
-    <Page Remove="Views\Pages\ForbiddenPage.xaml" />
-    <Page Remove="Views\Pages\LoginPage.xaml" />
-    <Page Remove="Views\Pages\SalesPage.xaml" />
-  </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="Assets\SplashScreen.scale-200.png" />
-    <Content Include="Assets\LockScreenLogo.scale-200.png" />
-    <Content Include="Assets\Square150x150Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="Assets\StoreLogo.png" />
-    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
-    <Content Include="appsettings.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	</Content>
-	<Content Include="appsettings.Development.json">
-		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	</Content>
-  </ItemGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+		<RootNamespace>hcmus_shop</RootNamespace>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<Platforms>x86;x64;ARM64</Platforms>
+		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+		<PublishProfile>win-$(Platform).pubxml</PublishProfile>
+		<UseWinUI>true</UseWinUI>
+		<WinUISDKReferences>false</WinUISDKReferences>
+		<EnableMsixTooling>true</EnableMsixTooling>
+		<Nullable>enable</Nullable>
 
-  <ItemGroup>
-    <Manifest Include="$(ApplicationManifest)" />
-  </ItemGroup>
+		<!-- IMPORTANT: Disable default implicit Page items to avoid duplicates -->
+		<EnableDefaultPageItems>false</EnableDefaultPageItems>
+	</PropertyGroup>
 
-  <!--
-    Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
-    Tools extension to be activated for this project even if the Windows App SDK Nuget
-    package has not yet been restored.
-  -->
-  <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-    <ProjectCapability Include="Msix" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.5">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.5" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7705" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260317003" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Components\Controls\" />
-    <Folder Include="Utils\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\hcmus-shop.Data\hcmus-shop.Data.csproj" />
-  </ItemGroup>
-    <ItemGroup>
-	    <Page Include="Views\Pages\LoginPage.xaml">
-		    <Generator>MSBuild:Compile</Generator>
-	    </Page>
-	    <Page Include="Views\Pages\SalesPage.xaml">
-		    <Generator>MSBuild:Compile</Generator>
-	    </Page>
-	    <Page Include="Views\Pages\AdminPage.xaml">
-		    <Generator>MSBuild:Compile</Generator>
-	    </Page>
-	    <Page Include="Views\Pages\ForbiddenPage.xaml">
-		    <Generator>MSBuild:Compile</Generator>
-	    </Page>
-    </ItemGroup>
-    <ItemGroup>
-      <None Update="Views\Pages\ForbiddenPage.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </None>
-    </ItemGroup>
+	<!-- ==================== FILE INCLUDES ==================== -->
 
-  <!--
-    Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
-    Explorer "Package and Publish" context menu entry to be enabled for this project even if
-    the Windows App SDK Nuget package has not yet been restored.
-  -->
-  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
-  </PropertyGroup>
+	<!-- Exclude Common folder -->
+	<ItemGroup>
+		<Compile Remove="Views\Pages\Common\**" />
+		<EmbeddedResource Remove="Views\Pages\Common\**" />
+		<None Remove="Views\Pages\Common\**" />
+		<Page Remove="Views\Pages\Common\**" />
+		<PRIResource Remove="Views\Pages\Common\**" />
+	</ItemGroup>
 
-  <!-- Publish Properties -->
-  <PropertyGroup>
-    <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
-    <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
-    <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
-    <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
-  </PropertyGroup>
+	<!-- Dashboard Components + Pages -->
+	<ItemGroup>
+		<Page Include="Views\Dashboard\**\*.xaml" />
+	</ItemGroup>
+
+	<!-- Other Pages -->
+	<ItemGroup>
+		<Page Include="Views\Pages\LoginPage.xaml" />
+		<Page Include="Views\Pages\SalesPage.xaml" />
+		<Page Include="Views\Pages\AdminPage.xaml" />
+		<Page Include="Views\Pages\ForbiddenPage.xaml" />
+	</ItemGroup>
+
+	<!-- Resources -->
+	<ItemGroup>
+		<Page Include="Resources\Styles\ThemeResources.xaml" />
+	</ItemGroup>
+
+	<!-- Assets -->
+	<ItemGroup>
+		<Content Include="Assets\SplashScreen.scale-200.png" />
+		<Content Include="Assets\LockScreenLogo.scale-200.png" />
+		<Content Include="Assets\Square150x150Logo.scale-200.png" />
+		<Content Include="Assets\Square44x44Logo.scale-200.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+		<Content Include="Assets\StoreLogo.png" />
+		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
+
+		<Content Include="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="appsettings.Development.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Manifest Include="$(ApplicationManifest)" />
+	</ItemGroup>
+
+	<!-- Msix capability -->
+	<ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+		<ProjectCapability Include="Msix" />
+	</ItemGroup>
+
+	<!-- Packages -->
+	<ItemGroup>
+		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+		<PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.5">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="LiveChartsCore" Version="2.0.0-*" />
+		<PackageReference Include="LiveChartsCore.SkiaSharpView" Version="2.0.0-*" />
+		<PackageReference Include="LiveChartsCore.SkiaSharpView.WinUI" Version="2.0.0-*" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.5" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.5" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7705" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260317003" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
+	</ItemGroup>
+
+	<!-- Project Reference -->
+	<ItemGroup>
+		<ProjectReference Include="..\hcmus-shop.Data\hcmus-shop.Data.csproj" />
+	</ItemGroup>
+
+	<!-- Folders -->
+	<ItemGroup>
+		<Folder Include="Components\Controls\" />
+		<Folder Include="Resources\Auth\" />
+		<Folder Include="Resources\Styles\" />
+		<Folder Include="Utils\" />
+		<Folder Include="Views\Pages\Admin\" />
+		<Folder Include="Views\Pages\Sale\" />
+	</ItemGroup>
+
+	<!-- Publish Settings -->
+	<PropertyGroup>
+		<PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
+		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+		<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
+		<PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+		<HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+	</PropertyGroup>
+
 </Project>

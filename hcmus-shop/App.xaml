@@ -12,7 +12,8 @@
 
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
-                <ResourceDictionary Source="ms-appx:///Resources/LoginStyles.xaml" />
+                <ResourceDictionary Source="ms-appx:///Resources/Styles/ThemeResources.xaml" />
+                <ResourceDictionary Source="ms-appx:///Resources/Auth/LoginStyles.xaml" />
                 <!-- Add other merged dictionaries if you have more -->
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

@@ -7,9 +7,9 @@ using System;
 using System.IO;
 using System.Reflection;
 using hcmus_shop.Data;
-using hcmus_shop.Services;
 using hcmus_shop.ViewModels;
 using hcmus_shop.Views;
+using hcmus_shop.Services.Auth;
 
 
 namespace hcmus_shop

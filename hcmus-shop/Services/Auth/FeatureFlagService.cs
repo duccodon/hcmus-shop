@@ -2,7 +2,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 
-namespace hcmus_shop.Services
+namespace hcmus_shop.Services.Auth
 {
     public class FeatureFlagService : IFeatureFlagService
     {

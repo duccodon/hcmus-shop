@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using hcmus_shop.Services;
+using hcmus_shop.Services.Auth;
 using System;
 using System.Threading.Tasks;
 using Windows.Storage;

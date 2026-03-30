@@ -1,0 +1,59 @@
+<UserControl
+    x:Class="hcmus_shop.Views.Dashboard.Components.Tables.RecentInvoicesTable"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:hcmus_shop.ViewModels"
+    x:Name="Root">
+
+    <Border
+        Background="{StaticResource CardBackground}"
+        CornerRadius="16"
+        Padding="16">
+        <StackPanel Spacing="12">
+            <TextBlock Text="Recent Invoices" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" FontSize="18" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="220" />
+                    <ColumnDefinition Width="220" />
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="100" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="No" Foreground="{StaticResource TextSecondary}" />
+                <TextBlock Grid.Column="1" Text="Customer" Foreground="{StaticResource TextSecondary}" />
+                <TextBlock Grid.Column="2" Text="Product" Foreground="{StaticResource TextSecondary}" />
+                <TextBlock Grid.Column="3" Text="Date" Foreground="{StaticResource TextSecondary}" />
+                <TextBlock Grid.Column="4" Text="Status" Foreground="{StaticResource TextSecondary}" />
+                <TextBlock Grid.Column="5" Text="Price" Foreground="{StaticResource TextSecondary}" />
+            </Grid>
+
+            <ItemsRepeater ItemsSource="{x:Bind Root.ItemsSource, Mode=OneWay}">
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="vm:RecentInvoiceItem">
+                        <Grid Padding="0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="130" />
+                                <ColumnDefinition Width="220" />
+                                <ColumnDefinition Width="220" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="130" />
+                                <ColumnDefinition Width="100" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="{x:Bind No}" Foreground="{StaticResource TextPrimary}" />
+                            <TextBlock Grid.Column="1" Text="{x:Bind Customer}" Foreground="{StaticResource TextPrimary}" />
+                            <TextBlock Grid.Column="2" Text="{x:Bind Product}" Foreground="{StaticResource TextPrimary}" />
+                            <TextBlock Grid.Column="3" Text="{x:Bind Date}" Foreground="{StaticResource TextSecondary}" />
+                            <Border Grid.Column="4" Background="{x:Bind StatusBrush}" CornerRadius="10" Padding="8,2">
+                                <TextBlock HorizontalAlignment="Center" Text="{x:Bind Status}" Foreground="White" FontSize="12" />
+                            </Border>
+                            <TextBlock Grid.Column="5" Text="{x:Bind Price}" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+        </StackPanel>
+    </Border>
+</UserControl>

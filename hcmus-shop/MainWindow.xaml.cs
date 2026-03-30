@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
-using hcmus_shop.Services;
+using hcmus_shop.Services.Auth;
 using hcmus_shop.Views;
+using DashboardPageView = hcmus_shop.Views.Dashboard.DashboardPage;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -49,7 +50,7 @@ namespace hcmus_shop
                 case "Dashboard":
                     if (CanAccessFeature("Dashboard"))
                     {
-                        ContentFrame.Navigate(typeof(DashboardPage));
+                        ContentFrame.Navigate(typeof(DashboardPageView));
                     }
                     else
                     {

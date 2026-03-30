@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 
-namespace hcmus_shop.Services
+namespace hcmus_shop.Services.Auth
 {
     public class AuthService : IAuthService
     {
