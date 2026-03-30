@@ -50,6 +50,7 @@ namespace hcmus_shop
 
             // === SETUP DEPENDENCY INJECTION ===
             var services = new ServiceCollection();
+            services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddDbContextFactory<MyShopDbContext>(options =>
             {
@@ -68,6 +69,7 @@ namespace hcmus_shop
             });
 
             services.AddSingleton<IAuthService, AuthService>();
+            services.AddSingleton<IFeatureFlagService, FeatureFlagService>();
             services.AddTransient<LoginViewModel>();
 
             Ioc.Default.ConfigureServices(services.BuildServiceProvider());

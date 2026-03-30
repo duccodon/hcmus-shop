@@ -8,7 +8,6 @@ namespace hcmus_shop.Models
         public string Sku { get; set; } = string.Empty;                    // Unique
         public string Name { get; set; } = string.Empty;
 
-        public int CategoryId { get; set; }
         public int BrandId { get; set; }
         public int? SeriesId { get; set; }                                 // Có thể null nếu là phụ kiện
 
@@ -20,9 +19,9 @@ namespace hcmus_shop.Models
         public int WarrantyMonths { get; set; } = 12;
         public bool IsActive { get; set; } = true;
 
-        public Category Category { get; set; } = null!;
         public Brand Brand { get; set; } = null!;
         public Series? Series { get; set; }
+        public ICollection<Category> Categories { get; set; } = new List<Category>();
 
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
         public ICollection<ProductInstance> Instances { get; set; } = new List<ProductInstance>();

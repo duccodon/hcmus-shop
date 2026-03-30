@@ -302,10 +302,6 @@ namespace hcmus_shop.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("brand_id1");
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("integer")
-                        .HasColumnName("category_id");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -367,9 +363,6 @@ namespace hcmus_shop.Data.Migrations
                     b.HasIndex("BrandId1")
                         .HasDatabaseName("ix_products_brand_id1");
 
-                    b.HasIndex("CategoryId")
-                        .HasDatabaseName("ix_products_category_id");
-
                     b.HasIndex("SeriesId")
                         .HasDatabaseName("ix_products_series_id");
 
@@ -378,6 +371,25 @@ namespace hcmus_shop.Data.Migrations
                         .HasDatabaseName("ix_products_sku");
 
                     b.ToTable("products", (string)null);
+                });
+
+            modelBuilder.Entity("hcmus_shop.Models.ProductCategory", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer")
+                        .HasColumnName("product_id");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer")
+                        .HasColumnName("category_id");
+
+                    b.HasKey("ProductId", "CategoryId")
+                        .HasName("pk_product_categories");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("ix_product_categories_category_id");
+
+                    b.ToTable("ProductCategories", (string)null);
                 });
 
             modelBuilder.Entity("hcmus_shop.Models.ProductImage", b =>
@@ -695,13 +707,6 @@ namespace hcmus_shop.Data.Migrations
                         .HasForeignKey("BrandId1")
                         .HasConstraintName("fk_products_brands_brand_id1");
 
-                    b.HasOne("hcmus_shop.Models.Category", "Category")
-                        .WithMany("Products")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_products_categories_category_id");
-
                     b.HasOne("hcmus_shop.Models.Series", "Series")
                         .WithMany("Products")
                         .HasForeignKey("SeriesId")
@@ -710,9 +715,28 @@ namespace hcmus_shop.Data.Migrations
 
                     b.Navigation("Brand");
 
+                    b.Navigation("Series");
+                });
+
+            modelBuilder.Entity("hcmus_shop.Models.ProductCategory", b =>
+                {
+                    b.HasOne("hcmus_shop.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_product_categories_categories_category_id");
+
+                    b.HasOne("hcmus_shop.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_product_categories_products_product_id");
+
                     b.Navigation("Category");
 
-                    b.Navigation("Series");
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("hcmus_shop.Models.ProductImage", b =>
@@ -756,11 +780,6 @@ namespace hcmus_shop.Data.Migrations
                     b.Navigation("Products");
 
                     b.Navigation("Series");
-                });
-
-            modelBuilder.Entity("hcmus_shop.Models.Category", b =>
-                {
-                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("hcmus_shop.Models.Customer", b =>

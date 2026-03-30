@@ -15,6 +15,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Page Remove="Views\Pages\AdminPage.xaml" />
+    <Page Remove="Views\Pages\ForbiddenPage.xaml" />
     <Page Remove="Views\Pages\LoginPage.xaml" />
     <Page Remove="Views\Pages\SalesPage.xaml" />
   </ItemGroup>
@@ -81,6 +82,14 @@
 	    <Page Include="Views\Pages\AdminPage.xaml">
 		    <Generator>MSBuild:Compile</Generator>
 	    </Page>
+	    <Page Include="Views\Pages\ForbiddenPage.xaml">
+		    <Generator>MSBuild:Compile</Generator>
+	    </Page>
+    </ItemGroup>
+    <ItemGroup>
+      <None Update="Views\Pages\ForbiddenPage.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </None>
     </ItemGroup>
 
   <!--

@@ -15,20 +15,23 @@ namespace hcmus_shop
     public sealed partial class MainWindow : Window
     {
         private readonly IAuthService _authService;
+        private readonly IFeatureFlagService _featureFlagService;
 
         public MainWindow()
         {
             InitializeComponent();
             _authService = Ioc.Default.GetRequiredService<IAuthService>();
-            ConfigureNavigationByRole();
-            NavigateTo("Dashboard");
-            AppNavigationView.SelectedItem = DashboardItem;
+            _featureFlagService = Ioc.Default.GetRequiredService<IFeatureFlagService>();
+            ConfigureNavigationByFeatureFlag();
+            //NavigateTo("Dashboard");  //test forbidden page
+            NavigateToDefault();
         }
 
-        private void ConfigureNavigationByRole()
+        private void ConfigureNavigationByFeatureFlag()
         {
-            var isAdmin = _authService.HasRole("Admin");
-            AdminItem.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
+            DashboardItem.Visibility = CanAccessFeature("Dashboard") ? Visibility.Visible : Visibility.Collapsed;
+            SalesItem.Visibility = CanAccessFeature("Sales") ? Visibility.Visible : Visibility.Collapsed;
+            AdminItem.Visibility = CanAccessFeature("Admin") ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void AppNavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -44,18 +47,68 @@ namespace hcmus_shop
             switch (target)
             {
                 case "Dashboard":
-                    ContentFrame.Navigate(typeof(DashboardPage));
+                    if (CanAccessFeature("Dashboard"))
+                    {
+                        ContentFrame.Navigate(typeof(DashboardPage));
+                    }
+                    else
+                    {
+                        ContentFrame.Navigate(typeof(ForbiddenPage));
+                    }
                     break;
                 case "Sales":
-                    ContentFrame.Navigate(typeof(SalesPage));
+                    if (CanAccessFeature("Sales"))
+                    {
+                        ContentFrame.Navigate(typeof(SalesPage));
+                    }
+                    else
+                    {
+                        ContentFrame.Navigate(typeof(ForbiddenPage));
+                    }
                     break;
                 case "Admin":
-                    if (_authService.HasRole("Admin"))
+                    if (CanAccessFeature("Admin"))
                     {
                         ContentFrame.Navigate(typeof(AdminPage));
                     }
+                    else
+                    {
+                        ContentFrame.Navigate(typeof(ForbiddenPage));
+                    }
                     break;
             }
+        }
+
+        private bool CanAccessFeature(string featureName)
+        {
+            return _featureFlagService.IsFeatureEnabledForRole(_authService.CurrentUser?.Role, featureName);
+        }
+
+        private void NavigateToDefault()
+        {
+            if (CanAccessFeature("Dashboard"))
+            {
+                NavigateTo("Dashboard");
+                AppNavigationView.SelectedItem = DashboardItem;
+                return;
+            }
+
+            if (CanAccessFeature("Sales"))
+            {
+                NavigateTo("Sales");
+                AppNavigationView.SelectedItem = SalesItem;
+                return;
+            }
+
+            if (CanAccessFeature("Admin"))
+            {
+                NavigateTo("Admin");
+                AppNavigationView.SelectedItem = AdminItem;
+                return;
+            }
+
+            ContentFrame.Navigate(typeof(ForbiddenPage));
+            AppNavigationView.SelectedItem = null;
         }
     }
 }

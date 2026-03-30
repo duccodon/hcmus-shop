@@ -170,7 +170,6 @@ namespace hcmus_shop.Data.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     sku = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    category_id = table.Column<int>(type: "integer", nullable: false),
                     brand_id = table.Column<int>(type: "integer", nullable: false),
                     series_id = table.Column<int>(type: "integer", nullable: true),
                     import_price = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
@@ -198,12 +197,6 @@ namespace hcmus_shop.Data.Migrations
                         column: x => x.brand_id1,
                         principalTable: "brands",
                         principalColumn: "brand_id");
-                    table.ForeignKey(
-                        name: "fk_products_categories_category_id",
-                        column: x => x.category_id,
-                        principalTable: "categories",
-                        principalColumn: "category_id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_products_series_series_id",
                         column: x => x.series_id,
@@ -291,6 +284,30 @@ namespace hcmus_shop.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProductCategories",
+                columns: table => new
+                {
+                    product_id = table.Column<int>(type: "integer", nullable: false),
+                    category_id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_product_categories", x => new { x.product_id, x.category_id });
+                    table.ForeignKey(
+                        name: "fk_product_categories_categories_category_id",
+                        column: x => x.category_id,
+                        principalTable: "categories",
+                        principalColumn: "category_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_product_categories_products_product_id",
+                        column: x => x.product_id,
+                        principalTable: "products",
+                        principalColumn: "product_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "order_items",
                 columns: table => new
                 {
@@ -370,6 +387,11 @@ namespace hcmus_shop.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "ix_product_categories_category_id",
+                table: "ProductCategories",
+                column: "category_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_products_brand_id",
                 table: "products",
                 column: "brand_id");
@@ -378,11 +400,6 @@ namespace hcmus_shop.Data.Migrations
                 name: "ix_products_brand_id1",
                 table: "products",
                 column: "brand_id1");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_products_category_id",
-                table: "products",
-                column: "category_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_products_series_id",
@@ -426,10 +443,16 @@ namespace hcmus_shop.Data.Migrations
                 name: "product_images");
 
             migrationBuilder.DropTable(
+                name: "ProductCategories");
+
+            migrationBuilder.DropTable(
                 name: "orders");
 
             migrationBuilder.DropTable(
                 name: "product_instances");
+
+            migrationBuilder.DropTable(
+                name: "categories");
 
             migrationBuilder.DropTable(
                 name: "customers");
@@ -442,9 +465,6 @@ namespace hcmus_shop.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "products");
-
-            migrationBuilder.DropTable(
-                name: "categories");
 
             migrationBuilder.DropTable(
                 name: "series");
