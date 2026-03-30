@@ -582,8 +582,10 @@ namespace hcmus_shop.Data.Migrations
 
                     b.Property<string>("Role")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Sale")
                         .HasColumnName("role");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -603,7 +605,10 @@ namespace hcmus_shop.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_users_username");
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("users", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_users_role", "role in ('Admin','Sale')");
+                        });
                 });
 
             modelBuilder.Entity("hcmus_shop.Models.InventoryLog", b =>

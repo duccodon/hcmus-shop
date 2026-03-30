@@ -90,13 +90,14 @@ namespace hcmus_shop.Data.Migrations
                     username = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     password_hash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     full_name = table.Column<string>(type: "text", nullable: false),
-                    role = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    role = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "Sale"),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_users", x => x.user_id);
+                    table.CheckConstraint("ck_users_role", "role in ('Admin','Sale')");
                 });
 
             migrationBuilder.CreateTable(

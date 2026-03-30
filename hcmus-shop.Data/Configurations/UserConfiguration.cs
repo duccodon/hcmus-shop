@@ -13,6 +13,11 @@ namespace hcmus_shop.Database.Configurations
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
+            builder.ToTable("users", tableBuilder =>
+            {
+                tableBuilder.HasCheckConstraint("ck_users_role", "role in ('Admin','Sale')");
+            });
+
             builder.Property(u => u.Username)
                    .HasMaxLength(50)
                    .IsRequired();
@@ -23,6 +28,7 @@ namespace hcmus_shop.Database.Configurations
 
             builder.Property(u => u.Role)
                    .HasMaxLength(20)
+                   .HasDefaultValue("Sale")
                    .IsRequired();
         }
     }

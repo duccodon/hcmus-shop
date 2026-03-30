@@ -7,6 +7,9 @@ using System;
 using System.IO;
 using System.Reflection;
 using hcmus_shop.Data;
+using hcmus_shop.Services;
+using hcmus_shop.ViewModels;
+using hcmus_shop.Views;
 
 
 namespace hcmus_shop
@@ -14,7 +17,8 @@ namespace hcmus_shop
     public partial class App : Application
     {
         public static IConfiguration Configuration { get; private set; } = null!;
-        private Window? _window;
+        private Window? _loginWindow;
+        private Window? _mainWindow;
 
         public App()
         {
@@ -47,7 +51,7 @@ namespace hcmus_shop
             // === SETUP DEPENDENCY INJECTION ===
             var services = new ServiceCollection();
 
-            services.AddDbContext<MyShopDbContext>(options =>
+            services.AddDbContextFactory<MyShopDbContext>(options =>
             {
                 var connectionString = Configuration.GetConnectionString("DefaultConnection");
 
@@ -63,13 +67,24 @@ namespace hcmus_shop
                 .UseSnakeCaseNamingConvention();
             });
 
+            services.AddSingleton<IAuthService, AuthService>();
+            services.AddTransient<LoginViewModel>();
+
             Ioc.Default.ConfigureServices(services.BuildServiceProvider());
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
-            _window = new MainWindow();
-            _window.Activate();
+            _loginWindow = new LoginWindow();
+            _loginWindow.Activate();
+        }
+
+        public void OpenMainWindow()
+        {
+            _mainWindow ??= new MainWindow();
+            _mainWindow.Activate();
+            _loginWindow?.Close();
+            _loginWindow = null;
         }
     }
 }

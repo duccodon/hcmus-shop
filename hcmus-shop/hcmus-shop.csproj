@@ -13,6 +13,11 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <Page Remove="Views\Pages\AdminPage.xaml" />
+    <Page Remove="Views\Pages\LoginPage.xaml" />
+    <Page Remove="Views\Pages\SalesPage.xaml" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -43,6 +48,7 @@
     <ProjectCapability Include="Msix" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
@@ -60,12 +66,22 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Components\Controls\" />
-    <Folder Include="Services\" />
     <Folder Include="Utils\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\hcmus-shop.Data\hcmus-shop.Data.csproj" />
   </ItemGroup>
+    <ItemGroup>
+	    <Page Include="Views\Pages\LoginPage.xaml">
+		    <Generator>MSBuild:Compile</Generator>
+	    </Page>
+	    <Page Include="Views\Pages\SalesPage.xaml">
+		    <Generator>MSBuild:Compile</Generator>
+	    </Page>
+	    <Page Include="Views\Pages\AdminPage.xaml">
+		    <Generator>MSBuild:Compile</Generator>
+	    </Page>
+    </ItemGroup>
 
   <!--
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
