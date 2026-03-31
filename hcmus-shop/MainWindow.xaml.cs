@@ -8,8 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace hcmus_shop
 {
@@ -18,17 +16,6 @@ namespace hcmus_shop
     /// </summary>
     public sealed partial class MainWindow : Window
     {
-        private static readonly Dictionary<string, string> TagToFeatureMap = new(StringComparer.OrdinalIgnoreCase)
-        {
-            ["Dashboard"] = "Dashboard",
-            ["Sales"] = "Sales",
-            ["Products"] = "Sales",
-            ["Store"] = "Sales",
-            ["Messages"] = "Sales",
-            ["Inventory"] = "Sales",
-            ["Admin"] = "Admin"
-        };
-
         private readonly IAuthService _authService;
         private readonly IFeatureFlagService _featureFlagService;
 
@@ -38,21 +25,21 @@ namespace hcmus_shop
             _authService = Ioc.Default.GetRequiredService<IAuthService>();
             _featureFlagService = Ioc.Default.GetRequiredService<IFeatureFlagService>();
             ConfigureNavigationByFeatureFlag();
-            NavigateTo("Sales");  //test forbidden page
-            //NavigateToDefault();
+            //NavigateTo("Sales");  //test forbidden page
+            NavigateToDefault();
         }
 
         private void ConfigureNavigationByFeatureFlag()
         {
-            foreach (var item in AppNavigationView.MenuItems.OfType<NavigationViewItem>())
+            foreach (var item in GetNavigationItems())
             {
-                if (item.Tag is not string tag || !TagToFeatureMap.TryGetValue(tag, out var featureName))
+                if (item.Tag is not string tag)
                 {
                     item.Visibility = Visibility.Visible;
                     continue;
                 }
 
-                item.Visibility = CanAccessFeature(featureName) ? Visibility.Visible : Visibility.Collapsed;
+                item.Visibility = CanAccessFeature(tag) ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
@@ -69,38 +56,25 @@ namespace hcmus_shop
             switch (target)
             {
                 case "Dashboard":
-                    if (CanAccessFeature("Dashboard"))
-                    {
-                        ContentFrame.Navigate(typeof(DashboardPageView));
-                    }
-                    else
-                    {
-                        ContentFrame.Navigate(typeof(ForbiddenPage));
-                    }
+                    NavigateOrForbid(typeof(DashboardPageView), "Dashboard");
                     break;
                 case "Sales":
+                    NavigateOrForbid(typeof(SalesPage), target);
+                    break;
                 case "Products":
+                    NavigateOrForbid(typeof(ProductsPage), target);
+                    break;
                 case "Store":
+                    NavigateOrForbid(typeof(StorePage), target);
+                    break;
                 case "Messages":
+                    NavigateOrForbid(typeof(MessagesPage), target);
+                    break;
                 case "Inventory":
-                    if (CanAccessFeature("Sales"))
-                    {
-                        ContentFrame.Navigate(typeof(SalesPage));
-                    }
-                    else
-                    {
-                        ContentFrame.Navigate(typeof(ForbiddenPage));
-                    }
+                    NavigateOrForbid(typeof(InventoryPage), target);
                     break;
                 case "Admin":
-                    if (CanAccessFeature("Admin"))
-                    {
-                        ContentFrame.Navigate(typeof(AdminPage));
-                    }
-                    else
-                    {
-                        ContentFrame.Navigate(typeof(ForbiddenPage));
-                    }
+                    NavigateOrForbid(typeof(AdminPage), "Admin");
                     break;
                 case "Logout":
                     _authService.Logout();
@@ -125,10 +99,15 @@ namespace hcmus_shop
                 return;
             }
 
-            if (CanAccessFeature("Sales"))
+            var firstAccessible = GetNavigationItems()
+                .Where(item => item.Tag is string tag && tag is not "Dashboard" and not "Admin")
+                .Select(item => new { Item = item, Tag = (string)item.Tag })
+                .FirstOrDefault(entry => CanAccessFeature(entry.Tag));
+
+            if (firstAccessible is not null)
             {
-                NavigateTo("Sales");
-                AppNavigationView.SelectedItem = ProductsItem;
+                NavigateTo(firstAccessible.Tag);
+                AppNavigationView.SelectedItem = firstAccessible.Item;
                 return;
             }
 
@@ -141,6 +120,23 @@ namespace hcmus_shop
 
             ContentFrame.Navigate(typeof(ForbiddenPage));
             AppNavigationView.SelectedItem = null;
+        }
+
+        private IEnumerable<NavigationViewItem> GetNavigationItems()
+        {
+            return AppNavigationView.MenuItems.OfType<NavigationViewItem>();
+        }
+
+        private void NavigateOrForbid(Type pageType, string featureName)
+        {
+            if (CanAccessFeature(featureName))
+            {
+                ContentFrame.Navigate(pageType);
+            }
+            else
+            {
+                ContentFrame.Navigate(typeof(ForbiddenPage));
+            }
         }
     }
 }

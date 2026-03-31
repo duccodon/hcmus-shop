@@ -39,7 +39,7 @@
 
 	<!-- Dashboard Components + Pages -->
 	<ItemGroup>
-		<Page Include="Views\Dashboard\**\*.xaml" />
+		<Page Include="Views\Pages\Dashboard\**\*.xaml" />
 	</ItemGroup>
 
 	<!-- Admin Pages -->
@@ -54,10 +54,11 @@
 
 	<!-- Top-level Pages -->
 	<ItemGroup>
-		<Page Include="Views\Pages\LoginPage.xaml" />
-		<Page Include="Views\Pages\SalesPage.xaml" />
-		<Page Include="Views\Pages\AdminPage.xaml" />
-		<Page Include="Views\Pages\ForbiddenPage.xaml" />
+		<Page Include="Views\Pages\Auth\**\*.xaml" />
+		<Page Include="Views\Pages\Inventory\**\*.xaml" />
+		<Page Include="Views\Pages\Products\ProductsPage.xaml" />
+		<Page Include="Views\Pages\Store\StorePage.xaml" />
+		<Page Include="Views\Pages\Messages\MessagesPage.xaml" />
 	</ItemGroup>
 
 	<!-- Resources -->
@@ -143,6 +144,18 @@
 
 	<ItemGroup>
 		<PRIResource Remove="Components\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Page Update="Views\Pages\Messages\MessagesPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="Views\Pages\Products\ProductsPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="Views\Pages\Store\StorePage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
 	</ItemGroup>
 
 </Project>
