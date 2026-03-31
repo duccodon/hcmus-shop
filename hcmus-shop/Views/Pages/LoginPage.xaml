@@ -49,7 +49,7 @@
                     <CheckBox Content="Remember me" IsChecked="{Binding RememberMe, Mode=TwoWay}" />
 
                     <TextBlock
-                        Foreground="IndianRed"
+                        Foreground="{StaticResource LoginErrorBrush}"
                         Text="{Binding ErrorMessage}"
                         Visibility="{Binding HasError, Converter={StaticResource BooleanToVisibilityConverter}}" />
 

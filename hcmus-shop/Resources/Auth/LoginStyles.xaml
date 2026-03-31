@@ -3,20 +3,12 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Color x:Key="LoginRightPanelColor">#F5F0EB</Color>
-    <Color x:Key="LoginPrimaryColor">#7B4F2E</Color>
-    <Color x:Key="LoginOutlineColor">#6F7EFF</Color>
-
-    <SolidColorBrush x:Key="LoginRightPanelBrush" Color="{StaticResource LoginRightPanelColor}" />
-    <SolidColorBrush x:Key="LoginPrimaryBrush" Color="{StaticResource LoginPrimaryColor}" />
-    <SolidColorBrush x:Key="LoginOutlineBrush" Color="{StaticResource LoginOutlineColor}" />
-
     <Style x:Key="LoginCardBorderStyle" TargetType="Border">
         <Setter Property="BorderBrush" Value="{StaticResource LoginOutlineBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="12" />
         <Setter Property="Padding" Value="30" />
-        <Setter Property="Background" Value="#0DFFFFFF" />
+        <Setter Property="Background" Value="{StaticResource LoginCardBackgroundBrush}" />
     </Style>
 
     <Style x:Key="LoginTextBoxStyle" TargetType="TextBox">
@@ -42,8 +34,8 @@
 
     <Style x:Key="LoginOutlineButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="#2F2F2F" />
-        <Setter Property="BorderBrush" Value="#D1C9C2" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="BorderBrush" Value="{StaticResource LoginInputBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="Padding" Value="18,8" />

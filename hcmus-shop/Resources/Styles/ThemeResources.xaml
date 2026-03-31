@@ -3,12 +3,19 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <SolidColorBrush x:Key="DashboardBackground" Color="#0F172A" />
-    <SolidColorBrush x:Key="CardBackground" Color="#1E2937" />
-    <SolidColorBrush x:Key="AccentCyan" Color="#06B6D4" />
-    <SolidColorBrush x:Key="AccentPurple" Color="#7C3AED" />
-    <SolidColorBrush x:Key="AccentOrange" Color="#F59E0B" />
-    <SolidColorBrush x:Key="TextPrimary" Color="#F1F5F9" />
-    <SolidColorBrush x:Key="TextSecondary" Color="#94A3B8" />
-    <SolidColorBrush x:Key="SidebarBackground" Color="#111827" />
+    <SolidColorBrush x:Key="DashboardBackground" Color="#F3F0EC" />
+    <SolidColorBrush x:Key="CardBackground" Color="#FFFBF8" />
+    <SolidColorBrush x:Key="AccentCyan" Color="#7B4F2E" />
+    <SolidColorBrush x:Key="AccentPurple" Color="#6F7EFF" />
+    <SolidColorBrush x:Key="AccentOrange" Color="#C58B5A" />
+    <SolidColorBrush x:Key="TextPrimary" Color="#1F1F1F" />
+    <SolidColorBrush x:Key="TextSecondary" Color="#5F5A56" />
+    <SolidColorBrush x:Key="SidebarBackground" Color="#E9E2DB" />
+
+    <SolidColorBrush x:Key="LoginRightPanelBrush" Color="#F5F0EB" />
+    <SolidColorBrush x:Key="LoginCardBackgroundBrush" Color="#FFFBF8" />
+    <SolidColorBrush x:Key="LoginPrimaryBrush" Color="#7B4F2E" />
+    <SolidColorBrush x:Key="LoginOutlineBrush" Color="#6F7EFF" />
+    <SolidColorBrush x:Key="LoginInputBorderBrush" Color="#D1C9C2" />
+    <SolidColorBrush x:Key="LoginErrorBrush" Color="#B42318" />
 </ResourceDictionary>
