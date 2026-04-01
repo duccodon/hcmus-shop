@@ -15,6 +15,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <controls:HeaderBar WelcomeText="{x:Bind ViewModel.WelcomeMessage, Mode=OneWay}" />
@@ -80,6 +81,11 @@
                 <tables:RecentInvoicesTable
                     Grid.Row="3"
                     ItemsSource="{x:Bind ViewModel.RecentInvoices, Mode=OneWay}" />
+
+                <tables:ProductSummaryTable
+                    Grid.Row="4"
+                    TopSoldItems="{x:Bind ViewModel.TopSoldProducts, Mode=OneWay}"
+                    LowStockItems="{x:Bind ViewModel.LowStockProducts, Mode=OneWay}" />
             </Grid>
         </ScrollViewer>
     </Grid>
