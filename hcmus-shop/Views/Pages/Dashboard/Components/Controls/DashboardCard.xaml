@@ -4,24 +4,66 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:hcmus_shop.Views.Dashboard.Components.Controls">
 
-    <Border
-        Background="{StaticResource CardBackground}"
-        CornerRadius="16"
-        Padding="16">
-        <StackPanel Spacing="10">
-            <StackPanel>
-                <TextBlock
-                    FontSize="18"
-                    FontWeight="SemiBold"
-                    Foreground="{StaticResource TextPrimary}"
-                    Text="{x:Bind Title, Mode=OneWay}" />
-                <TextBlock
-                    FontSize="12"
-                    Foreground="{StaticResource TextSecondary}"
-                    Text="{x:Bind Subtitle, Mode=OneWay}" />
-            </StackPanel>
+    <UserControl.Resources>
+        <LinearGradientBrush x:Key="CardGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#F7F7FB" Offset="0" />
+            <GradientStop Color="#ECF0FF" Offset="1" />
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="CardStroke" Color="#1A000000" />
+        <SolidColorBrush x:Key="TitleBrush" Color="#1E1E2D" />
+        <SolidColorBrush x:Key="SubtitleBrush" Color="#7A7F9A" />
+        <SolidColorBrush x:Key="PillBrush" Color="#E6E8F5" />
+    </UserControl.Resources>
 
-            <ContentPresenter Content="{x:Bind CardContent, Mode=OneWay}" />
-        </StackPanel>
-    </Border>
+    <Grid>
+        <Border
+            Background="{StaticResource CardGradient}"
+            BorderBrush="{StaticResource CardStroke}"
+            BorderThickness="1"
+            CornerRadius="20"
+            Padding="18"
+            Shadow="{ThemeResource NavigationViewContentBackgroundShadow}">
+            <Grid RowDefinitions="Auto,*" RowSpacing="14">
+                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <StackPanel Orientation="Vertical" Spacing="4">
+                        <TextBlock
+                            FontSize="18"
+                            FontWeight="SemiBold"
+                            Foreground="{StaticResource TitleBrush}"
+                            Text="{x:Bind Title, Mode=OneWay}" />
+                        <TextBlock
+                            FontSize="12"
+                            Foreground="{StaticResource SubtitleBrush}"
+                            Text="{x:Bind Subtitle, Mode=OneWay}" />
+                    </StackPanel>
+
+                    <Border
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        Grid.Column="1"
+                        Background="{StaticResource PillBrush}"
+                        CornerRadius="12"
+                        Padding="10,6"
+                        VerticalAlignment="Center">
+                        <TextBlock
+                            Foreground="{StaticResource TitleBrush}"
+                            FontSize="12"
+                            FontWeight="SemiBold"
+                            Opacity="0.75"
+                            Text="Details" />
+                    </Border>
+                </Grid>
+
+                <Border
+                    Grid.Row="1"
+                    Background="#CCFFFFFF"
+                    CornerRadius="14"
+                    Padding="10"
+                    BorderBrush="{StaticResource CardStroke}"
+                    BorderThickness="1">
+                    <ContentPresenter Content="{x:Bind CardContent, Mode=OneWay}" />
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
 </UserControl>

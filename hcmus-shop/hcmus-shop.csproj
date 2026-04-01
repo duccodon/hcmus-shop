@@ -147,6 +147,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Page Update="Views\Pages\Dashboard\Components\Tables\ProductSummaryTable.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
 		<Page Update="Views\Pages\Messages\MessagesPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
