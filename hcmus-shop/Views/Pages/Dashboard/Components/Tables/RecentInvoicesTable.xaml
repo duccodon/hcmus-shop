@@ -109,25 +109,34 @@
 
                 <!-- Status header with filter dropdown -->
                 <Border Grid.Column="4" Padding="6,4" BorderBrush="#26000000" BorderThickness="1,0,0,1">
-                    <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Button Click="SortHeader_Click" Tag="Status" Padding="0" Background="Transparent" BorderThickness="0">
-                            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                <TextBlock Text="Status" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" />
-                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind StatusSortGlyph, Mode=OneWay}" Foreground="{StaticResource TextSecondary}" FontSize="14" />
-                            </StackPanel>
-                        </Button>
-                        <ComboBox
-                            x:Name="StatusFilterCombo"
-                            Width="100"
-                            SelectedIndex="0"
-                            SelectionChanged="StatusFilterCombo_SelectionChanged"
-                            FontSize="12">
-                            <ComboBoxItem Content="All" Tag="" />
-                            <ComboBoxItem Content="Paid" Tag="Paid" />
-                            <ComboBoxItem Content="Pending" Tag="Pending" />
-                            <ComboBoxItem Content="Cancelled" Tag="Cancelled" />
-                        </ComboBox>
-                    </StackPanel>
+                    <Button
+                        x:Name="StatusHeaderButton"
+                        Click="StatusHeader_Click"
+                        HorizontalAlignment="Center"
+                        Padding="6,4"
+                        Background="Transparent"
+                        BorderThickness="0">    
+                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                            <TextBlock
+                                x:Name="StatusHeaderLabel"
+                                Text="Status: All"
+                                FontWeight="SemiBold"
+                                Foreground="{StaticResource TextSecondary}" />
+                                        <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                Glyph="&#xE70D;"
+                                Foreground="{StaticResource TextSecondary}"
+                                FontSize="14" />            
+                        </StackPanel>
+                        <Button.Flyout>
+                            <MenuFlyout x:Name="StatusMenuFlyout" Placement="Bottom">
+                                <MenuFlyoutItem Text="All"       Click="StatusFilter_Click" Tag="" />
+                                <MenuFlyoutItem Text="Paid"      Click="StatusFilter_Click" Tag="Paid" />
+                                <MenuFlyoutItem Text="Pending"   Click="StatusFilter_Click" Tag="Pending" />
+                                <MenuFlyoutItem Text="Cancelled" Click="StatusFilter_Click" Tag="Cancelled" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
                 </Border>
 
                 <Border Grid.Column="5" Padding="10,8" BorderBrush="#26000000" BorderThickness="1,0,0,1">
@@ -225,19 +234,34 @@
             <!-- Pagination Row -->
             <Grid Grid.Row="3" Margin="0,4,0,0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Foreground="{StaticResource TextSecondary}"
+                        Text="Items" />
+                    <ComboBox
+                        x:Name="PageSizeCombo"
+                        Width="70"
+                        Padding="10,6,0,6"
+                        ItemsSource="{x:Bind PageSizeOptions, Mode=OneWay}"
+                        SelectionChanged="PageSizeCombo_SelectionChanged"
+                        SelectedItem="{x:Bind SelectedPageSize, Mode=TwoWay}" />
+                </StackPanel>
+
                 <TextBlock
+                    Grid.Column="1"
                     VerticalAlignment="Center"
                     Foreground="{StaticResource TextSecondary}"
                     Text="{x:Bind PagingText, Mode=OneWay}" />
 
                 <!-- Numbered pagination -->
                 <ItemsControl
-                    Grid.Column="1"
+                    Grid.Column="2"
                     ItemsSource="{x:Bind PageButtons, Mode=OneWay}"
                     VerticalAlignment="Center">
                     <ItemsControl.ItemsPanel>

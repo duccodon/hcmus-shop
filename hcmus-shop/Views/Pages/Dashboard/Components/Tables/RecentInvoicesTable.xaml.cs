@@ -58,6 +58,7 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
         private string _sortColumn = DefaultSortColumn;
         private bool _sortAscending = true; // default: ascending for No
         private int _currentPage = 1;
+        private int _selectedPageSize = DefaultPageSize;
 
         // ──────────────────────────────────────────────
         // Public Observable Collections
@@ -65,12 +66,30 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
 
         public ObservableCollection<RecentInvoiceItem> PagedItems { get; } = [];
         public ObservableCollection<PageButtonItem> PageButtons { get; } = [];
+        public ObservableCollection<int> PageSizeOptions { get; } = [5, 10, 20, 50];
 
         // ──────────────────────────────────────────────
         // Computed Properties
         // ──────────────────────────────────────────────
 
-        public int PageSize { get; } = DefaultPageSize;
+        public int PageSize => _selectedPageSize;
+        public int SelectedPageSize
+        {
+            get => _selectedPageSize;
+            set
+            {
+                if (_selectedPageSize == value)
+                {
+                    return;
+                }
+
+                _selectedPageSize = value;
+                _currentPage = 1;
+                RebuildPagedItems();
+                NotifyPagingChanged();
+                OnPropertyChanged(nameof(SelectedPageSize));
+            }
+        }
         public string NoSortGlyph => GetSortGlyphFor("No");
         public string CustomerSortGlyph => GetSortGlyphFor("Customer");
         public string ProductSortGlyph => GetSortGlyphFor("Product");
@@ -83,6 +102,11 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
 
         private int TotalPages =>
             Math.Max(1, (int)Math.Ceiling((double)_filteredSortedItems.Count / PageSize));
+
+        // ──────────────────────────────────────────────
+        // Status filter state
+        // ──────────────────────────────────────────────
+        private string _activeStatusFilter = string.Empty;
 
         // ──────────────────────────────────────────────
         // Events
@@ -154,8 +178,37 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
             ApplyFilterAndSort(resetPage: true);
         }
 
-        private void StatusFilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void PageSizeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (PageSizeCombo.SelectedItem is int size)
+            {
+                SelectedPageSize = size;
+            }
+        }
+
+        // ──────────────────────────────────────────────
+        // Event Handlers – Status Flyout
+        // ──────────────────────────────────────────────
+
+        private void StatusHeader_Click(object sender, RoutedEventArgs e)
+        {
+            // Intentionally no sorting on Status header click.
+            // This header is used only to open the status filter flyout.
+        }
+
+        private void StatusFilter_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuFlyoutItem item)
+                return;
+
+            _activeStatusFilter = item.Tag?.ToString() ?? string.Empty;
+
+            // Update the header label to reflect current filter
+            var label = string.IsNullOrEmpty(_activeStatusFilter)
+                ? "Status: All"
+                : $"Status: {_activeStatusFilter}";
+            StatusHeaderLabel.Text = label;
+
             ApplyFilterAndSort(resetPage: true);
         }
 
@@ -240,11 +293,10 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
             }
 
             // ── Status header filter ────────────────
-            var statusTag = (StatusFilterCombo?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
-            if (!string.IsNullOrEmpty(statusTag))
+            if (!string.IsNullOrWhiteSpace(_activeStatusFilter))
             {
                 query = query.Where(item =>
-                    string.Equals(item.Status, statusTag, StringComparison.OrdinalIgnoreCase));
+                    string.Equals(item.Status, _activeStatusFilter, StringComparison.OrdinalIgnoreCase));
             }
 
             // ── Sort ────────────────────────────────
