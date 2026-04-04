@@ -11,5 +11,11 @@
             VerticalAlignment="Center"
             FontSize="28"
             Text="MessagesPage" />
+
+        <CheckBox x:Name="MyCheckBox" 
+          Content="I agree to the terms" 
+          Checked="OnChecked" 
+          Unchecked="OnUnchecked" />
+
     </Grid>
 </Page>
