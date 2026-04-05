@@ -419,6 +419,11 @@ namespace hcmus_shop.Views
 
         private void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        private void AddProductButton_Click(object sender, RoutedEventArgs e)
+        {
+            Frame?.Navigate(typeof(AddProductPage));
+        }
     }
 
     public class ProductPageButtonItem

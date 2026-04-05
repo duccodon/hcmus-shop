@@ -17,6 +17,7 @@ namespace hcmus_shop
     public partial class App : Application
     {
         public static IConfiguration Configuration { get; private set; } = null!;
+        public Window? CurrentWindow { get; private set; }
         private Window? _loginWindow;
         private Window? _mainWindow;
 
@@ -78,12 +79,14 @@ namespace hcmus_shop
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
             _loginWindow = new LoginWindow();
+            CurrentWindow = _loginWindow;
             _loginWindow.Activate();
         }
 
         public void OpenMainWindow()
         {
             _mainWindow ??= new MainWindow();
+            CurrentWindow = _mainWindow;
             _mainWindow.Activate();
             _loginWindow?.Close();
             _loginWindow = null;

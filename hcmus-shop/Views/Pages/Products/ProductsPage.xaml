@@ -44,6 +44,7 @@
                                     Content="+ Add Product"
                                     Padding="16,8"
                                     CornerRadius="8"
+                                    Click="AddProductButton_Click"
                                     Background="{StaticResource AccentPurple}"
                                     Foreground="White" />
                             </StackPanel>
@@ -217,8 +218,6 @@
                                         x:Name="SelectAllCheckBox"
                                         Width="22"
                                         Height="22"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
                                         Click="SelectAllCheckBox_Click" />
                                 </Border>
 
@@ -269,18 +268,12 @@
                                                         BorderBrush="#22000000"
                                                         BorderThickness="0,0,0,1">
                                                     <CheckBox
-                                                        Width="10"
-                                                        Height="10"
-                                                        HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"
+                                                        Width="22"
+                                                        Height="22"
                                                         Tag="{x:Bind ProductId, Mode=OneWay}"
                                                         Loaded="RowCheckBox_Loaded"
                                                         Checked="RowCheckBox_Checked"
                                                         Unchecked="RowCheckBox_Unchecked" />
-                                                    <!--<CheckBox x:Name="MyCheckBox" 
-                                                              Content="I agree to the terms" 
-                                                              Checked="RowCheckBox_Checked" 
-                                                              Unchecked="RowCheckBox_Unchecked" />-->
                                                 </Border>
 
                                                 <!-- Product name + SKU -->
