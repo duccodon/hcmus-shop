@@ -23,10 +23,13 @@
 	<!-- Exclude Common folder (shared base classes, not standalone pages) -->
 	<ItemGroup>
 		<Compile Remove="Components\**" />
+		<Compile Remove="Utils\**" />
 		<Compile Remove="Views\Pages\Common\**" />
 		<EmbeddedResource Remove="Components\**" />
+		<EmbeddedResource Remove="Utils\**" />
 		<EmbeddedResource Remove="Views\Pages\Common\**" />
 		<None Remove="Components\**" />
+		<None Remove="Utils\**" />
 		<None Remove="Views\Pages\Common\**" />
 		<Page Remove="Views\Pages\Common\**" />
 		<PRIResource Remove="Views\Pages\Common\**" />
@@ -40,6 +43,7 @@
 	<!-- Dashboard Components + Pages -->
 	<ItemGroup>
 		<Page Include="Views\Pages\Dashboard\**\*.xaml" />
+        <Page Include="Views\Components\**\*.xaml" />
 	</ItemGroup>
 
 	<!-- Admin Pages -->
@@ -126,7 +130,6 @@
 	<ItemGroup>
 		<Folder Include="Resources\Auth\" />
 		<Folder Include="Resources\Styles\" />
-		<Folder Include="Utils\" />
 		<Folder Include="Views\Pages\Admin\" />
 		<Folder Include="Views\Pages\Sale\" />
 	</ItemGroup>
@@ -163,9 +166,16 @@
         <Page Update="Views\Pages\Products\AddProductPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
+        <Page Update="Views\Components\**\*.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
 		<Page Update="Views\Pages\Store\StorePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PRIResource Remove="Utils\**" />
 	</ItemGroup>
 
 </Project>

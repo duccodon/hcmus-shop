@@ -12,6 +12,18 @@
     <SolidColorBrush x:Key="TextSecondary" Color="#5F5A56" />
     <SolidColorBrush x:Key="SidebarBackground" Color="#E9E2DB" />
 
+    <SolidColorBrush x:Key="DangerForeground" Color="#DC2626" />
+    <SolidColorBrush x:Key="DangerBackgroundSubtle" Color="#15DC2626" />
+    <SolidColorBrush x:Key="WarningForeground" Color="#A16207" />
+    <SolidColorBrush x:Key="WarningBackgroundSubtle" Color="#15CA8A04" />
+    <SolidColorBrush x:Key="SuccessForeground" Color="#15803D" />
+    <SolidColorBrush x:Key="SuccessBackgroundSubtle" Color="#DCE4E7" />
+    <SolidColorBrush x:Key="SelectionHighlight" Color="#0A6F7EFF" />
+    <SolidColorBrush x:Key="TableRowBorder" Color="#22000000" />
+    <SolidColorBrush x:Key="TableHeaderBackground" Color="#0D000000" />
+    <SolidColorBrush x:Key="TableHeaderBorder" Color="#24000000" />
+    <SolidColorBrush x:Key="DividerBrush" Color="#14000000" />
+
     <SolidColorBrush x:Key="LoginRightPanelBrush" Color="#F5F0EB" />
     <SolidColorBrush x:Key="LoginCardBackgroundBrush" Color="#FFFBF8" />
     <SolidColorBrush x:Key="LoginPrimaryBrush" Color="#7B4F2E" />

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="hcmus_shop.Views.Components.Pagination.PaginationFooter"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Name="Root">
+
+    <Grid Margin="0,6,0,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <TextBlock
+                VerticalAlignment="Center"
+                Text="{x:Bind ResultText, Mode=OneWay}"
+                FontSize="13"
+                Foreground="{StaticResource TextSecondary}" />
+
+            <ComboBox
+                Width="75"
+                ItemsSource="{x:Bind PageSizeOptions, Mode=OneWay}"
+                SelectedItem="{x:Bind SelectedPageSize, Mode=TwoWay}" />
+        </StackPanel>
+
+        <TextBlock
+            Grid.Column="1"
+            VerticalAlignment="Center"
+            Foreground="{StaticResource TextSecondary}"
+            Text="{x:Bind CenterText, Mode=OneWay}" />
+
+        <ItemsControl Grid.Column="2" ItemsSource="{x:Bind PageButtons, Mode=OneWay}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" Spacing="6" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button
+                        MinWidth="36"
+                        Height="32"
+                        Padding="10,0"
+                        Content="{Binding Label}"
+                        Command="{Binding PageButtonClickCommand, ElementName=Root}"
+                        CommandParameter="{Binding PageNumber}"
+                        IsEnabled="{Binding IsEnabled}"
+                        Background="{Binding Background}"
+                        Foreground="{Binding Foreground}"
+                        CornerRadius="8" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</UserControl>

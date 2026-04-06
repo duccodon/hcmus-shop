@@ -8,6 +8,7 @@ using System.IO;
 using System.Reflection;
 using hcmus_shop.Data;
 using hcmus_shop.ViewModels;
+using hcmus_shop.ViewModels.Products;
 using hcmus_shop.Views;
 using hcmus_shop.Services.Auth;
 
@@ -72,6 +73,8 @@ namespace hcmus_shop
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IFeatureFlagService, FeatureFlagService>();
             services.AddTransient<LoginViewModel>();
+            services.AddTransient<ProductsViewModel>();
+            services.AddTransient<AddProductViewModel>();
 
             Ioc.Default.ConfigureServices(services.BuildServiceProvider());
         }

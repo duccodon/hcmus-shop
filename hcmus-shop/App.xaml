@@ -9,6 +9,12 @@
         <ResourceDictionary>
             <!-- Declare your converter here -->
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
+            <converters:StockToneForegroundConverter x:Key="StockToneForegroundConverter" />
+            <converters:StatusToneBackgroundConverter x:Key="StatusToneBackgroundConverter" />
+            <converters:StatusToneForegroundConverter x:Key="StatusToneForegroundConverter" />
+            <converters:PageButtonBackgroundConverter x:Key="PageButtonBackgroundConverter" />
+            <converters:PageButtonForegroundConverter x:Key="PageButtonForegroundConverter" />
 
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />

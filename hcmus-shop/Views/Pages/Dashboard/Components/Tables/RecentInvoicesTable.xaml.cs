@@ -1,4 +1,5 @@
 using hcmus_shop.ViewModels;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -31,11 +32,9 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
         private const string GlyphSortDesc = "\uE70D";
 
         // Pagination symbols
-        private const string LabelFirst = "\u00AB"; // «
-        private const string LabelPrev = "\u2039"; // ‹
-        private const string LabelNext = "\u203A"; // ›
-        private const string LabelLast = "\u00BB"; // »
-        private const string LabelEllipsis = "\u2026"; // …
+        private const string LabelPrev = "\u2190 Previous";
+        private const string LabelNext = "Next \u2192";
+        private const string LabelEllipsis = "\u2026";
 
         // ──────────────────────────────────────────────
         // Dependency Property
@@ -67,6 +66,7 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
         public ObservableCollection<RecentInvoiceItem> PagedItems { get; } = [];
         public ObservableCollection<PageButtonItem> PageButtons { get; } = [];
         public ObservableCollection<int> PageSizeOptions { get; } = [5, 10, 20, 50];
+        public IRelayCommand<int> PageButtonClickCommand { get; }
 
         // ──────────────────────────────────────────────
         // Computed Properties
@@ -99,6 +99,20 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
         public bool CanGoPrevious => _currentPage > 1;
         public bool CanGoNext => _currentPage < TotalPages;
         public string PagingText => $"Page {_currentPage}/{TotalPages} • {_filteredSortedItems.Count} items";
+        public string FooterResultText
+        {
+            get
+            {
+                if (_filteredSortedItems.Count == 0)
+                {
+                    return "Result 0 of 0";
+                }
+
+                var start = ((_currentPage - 1) * PageSize) + 1;
+                var end = Math.Min(_currentPage * PageSize, _filteredSortedItems.Count);
+                return $"Result {start}-{end} of {_filteredSortedItems.Count}";
+            }
+        }
 
         private int TotalPages =>
             Math.Max(1, (int)Math.Ceiling((double)_filteredSortedItems.Count / PageSize));
@@ -121,6 +135,7 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
         public RecentInvoicesTable()
         {
             InitializeComponent();
+            PageButtonClickCommand = new RelayCommand<int>(OnPageButtonCommandExecute);
         }
 
         // ──────────────────────────────────────────────
@@ -176,14 +191,6 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
             CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs args)
         {
             ApplyFilterAndSort(resetPage: true);
-        }
-
-        private void PageSizeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (PageSizeCombo.SelectedItem is int size)
-            {
-                SelectedPageSize = size;
-            }
         }
 
         // ──────────────────────────────────────────────
@@ -244,6 +251,16 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
             if (sender is not Button { Tag: int targetPage })
                 return;
 
+            if (targetPage < 1 || targetPage > TotalPages || targetPage == _currentPage)
+                return;
+
+            _currentPage = targetPage;
+            RebuildPagedItems();
+            NotifyPagingChanged();
+        }
+
+        private void OnPageButtonCommandExecute(int targetPage)
+        {
             if (targetPage < 1 || targetPage > TotalPages || targetPage == _currentPage)
                 return;
 
@@ -381,8 +398,7 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
 
             var totalPages = TotalPages;
             var currentPage = _currentPage;
-            var accentBrush = Application.Current.Resources["SystemAccentColor"] is Windows.UI.Color c
-                ? new SolidColorBrush(c) : new SolidColorBrush(Colors.DodgerBlue);
+            var accentBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 111, 126, 255));
             var defaultBrush = new SolidColorBrush(Colors.Transparent);
             var fgAccent = new SolidColorBrush(Colors.White);
             var fgDefault = Application.Current.Resources.TryGetValue("TextPrimary", out var tp) && tp is SolidColorBrush tpBrush
@@ -422,8 +438,6 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
                 FontWeight = new FontWeight { Weight = 400 },
             };
 
-            // Navigation: first, prev
-            PageButtons.Add(NavBtn(LabelFirst, 1, currentPage > 1));
             PageButtons.Add(NavBtn(LabelPrev, currentPage - 1, currentPage > 1));
 
             // Page number logic: always show first, last, current ±1 window
@@ -439,9 +453,7 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
                 lastAdded = page;
             }
 
-            // Navigation: next, last
             PageButtons.Add(NavBtn(LabelNext, currentPage + 1, currentPage < totalPages));
-            PageButtons.Add(NavBtn(LabelLast, totalPages, currentPage < totalPages));
         }
 
         /// <summary>
@@ -554,6 +566,7 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
             OnPropertyChanged(nameof(CanGoPrevious));
             OnPropertyChanged(nameof(CanGoNext));
             OnPropertyChanged(nameof(PagingText));
+            OnPropertyChanged(nameof(FooterResultText));
         }
 
         private string GetSortGlyphFor(string column)
