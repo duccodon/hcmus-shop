@@ -6,10 +6,13 @@ namespace hcmus_shop.ViewModels.Products
     {
         private bool _isSelected;
 
-        public CategoryOptionViewModel(string name)
+        public CategoryOptionViewModel(int categoryId, string name)
         {
+            CategoryId = categoryId;
             Name = name;
         }
+
+        public int CategoryId { get; }
 
         public string Name { get; }
 

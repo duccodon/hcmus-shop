@@ -12,7 +12,7 @@ using hcmus_shop.Data;
 namespace hcmus_shop.Data.Migrations
 {
     [DbContext(typeof(MyShopDbContext))]
-    [Migration("20260330033958_InitialCreate")]
+    [Migration("20260406185446_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

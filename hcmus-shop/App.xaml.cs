@@ -7,6 +7,8 @@ using System;
 using System.IO;
 using System.Reflection;
 using hcmus_shop.Data;
+using hcmus_shop.Data.Repositories.Implementations;
+using hcmus_shop.Data.Repositories.Interfaces;
 using hcmus_shop.ViewModels;
 using hcmus_shop.ViewModels.Products;
 using hcmus_shop.Views;
@@ -72,6 +74,10 @@ namespace hcmus_shop
 
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IFeatureFlagService, FeatureFlagService>();
+            services.AddTransient<IProductRepository, ProductRepository>();
+            services.AddTransient<IBrandRepository, BrandRepository>();
+            services.AddTransient<ICategoryRepository, CategoryRepository>();
+            services.AddTransient<ISeriesRepository, SeriesRepository>();
             services.AddTransient<LoginViewModel>();
             services.AddTransient<ProductsViewModel>();
             services.AddTransient<AddProductViewModel>();

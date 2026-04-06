@@ -20,6 +20,35 @@ namespace hcmus_shop.Views
             InitializeComponent();
             ViewModel = Ioc.Default.GetRequiredService<AddProductViewModel>();
             DataContext = ViewModel;
+            Loaded += AddProductPage_Loaded;
+            Unloaded += AddProductPage_Unloaded;
+            ViewModel.ProductSaved += ViewModel_ProductSaved;
+        }
+
+        private async void AddProductPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!ViewModel.IsInitialized)
+            {
+                await ViewModel.InitializeCommand.ExecuteAsync(null);
+            }
+        }
+
+        private void AddProductPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            ViewModel.ProductSaved -= ViewModel_ProductSaved;
+            Loaded -= AddProductPage_Loaded;
+            Unloaded -= AddProductPage_Unloaded;
+        }
+
+        private void ViewModel_ProductSaved(object? sender, EventArgs e)
+        {
+            if (Frame?.CanGoBack == true)
+            {
+                Frame.GoBack();
+                return;
+            }
+
+            Frame?.Navigate(typeof(ProductsPage));
         }
 
         private async void AddImageButton_Click(object sender, RoutedEventArgs e)
