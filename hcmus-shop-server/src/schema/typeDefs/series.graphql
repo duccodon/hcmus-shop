@@ -1,0 +1,20 @@
+type Series {
+  seriesId: Int!
+  brandId: Int!
+  name: String!
+  description: String
+  targetSegment: String
+  createdAt: String!
+  brand: Brand!
+}
+
+extend type Query {
+  seriesByBrand(brandId: Int!): [Series!]!
+  series(seriesId: Int!): Series
+}
+
+extend type Mutation {
+  createSeries(brandId: Int!, name: String!, description: String, targetSegment: String): Series!
+  updateSeries(seriesId: Int!, name: String, description: String, targetSegment: String): Series!
+  deleteSeries(seriesId: Int!): Series!
+}

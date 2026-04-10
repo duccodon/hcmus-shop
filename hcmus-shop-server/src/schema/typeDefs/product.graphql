@@ -1,0 +1,86 @@
+type Product {
+  productId: Int!
+  sku: String!
+  name: String!
+  brandId: Int!
+  seriesId: Int
+  importPrice: Float!
+  sellingPrice: Float!
+  stockQuantity: Int!
+  specifications: JSON
+  description: String
+  warrantyMonths: Int!
+  isActive: Boolean!
+  createdAt: String!
+  brand: Brand!
+  series: Series
+  categories: [Category!]!
+  images: [ProductImage!]!
+}
+
+type ProductImage {
+  imageId: Int!
+  imageUrl: String!
+  displayOrder: Int!
+}
+
+type ProductPage {
+  items: [Product!]!
+  totalCount: Int!
+  page: Int!
+  pageSize: Int!
+}
+
+input CreateProductInput {
+  sku: String!
+  name: String!
+  brandId: Int!
+  seriesId: Int
+  importPrice: Float!
+  sellingPrice: Float!
+  stockQuantity: Int
+  specifications: JSON
+  description: String
+  warrantyMonths: Int
+  categoryIds: [Int!]
+  imageUrls: [String!]
+}
+
+input UpdateProductInput {
+  sku: String
+  name: String
+  brandId: Int
+  seriesId: Int
+  importPrice: Float
+  sellingPrice: Float
+  stockQuantity: Int
+  specifications: JSON
+  description: String
+  warrantyMonths: Int
+  isActive: Boolean
+  categoryIds: [Int!]
+  imageUrls: [String!]
+}
+
+scalar JSON
+
+extend type Query {
+  products(
+    search: String
+    categoryId: Int
+    brandId: Int
+    minPrice: Float
+    maxPrice: Float
+    sortBy: String
+    sortOrder: String
+    page: Int
+    pageSize: Int
+  ): ProductPage!
+  product(productId: Int!): Product
+}
+
+extend type Mutation {
+  createProduct(input: CreateProductInput!): Product!
+  updateProduct(productId: Int!, input: UpdateProductInput!): Product!
+  deleteProduct(productId: Int!): Product!
+}

@@ -1,0 +1,20 @@
+type Brand {
+  brandId: Int!
+  name: String!
+  description: String
+  logoUrl: String
+  createdAt: String!
+  series: [Series!]!
+  productCount: Int!
+}
+
+extend type Query {
+  brands: [Brand!]!
+  brand(brandId: Int!): Brand
+}
+
+extend type Mutation {
+  createBrand(name: String!, description: String, logoUrl: String): Brand!
+  updateBrand(brandId: Int!, name: String, description: String, logoUrl: String): Brand!
+  deleteBrand(brandId: Int!): Brand!
+}
