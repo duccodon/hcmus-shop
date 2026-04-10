@@ -1,24 +1,27 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml;
 using System;
 using System.IO;
 using System.Reflection;
-using hcmus_shop.Data;
-using hcmus_shop.Data.Repositories.Implementations;
-using hcmus_shop.Data.Repositories.Interfaces;
+using hcmus_shop.Services.GraphQL;
+using hcmus_shop.Services.Auth;
+using hcmus_shop.Services.Brands;
+using hcmus_shop.Services.Categories;
+using hcmus_shop.Services.Series;
+using hcmus_shop.Services.Products;
 using hcmus_shop.ViewModels;
 using hcmus_shop.ViewModels.Products;
 using hcmus_shop.Views;
-using hcmus_shop.Services.Auth;
-
+using Windows.Storage;
 
 namespace hcmus_shop
 {
     public partial class App : Application
     {
+        private const string ConfigServerUrlKey = "config_server_url";
+
         public static IConfiguration Configuration { get; private set; } = null!;
         public Window? CurrentWindow { get; private set; }
         private Window? _loginWindow;
@@ -27,16 +30,6 @@ namespace hcmus_shop
         public App()
         {
             InitializeComponent();
-
-            //// === SETUP DEPENDENCY INJECTION + MVVM TOOLKIT ===
-            //Ioc.Default.ConfigureServices(
-            //    new ServiceCollection()
-            //        // Đăng ký các Service và ViewModel ở đây sau
-            //        // Ví dụ:
-            //        // .AddSingleton<ILoginService, LoginService>()
-            //        // .AddTransient<LoginViewModel>()
-            //        // .AddTransient<DashboardViewModel>()
-            //        .BuildServiceProvider());
 
             // === SETUP CONFIGURATION ===
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
@@ -56,28 +49,21 @@ namespace hcmus_shop
             var services = new ServiceCollection();
             services.AddSingleton<IConfiguration>(Configuration);
 
-            services.AddDbContextFactory<MyShopDbContext>(options =>
-            {
-                var connectionString = Configuration.GetConnectionString("DefaultConnection");
+            // GraphQL Client — use saved config URL or fall back to appsettings default
+            var serverUrl = GetConfiguredServerUrl();
+            services.AddSingleton<IGraphQLClientService>(new GraphQLClientService(serverUrl));
 
-                if (string.IsNullOrEmpty(connectionString))
-                {
-                    throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-                }
-
-                options.UseNpgsql(connectionString, npgsql =>
-                {
-                    npgsql.EnableRetryOnFailure(maxRetryCount: 5);
-                })
-                .UseSnakeCaseNamingConvention();
-            });
-
+            // Auth
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IFeatureFlagService, FeatureFlagService>();
-            services.AddTransient<IProductRepository, ProductRepository>();
-            services.AddTransient<IBrandRepository, BrandRepository>();
-            services.AddTransient<ICategoryRepository, CategoryRepository>();
-            services.AddTransient<ISeriesRepository, SeriesRepository>();
+
+            // Feature Services (replace old Repositories)
+            services.AddTransient<IBrandService, BrandService>();
+            services.AddTransient<ICategoryService, CategoryService>();
+            services.AddTransient<ISeriesService, SeriesService>();
+            services.AddTransient<IProductService, ProductService>();
+
+            // ViewModels
             services.AddTransient<LoginViewModel>();
             services.AddTransient<ProductsViewModel>();
             services.AddTransient<AddProductViewModel>();
@@ -94,11 +80,59 @@ namespace hcmus_shop
 
         public void OpenMainWindow()
         {
-            _mainWindow ??= new MainWindow();
+            _mainWindow = new MainWindow();
             CurrentWindow = _mainWindow;
             _mainWindow.Activate();
             _loginWindow?.Close();
             _loginWindow = null;
+        }
+
+        public void OpenLoginWindow()
+        {
+            _loginWindow = new LoginWindow();
+            CurrentWindow = _loginWindow;
+            _loginWindow.Activate();
+            _mainWindow = null;
+        }
+
+        /// <summary>
+        /// Gets the server URL from local config, falls back to appsettings.json default.
+        /// </summary>
+        private string GetConfiguredServerUrl()
+        {
+            var localSettings = ApplicationData.Current.LocalSettings;
+            if (localSettings.Values.TryGetValue(ConfigServerUrlKey, out var saved)
+                && saved is string url
+                && !string.IsNullOrWhiteSpace(url))
+            {
+                return url;
+            }
+
+            return Configuration["GraphQL:Endpoint"] ?? "http://localhost:4000/graphql";
+        }
+
+        /// <summary>
+        /// Saves the server URL to local config (called from ConfigScreen).
+        /// </summary>
+        public static void SaveServerUrl(string url)
+        {
+            ApplicationData.Current.LocalSettings.Values[ConfigServerUrlKey] = url;
+        }
+
+        /// <summary>
+        /// Gets the currently saved server URL.
+        /// </summary>
+        public static string GetSavedServerUrl()
+        {
+            var localSettings = ApplicationData.Current.LocalSettings;
+            if (localSettings.Values.TryGetValue(ConfigServerUrlKey, out var saved)
+                && saved is string url
+                && !string.IsNullOrWhiteSpace(url))
+            {
+                return url;
+            }
+
+            return Configuration["GraphQL:Endpoint"] ?? "http://localhost:4000/graphql";
         }
     }
 }

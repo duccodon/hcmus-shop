@@ -78,8 +78,10 @@ namespace hcmus_shop
                     break;
                 case "Logout":
                     _authService.Logout();
-                    var loginWindow = new LoginWindow();
-                    loginWindow.Activate();
+                    if (Application.Current is App app)
+                    {
+                        app.OpenLoginWindow();
+                    }
                     Close();
                     break;
             }

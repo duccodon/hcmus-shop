@@ -1,0 +1,211 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId       String         @id @default(uuid()) @db.Uuid
+  username     String         @unique @db.VarChar(50)
+  passwordHash String         @db.VarChar(255)
+  fullName     String
+  role         String         @default("Sale") @db.VarChar(20)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime?      @updatedAt
+
+  orders        Order[]
+  inventoryLogs InventoryLog[]
+
+  @@map("users")
+}
+
+model Customer {
+  customerId    String    @id @default(uuid()) @db.Uuid
+  name          String
+  phone         String?
+  email         String?
+  loyaltyPoints Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @updatedAt
+
+  orders Order[]
+
+  @@map("customers")
+}
+
+model Brand {
+  brandId     Int       @id @default(autoincrement())
+  name        String    @db.VarChar(100)
+  description String?
+  logoUrl     String?   @db.VarChar(500)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  products Product[]
+  series   Series[]
+
+  @@map("brands")
+}
+
+model Series {
+  seriesId      Int       @id @default(autoincrement())
+  brandId       Int
+  name          String
+  description   String?
+  targetSegment String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @updatedAt
+
+  brand    Brand     @relation(fields: [brandId], references: [brandId])
+  products Product[]
+
+  @@map("series")
+}
+
+model Category {
+  categoryId  Int       @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  products ProductCategory[]
+
+  @@map("categories")
+}
+
+model Product {
+  productId      Int       @id @default(autoincrement())
+  sku            String    @unique @db.VarChar(50)
+  name           String    @db.VarChar(200)
+  brandId        Int
+  seriesId       Int?
+  importPrice    Decimal   @db.Decimal(18, 2)
+  sellingPrice   Decimal   @db.Decimal(18, 2)
+  stockQuantity  Int       @default(0)
+  specifications Json?     @db.JsonB
+  description    String?
+  warrantyMonths Int       @default(12)
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime? @updatedAt
+
+  brand      Brand              @relation(fields: [brandId], references: [brandId], onDelete: Restrict)
+  series     Series?            @relation(fields: [seriesId], references: [seriesId], onDelete: SetNull)
+  categories ProductCategory[]
+  images     ProductImage[]
+  instances  ProductInstance[]
+  inventoryLogs InventoryLog[]
+
+  @@map("products")
+}
+
+model ProductCategory {
+  productId  Int
+  categoryId Int
+
+  product  Product  @relation(fields: [productId], references: [productId], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [categoryId], onDelete: Cascade)
+
+  @@id([productId, categoryId])
+  @@map("product_categories")
+}
+
+model ProductImage {
+  imageId      Int       @id @default(autoincrement())
+  productId    Int
+  imageUrl     String
+  displayOrder Int
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime? @updatedAt
+
+  product Product @relation(fields: [productId], references: [productId])
+
+  @@map("product_images")
+}
+
+model ProductInstance {
+  instanceId   Int       @id @default(autoincrement())
+  productId    Int
+  serialNumber String    @unique
+  status       String    @default("Available")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime? @updatedAt
+
+  product    Product     @relation(fields: [productId], references: [productId])
+  orderItems OrderItem[]
+  inventoryLogs InventoryLog[]
+
+  @@map("product_instances")
+}
+
+model Promotion {
+  promotionId     Int       @id @default(autoincrement())
+  code            String    @unique
+  discountPercent Decimal
+  discountAmount  Decimal?
+  startDate       DateTime
+  endDate         DateTime
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime? @updatedAt
+
+  orders Order[]
+
+  @@map("promotions")
+}
+
+model Order {
+  orderId        String    @id @default(uuid()) @db.Uuid
+  customerId     String    @db.Uuid
+  userId         String    @db.Uuid
+  promotionId    Int?
+  subtotal       Decimal   @db.Decimal(18, 2)
+  discountAmount Decimal   @default(0) @db.Decimal(18, 2)
+  finalAmount    Decimal   @db.Decimal(18, 2)
+  status         String    @default("Created") @db.VarChar(20)
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime? @updatedAt
+
+  customer   Customer   @relation(fields: [customerId], references: [customerId])
+  user       User       @relation(fields: [userId], references: [userId])
+  promotion  Promotion? @relation(fields: [promotionId], references: [promotionId])
+  orderItems OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  orderItemId   Int     @id @default(autoincrement())
+  orderId       String  @db.Uuid
+  instanceId    Int
+  unitSalePrice Decimal
+  quantity      Int     @default(1)
+
+  order    Order           @relation(fields: [orderId], references: [orderId])
+  instance ProductInstance @relation(fields: [instanceId], references: [instanceId])
+
+  @@map("order_items")
+}
+
+model InventoryLog {
+  logId          Int       @id @default(autoincrement())
+  productId      Int
+  instanceId     Int?
+  userId         String    @db.Uuid
+  quantityChange Int
+  changeType     String
+  reason         String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime? @updatedAt
+
+  product  Product          @relation(fields: [productId], references: [productId])
+  instance ProductInstance? @relation(fields: [instanceId], references: [instanceId])
+  user     User             @relation(fields: [userId], references: [userId])
+
+  @@map("inventory_logs")
+}
