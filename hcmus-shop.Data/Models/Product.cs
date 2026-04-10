@@ -19,6 +19,9 @@ namespace hcmus_shop.Models
         public int WarrantyMonths { get; set; } = 12;
         public bool IsActive { get; set; } = true;
 
+        // Foreign keys and navigation properties
+
+
         public Brand Brand { get; set; } = null!;
         public Series? Series { get; set; }
         public ICollection<Category> Categories { get; set; } = new List<Category>();

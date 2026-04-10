@@ -1,8 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using hcmus_shop.Data.DTOs.Products;
-using hcmus_shop.Data.Repositories.Interfaces;
-using hcmus_shop.ViewModels;
+using hcmus_shop.Models.DTOs;
+using hcmus_shop.Services.Brands;
+using hcmus_shop.Services.Categories;
+using hcmus_shop.Services.Products;
+using hcmus_shop.Services.Series;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -12,10 +14,10 @@ namespace hcmus_shop.ViewModels.Products
 {
     public class AddProductViewModel : ObservableObject
     {
-        private readonly IProductRepository _productRepository;
-        private readonly IBrandRepository _brandRepository;
-        private readonly ICategoryRepository _categoryRepository;
-        private readonly ISeriesRepository _seriesRepository;
+        private readonly IProductService _productService;
+        private readonly IBrandService _brandService;
+        private readonly ICategoryService _categoryService;
+        private readonly ISeriesService _seriesService;
         private ImagePreview _mainPreview = new();
         private int? _selectedBrandId;
         private int? _selectedSeriesId;
@@ -24,36 +26,34 @@ namespace hcmus_shop.ViewModels.Products
         private string _saveErrorMessage = string.Empty;
 
         public AddProductViewModel(
-            IProductRepository productRepository,
-            IBrandRepository brandRepository,
-            ICategoryRepository categoryRepository,
-            ISeriesRepository seriesRepository)
+            IProductService productService,
+            IBrandService brandService,
+            ICategoryService categoryService,
+            ISeriesService seriesService)
         {
-            _productRepository = productRepository;
-            _brandRepository = brandRepository;
-            _categoryRepository = categoryRepository;
-            _seriesRepository = seriesRepository;
+            _productService = productService;
+            _brandService = brandService;
+            _categoryService = categoryService;
+            _seriesService = seriesService;
 
             SelectPreviewCommand = new RelayCommand<ImagePreview?>(SelectPreview);
             AddCategoryCommand = new RelayCommand(AddCategory);
             SaveProductCommand = new AsyncRelayCommand(SaveProductAsync, () => !IsSaving);
             InitializeCommand = new AsyncRelayCommand(InitializeAsync, () => !IsInitialized);
 
-            DraftProduct = new CreateProductDto
+            DraftProduct = new CreateProductInput
             {
                 Sku = string.Empty,
                 Name = string.Empty,
                 Description = string.Empty,
-                Specifications = string.Empty,
                 WarrantyMonths = 12,
                 ImportPrice = 0,
                 SellingPrice = 0,
-                IsActive = true,
                 BrandId = 0,
             };
         }
 
-        public CreateProductDto DraftProduct { get; }
+        public CreateProductInput DraftProduct { get; }
 
         public ObservableCollection<ImagePreview> PreviewImages { get; } = [];
 
@@ -145,20 +145,20 @@ namespace hcmus_shop.ViewModels.Products
 
         public double ImportPriceValue
         {
-            get => decimal.ToDouble(DraftProduct.ImportPrice);
+            get => DraftProduct.ImportPrice;
             set
             {
-                DraftProduct.ImportPrice = Convert.ToDecimal(value);
+                DraftProduct.ImportPrice = value;
                 OnPropertyChanged(nameof(ImportPriceValue));
             }
         }
 
         public double SellingPriceValue
         {
-            get => decimal.ToDouble(DraftProduct.SellingPrice);
+            get => DraftProduct.SellingPrice;
             set
             {
-                DraftProduct.SellingPrice = Convert.ToDecimal(value);
+                DraftProduct.SellingPrice = value;
                 OnPropertyChanged(nameof(SellingPriceValue));
             }
         }
@@ -205,8 +205,8 @@ namespace hcmus_shop.ViewModels.Products
                 return;
             }
 
-            var brands = await _brandRepository.GetAllAsync();
-            var categories = await _categoryRepository.GetAllAsync();
+            var brands = await _brandService.GetAllAsync();
+            var categories = await _categoryService.GetAllAsync();
 
             BrandOptions.Clear();
             foreach (var brand in brands)
@@ -232,7 +232,7 @@ namespace hcmus_shop.ViewModels.Products
                 return;
             }
 
-            var seriesItems = await _seriesRepository.GetByBrandIdAsync(SelectedBrandId.Value);
+            var seriesItems = await _seriesService.GetByBrandAsync(SelectedBrandId.Value);
             foreach (var series in seriesItems)
             {
                 SeriesOptions.Add(new LookupOptionViewModel(series.SeriesId, series.Name));
@@ -273,14 +273,10 @@ namespace hcmus_shop.ViewModels.Products
                     .Select(preview => preview.File!.Path)
             ];
 
-            DraftProduct.Specifications = string.IsNullOrWhiteSpace(DraftProduct.Specifications)
-                ? null
-                : DraftProduct.Specifications;
-
             IsSaving = true;
             try
             {
-                await _productRepository.CreateAsync(DraftProduct);
+                await _productService.CreateAsync(DraftProduct);
                 ProductSaved?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
