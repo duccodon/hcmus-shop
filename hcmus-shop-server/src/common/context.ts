@@ -1,10 +1,11 @@
-import { verifyToken, JwtPayload } from "../utils/jwt";
+import { Request } from "express";
+import { verifyToken, JwtPayload } from "./jwt";
 
 export interface Context {
   user: JwtPayload | null;
 }
 
-export function getUser(token?: string): JwtPayload | null {
+function getUserFromToken(token?: string): JwtPayload | null {
   if (!token) return null;
 
   try {
@@ -13,6 +14,16 @@ export function getUser(token?: string): JwtPayload | null {
   } catch {
     return null;
   }
+}
+
+export async function buildContext({
+  req,
+}: {
+  req: Request;
+}): Promise<Context> {
+  return {
+    user: getUserFromToken(req.headers.authorization),
+  };
 }
 
 export function requireAuth(context: Context): JwtPayload {

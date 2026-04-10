@@ -3,36 +3,31 @@ import express from "express";
 import cors from "cors";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
-import { PrismaClient } from "@prisma/client";
 import { readFileSync } from "fs";
 import { join } from "path";
-import { Context, getUser } from "./middleware/auth";
-import { authResolvers } from "./schema/resolvers/auth";
-import { brandResolvers } from "./schema/resolvers/brand";
-import { categoryResolvers } from "./schema/resolvers/category";
-import { seriesResolvers } from "./schema/resolvers/series";
-import { productResolvers } from "./schema/resolvers/product";
-import GraphQLJSON from "./utils/jsonScalar";
+import { Context, buildContext } from "./common/context";
+import { authPlugin } from "./common/authPlugin";
+import GraphQLJSON from "./common/jsonScalar";
+import { authResolver } from "./features/auth/auth.resolver";
+import { brandResolver } from "./features/brand/brand.resolver";
+import { categoryResolver } from "./features/category/category.resolver";
+import { seriesResolver } from "./features/series/series.resolver";
+import { productResolver } from "./features/product/product.resolver";
 
-// Load .graphql files
-function loadTypeDef(filename: string): string {
-  return readFileSync(
-    join(__dirname, "schema", "typeDefs", filename),
-    "utf-8"
-  );
+// Load .graphql type definitions
+function loadTypeDef(featurePath: string): string {
+  return readFileSync(join(__dirname, "features", featurePath), "utf-8");
 }
 
 const typeDefs = [
-  loadTypeDef("auth.graphql"),
-  loadTypeDef("brand.graphql"),
-  loadTypeDef("category.graphql"),
-  loadTypeDef("series.graphql"),
-  loadTypeDef("product.graphql"),
+  loadTypeDef("auth/auth.typeDef.graphql"),
+  loadTypeDef("brand/brand.typeDef.graphql"),
+  loadTypeDef("category/category.typeDef.graphql"),
+  loadTypeDef("series/series.typeDef.graphql"),
+  loadTypeDef("product/product.typeDef.graphql"),
 ].join("\n");
 
-const prisma = new PrismaClient();
-
-// Merge resolvers
+// Merge resolvers by type (Query, Mutation, etc.)
 function mergeResolvers(...resolversList: Record<string, unknown>[]) {
   const merged: Record<string, Record<string, unknown>> = {};
   for (const resolvers of resolversList) {
@@ -46,11 +41,11 @@ function mergeResolvers(...resolversList: Record<string, unknown>[]) {
 
 const resolvers = mergeResolvers(
   { JSON: GraphQLJSON },
-  authResolvers(prisma),
-  brandResolvers(prisma),
-  categoryResolvers(prisma),
-  seriesResolvers(prisma),
-  productResolvers(prisma)
+  authResolver,
+  brandResolver,
+  categoryResolver,
+  seriesResolver,
+  productResolver
 );
 
 async function main() {
@@ -60,6 +55,7 @@ async function main() {
   const server = new ApolloServer<Context>({
     typeDefs,
     resolvers,
+    plugins: [authPlugin],
   });
 
   await server.start();
@@ -68,11 +64,7 @@ async function main() {
     "/graphql",
     cors<cors.CorsRequest>(),
     express.json(),
-    expressMiddleware(server, {
-      context: async ({ req }) => ({
-        user: getUser(req.headers.authorization),
-      }),
-    })
+    expressMiddleware(server, { context: buildContext })
   );
 
   app.listen(port, () => {
