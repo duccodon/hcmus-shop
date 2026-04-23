@@ -50,6 +50,7 @@ namespace hcmus_shop.ViewModels.Products
 
             AddProductCommand = new RelayCommand(AddProduct);
             EditProductCommand = new RelayCommand<int>(EditProduct);
+            DeleteProductCommand = new AsyncRelayCommand<int>(DeleteSingleProductAsync);
             GoToPageCommand = new AsyncRelayCommand<int>(GoToPageAsync);
             BulkToggleStatusCommand = new AsyncRelayCommand(BulkToggleStatusAsync);
             BulkDeleteCommand = new AsyncRelayCommand(BulkDeleteAsync);
@@ -74,6 +75,7 @@ namespace hcmus_shop.ViewModels.Products
 
         public IRelayCommand AddProductCommand { get; }
         public IRelayCommand<int> EditProductCommand { get; }
+        public IAsyncRelayCommand<int> DeleteProductCommand { get; }
         public IAsyncRelayCommand<int> GoToPageCommand { get; }
         public IAsyncRelayCommand BulkToggleStatusCommand { get; }
         public IAsyncRelayCommand BulkDeleteCommand { get; }
@@ -83,6 +85,7 @@ namespace hcmus_shop.ViewModels.Products
         public event EventHandler? NavigateToAddProductRequested;
         public event Action<int>? NavigateToEditProductRequested;
         public Func<int, Task<bool>>? ConfirmBulkDeleteAsync { get; set; }
+        public Func<int, Task<bool>>? ConfirmRowDeleteAsync { get; set; }
 
         public string SearchQuery
         {
@@ -428,6 +431,48 @@ namespace hcmus_shop.ViewModels.Products
                 }
 
                 if ((_currentPage - 1) * SelectedPageSize >= Math.Max(_totalCount - selectedIds.Count, 0) && _currentPage > 1)
+                {
+                    _currentPage--;
+                }
+
+                await LoadProductsAsync();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = ex.Message;
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private async Task DeleteSingleProductAsync(int productId)
+        {
+            if (productId <= 0)
+            {
+                return;
+            }
+
+            if (ConfirmRowDeleteAsync is null)
+            {
+                return;
+            }
+
+            var confirmed = await ConfirmRowDeleteAsync(productId);
+            if (!confirmed)
+            {
+                return;
+            }
+
+            IsLoading = true;
+            ErrorMessage = string.Empty;
+
+            try
+            {
+                await _productService.DeleteAsync(productId);
+
+                if (PagedProducts.Count <= 1 && _currentPage > 1)
                 {
                     _currentPage--;
                 }

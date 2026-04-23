@@ -389,6 +389,8 @@
                                                             Padding="6"
                                                             CornerRadius="6"
                                                             Background="Transparent"
+                                                            Command="{Binding DataContext.DeleteProductCommand, ElementName=Root}"
+                                                            CommandParameter="{x:Bind ProductId}"
                                                             ToolTipService.ToolTip="Delete product">
                                                             <FontIcon
                                                                 FontFamily="Segoe Fluent Icons"
