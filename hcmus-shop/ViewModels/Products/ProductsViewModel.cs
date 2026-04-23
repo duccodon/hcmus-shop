@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using hcmus_shop.Models.DTOs;
+using hcmus_shop.Services.Products;
 using Microsoft.UI;
 using Microsoft.UI.Xaml.Media;
 using System;
@@ -7,28 +9,39 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace hcmus_shop.ViewModels.Products
 {
     public class ProductsViewModel : ObservableObject
     {
-        private readonly List<ProductRowViewModel> _allProducts = [];
-        private List<ProductRowViewModel> _filteredProducts = [];
+        private readonly IProductService _productService;
+        private CancellationTokenSource? _searchDebounceCts;
 
         private string _searchQuery = string.Empty;
         private int _selectedPageSize = 10;
         private bool _isAllOnPageSelected;
         private int _currentPage = 1;
+        private int _totalCount;
+        private bool _isLoading;
+        private string _errorMessage = string.Empty;
+        private bool _isInitialized;
+        private int? _selectedCategoryId;
+        private int? _selectedBrandId;
+        private readonly string _sortBy = "createdAt";
+        private readonly string _sortOrder = "desc";
+        private int _loadVersion;
 
-        public ProductsViewModel()
+        public ProductsViewModel(IProductService productService)
         {
-            AddProductCommand = new RelayCommand(AddProduct);
-            GoToPageCommand = new RelayCommand<int>(GoToPage);
-            BulkToggleStatusCommand = new RelayCommand(BulkToggleStatus);
-            BulkDeleteCommand = new RelayCommand(BulkDelete);
+            _productService = productService;
 
-            SeedProducts();
-            ApplyFilter();
+            AddProductCommand = new RelayCommand(AddProduct);
+            GoToPageCommand = new AsyncRelayCommand<int>(GoToPageAsync);
+            BulkToggleStatusCommand = new AsyncRelayCommand(BulkToggleStatusAsync);
+            BulkDeleteCommand = new AsyncRelayCommand(BulkDeleteAsync);
+            InitializeCommand = new AsyncRelayCommand(InitializeAsync, () => !IsInitialized && !IsLoading);
         }
 
         public ObservableCollection<ProductRowViewModel> PagedProducts { get; } = [];
@@ -36,9 +49,10 @@ namespace hcmus_shop.ViewModels.Products
         public ObservableCollection<PageButtonItem> PageButtons { get; } = [];
 
         public IRelayCommand AddProductCommand { get; }
-        public IRelayCommand<int> GoToPageCommand { get; }
-        public IRelayCommand BulkToggleStatusCommand { get; }
-        public IRelayCommand BulkDeleteCommand { get; }
+        public IAsyncRelayCommand<int> GoToPageCommand { get; }
+        public IAsyncRelayCommand BulkToggleStatusCommand { get; }
+        public IAsyncRelayCommand BulkDeleteCommand { get; }
+        public IAsyncRelayCommand InitializeCommand { get; }
 
         public event EventHandler? NavigateToAddProductRequested;
 
@@ -50,7 +64,7 @@ namespace hcmus_shop.ViewModels.Products
                 if (SetProperty(ref _searchQuery, value))
                 {
                     _currentPage = 1;
-                    ApplyFilter();
+                    DebounceSearch();
                 }
             }
         }
@@ -63,8 +77,74 @@ namespace hcmus_shop.ViewModels.Products
                 if (SetProperty(ref _selectedPageSize, value))
                 {
                     _currentPage = 1;
-                    RefreshPaging();
-                    OnPropertyChanged(nameof(ResultText));
+                    _ = LoadProductsAsync();
+                }
+            }
+        }
+
+        public bool IsInitialized
+        {
+            get => _isInitialized;
+            private set
+            {
+                if (SetProperty(ref _isInitialized, value))
+                {
+                    InitializeCommand.NotifyCanExecuteChanged();
+                }
+            }
+        }
+
+        public bool IsLoading
+        {
+            get => _isLoading;
+            private set
+            {
+                if (SetProperty(ref _isLoading, value))
+                {
+                    InitializeCommand.NotifyCanExecuteChanged();
+                    OnPropertyChanged(nameof(IsEmpty));
+                }
+            }
+        }
+
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            private set
+            {
+                if (SetProperty(ref _errorMessage, value))
+                {
+                    OnPropertyChanged(nameof(HasError));
+                    OnPropertyChanged(nameof(IsEmpty));
+                }
+            }
+        }
+
+        public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
+        public bool IsEmpty => !IsLoading && !HasError && PagedProducts.Count == 0;
+
+        public int? SelectedCategoryId
+        {
+            get => _selectedCategoryId;
+            set
+            {
+                if (SetProperty(ref _selectedCategoryId, value))
+                {
+                    _currentPage = 1;
+                    _ = LoadProductsAsync();
+                }
+            }
+        }
+
+        public int? SelectedBrandId
+        {
+            get => _selectedBrandId;
+            set
+            {
+                if (SetProperty(ref _selectedBrandId, value))
+                {
+                    _currentPage = 1;
+                    _ = LoadProductsAsync();
                 }
             }
         }
@@ -86,34 +166,45 @@ namespace hcmus_shop.ViewModels.Products
             }
         }
 
-        public bool HasSelection => _allProducts.Any(p => p.IsSelected);
+        public bool HasSelection => PagedProducts.Any(p => p.IsSelected);
 
-        public string SelectionActionText => $"{_allProducts.Count(p => p.IsSelected)} selected";
+        public string SelectionActionText => $"{PagedProducts.Count(p => p.IsSelected)} selected";
 
         public string ResultText
         {
             get
             {
-                if (_filteredProducts.Count == 0)
+                if (_totalCount == 0)
                 {
                     return "Result 0 of 0";
                 }
 
                 var start = ((_currentPage - 1) * SelectedPageSize) + 1;
-                var end = Math.Min(_currentPage * SelectedPageSize, _filteredProducts.Count);
-                return $"Result {start}-{end} of {_filteredProducts.Count}";
+                var end = Math.Min(_currentPage * SelectedPageSize, _totalCount);
+                return $"Result {start}-{end} of {_totalCount}";
             }
         }
 
         private int TotalPages =>
-            Math.Max(1, (int)Math.Ceiling((double)_filteredProducts.Count / SelectedPageSize));
+            Math.Max(1, (int)Math.Ceiling((double)Math.Max(_totalCount, 1) / SelectedPageSize));
 
         private void AddProduct()
         {
             NavigateToAddProductRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        private void GoToPage(int page)
+        private async Task InitializeAsync()
+        {
+            if (IsInitialized)
+            {
+                return;
+            }
+
+            IsInitialized = true;
+            await LoadProductsAsync();
+        }
+
+        private async Task GoToPageAsync(int page)
         {
             if (page < 1 || page > TotalPages || page == _currentPage)
             {
@@ -121,74 +212,180 @@ namespace hcmus_shop.ViewModels.Products
             }
 
             _currentPage = page;
-            RefreshPaging();
-            OnPropertyChanged(nameof(ResultText));
+            await LoadProductsAsync();
         }
 
-        private void BulkToggleStatus()
+        private async Task BulkToggleStatusAsync()
         {
-            foreach (var row in _allProducts.Where(p => p.IsSelected))
+            var selectedRows = PagedProducts.Where(p => p.IsSelected).ToList();
+            if (selectedRows.Count == 0)
             {
-                row.IsActive = !row.IsActive;
+                return;
             }
 
-            NotifySelectionChanged();
-            RefreshPaging();
+            IsLoading = true;
+            ErrorMessage = string.Empty;
+
+            try
+            {
+                foreach (var row in selectedRows)
+                {
+                    await _productService.UpdateAsync(row.ProductId, new UpdateProductInput
+                    {
+                        IsActive = !row.IsActive
+                    });
+                }
+
+                await LoadProductsAsync();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = ex.Message;
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
-        private void BulkDelete()
+        private async Task BulkDeleteAsync()
         {
-            var selectedIds = _allProducts
+            var selectedIds = PagedProducts
                 .Where(p => p.IsSelected)
                 .Select(p => p.ProductId)
-                .ToHashSet();
-
-            _allProducts.RemoveAll(product => selectedIds.Contains(product.ProductId));
-            _filteredProducts.RemoveAll(product => selectedIds.Contains(product.ProductId));
-
-            NotifySelectionChanged();
-            RefreshPaging();
-            OnPropertyChanged(nameof(ResultText));
-        }
-
-        private void ApplyFilter()
-        {
-            var query = SearchQuery?.Trim() ?? string.Empty;
-
-            _filteredProducts = string.IsNullOrEmpty(query)
-                ? [.. _allProducts]
-                :
-                [
-                    .. _allProducts.Where(p =>
-                        p.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                        p.CategoryDisplay.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                        p.Sku.Contains(query, StringComparison.OrdinalIgnoreCase))
-                ];
-
-            RefreshPaging();
-            OnPropertyChanged(nameof(ResultText));
-        }
-
-        private void RefreshPaging()
-        {
-            if (_currentPage > TotalPages)
-            {
-                _currentPage = TotalPages;
-            }
-
-            var pageItems = _filteredProducts
-                .Skip((_currentPage - 1) * SelectedPageSize)
-                .Take(SelectedPageSize)
                 .ToList();
 
-            PagedProducts.Clear();
-            foreach (var item in pageItems)
+            if (selectedIds.Count == 0)
             {
-                PagedProducts.Add(item);
+                return;
             }
 
-            RebuildPageButtons();
-            UpdateSelectAllState();
+            IsLoading = true;
+            ErrorMessage = string.Empty;
+
+            try
+            {
+                foreach (var productId in selectedIds)
+                {
+                    await _productService.DeleteAsync(productId);
+                }
+
+                if ((_currentPage - 1) * SelectedPageSize >= Math.Max(_totalCount - selectedIds.Count, 0) && _currentPage > 1)
+                {
+                    _currentPage--;
+                }
+
+                await LoadProductsAsync();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = ex.Message;
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        public async Task LoadProductsAsync()
+        {
+            var requestVersion = ++_loadVersion;
+
+            IsLoading = true;
+            ErrorMessage = string.Empty;
+
+            try
+            {
+                var page = await _productService.GetAllAsync(new ProductFilterDto
+                {
+                    Search = string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery.Trim(),
+                    CategoryId = SelectedCategoryId,
+                    BrandId = SelectedBrandId,
+                    SortBy = _sortBy,
+                    SortOrder = _sortOrder,
+                    Page = _currentPage,
+                    PageSize = SelectedPageSize
+                });
+
+                if (requestVersion != _loadVersion)
+                {
+                    return;
+                }
+
+                _totalCount = page.TotalCount;
+                if (_currentPage > TotalPages)
+                {
+                    _currentPage = TotalPages;
+                }
+
+                PagedProducts.Clear();
+                foreach (var item in page.Items)
+                {
+                    var row = new ProductRowViewModel(
+                        item.ProductId,
+                        item.Sku,
+                        item.Name,
+                        item.Categories.Count > 0 ? string.Join(", ", item.Categories.Select(c => c.Name)) : "Uncategorized",
+                        item.StockQuantity,
+                        Convert.ToDecimal(item.SellingPrice),
+                        item.IsActive);
+
+                    row.PropertyChanged += Row_PropertyChanged;
+                    PagedProducts.Add(row);
+                }
+
+                RebuildPageButtons();
+                UpdateSelectAllState();
+                NotifySelectionChanged();
+                OnPropertyChanged(nameof(ResultText));
+                OnPropertyChanged(nameof(IsEmpty));
+            }
+            catch (Exception ex)
+            {
+                if (requestVersion == _loadVersion)
+                {
+                    _totalCount = 0;
+                    PagedProducts.Clear();
+                    RebuildPageButtons();
+                    UpdateSelectAllState();
+                    NotifySelectionChanged();
+                    OnPropertyChanged(nameof(ResultText));
+                    OnPropertyChanged(nameof(IsEmpty));
+                    ErrorMessage = ex.Message;
+                }
+            }
+            finally
+            {
+                if (requestVersion == _loadVersion)
+                {
+                    IsLoading = false;
+                }
+            }
+        }
+
+        private void DebounceSearch()
+        {
+            _searchDebounceCts?.Cancel();
+            _searchDebounceCts?.Dispose();
+            _searchDebounceCts = new CancellationTokenSource();
+            var token = _searchDebounceCts.Token;
+
+            _ = DebounceSearchAsync(token);
+        }
+
+        private async Task DebounceSearchAsync(CancellationToken token)
+        {
+            try
+            {
+                await Task.Delay(400, token);
+                if (!token.IsCancellationRequested)
+                {
+                    await LoadProductsAsync();
+                }
+            }
+            catch (TaskCanceledException)
+            {
+            }
         }
 
         private void RebuildPageButtons()
@@ -203,7 +400,7 @@ namespace hcmus_shop.ViewModels.Products
 
             PageButtons.Add(new PageButtonItem
             {
-                Label = "← Previous",
+                Label = "<- Previous",
                 PageNumber = _currentPage - 1,
                 IsEnabled = _currentPage > 1,
                 IsCurrent = false,
@@ -220,7 +417,7 @@ namespace hcmus_shop.ViewModels.Products
                 {
                     PageButtons.Add(new PageButtonItem
                     {
-                        Label = "…",
+                        Label = "...",
                         PageNumber = -1,
                         IsEnabled = false,
                         IsCurrent = false,
@@ -244,40 +441,13 @@ namespace hcmus_shop.ViewModels.Products
 
             PageButtons.Add(new PageButtonItem
             {
-                Label = "Next →",
+                Label = "Next ->",
                 PageNumber = _currentPage + 1,
                 IsEnabled = _currentPage < TotalPages,
                 IsCurrent = false,
                 Background = normalBackground,
                 Foreground = normalForeground,
             });
-        }
-
-        private void SeedProducts()
-        {
-            var seeded = new[]
-            {
-                new ProductRowViewModel(1, "SUN-001", "Casual Sunglass", "Accessories", 124, 47m, true),
-                new ProductRowViewModel(2, "TEE-001", "T-Shirt", "Clothes", 124, 47m, true),
-                new ProductRowViewModel(3, "TEA-001", "Green Tea", "Beauty", 0, 47m, false),
-                new ProductRowViewModel(4, "DEN-001", "Denim Shirt", "Clothes", 124, 47m, false),
-                new ProductRowViewModel(5, "JCK-001", "Casual Jacket", "Clothes", 0, 47m, false),
-                new ProductRowViewModel(6, "CAP-001", "Cap", "Accessories", 124, 47m, true),
-                new ProductRowViewModel(7, "SHO-001", "Nike Cats", "Shoes", 124, 47m, false),
-                new ProductRowViewModel(8, "FAN-001", "Cooling Fan", "Electronics", 124, 47m, false),
-                new ProductRowViewModel(9, "WAT-001", "Man Watch", "Accessories", 124, 47m, false),
-                new ProductRowViewModel(10, "LAP-001", "Laptop Stand", "Accessories", 46, 52m, true),
-                new ProductRowViewModel(11, "MOU-001", "Gaming Mouse", "Electronics", 6, 31m, true),
-                new ProductRowViewModel(12, "KEY-001", "Mechanical Keyboard", "Electronics", 2, 69m, true),
-                new ProductRowViewModel(13, "BAG-001", "Crossbody Bag", "Accessories", 0, 39m, false),
-                new ProductRowViewModel(14, "PWR-001", "Power Bank", "Electronics", 76, 29m, true),
-            };
-
-            foreach (var row in seeded)
-            {
-                row.PropertyChanged += Row_PropertyChanged;
-                _allProducts.Add(row);
-            }
         }
 
         private void Row_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -295,7 +465,11 @@ namespace hcmus_shop.ViewModels.Products
         {
             if (PagedProducts.Count == 0)
             {
-                IsAllOnPageSelected = false;
+                if (_isAllOnPageSelected)
+                {
+                    _isAllOnPageSelected = false;
+                    OnPropertyChanged(nameof(IsAllOnPageSelected));
+                }
                 return;
             }
 
