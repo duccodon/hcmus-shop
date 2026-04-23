@@ -67,6 +67,7 @@ namespace hcmus_shop
             services.AddTransient<LoginViewModel>();
             services.AddTransient<ProductsViewModel>();
             services.AddTransient<AddProductViewModel>();
+            services.AddTransient<EditProductViewModel>();
 
             Ioc.Default.ConfigureServices(services.BuildServiceProvider());
         }

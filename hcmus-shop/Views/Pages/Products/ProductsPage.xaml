@@ -360,6 +360,8 @@
                                                             Padding="6"
                                                             CornerRadius="6"
                                                             Background="Transparent"
+                                                            Command="{Binding DataContext.EditProductCommand, ElementName=Root}"
+                                                            CommandParameter="{x:Bind ProductId}"
                                                             ToolTipService.ToolTip="Edit product">
                                                             <FontIcon
                                                                 FontFamily="Segoe Fluent Icons"

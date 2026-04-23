@@ -48,6 +48,7 @@ namespace hcmus_shop.ViewModels.Products
             _categoryService = categoryService;
 
             AddProductCommand = new RelayCommand(AddProduct);
+            EditProductCommand = new RelayCommand<int>(EditProduct);
             GoToPageCommand = new AsyncRelayCommand<int>(GoToPageAsync);
             BulkToggleStatusCommand = new AsyncRelayCommand(BulkToggleStatusAsync);
             BulkDeleteCommand = new AsyncRelayCommand(BulkDeleteAsync);
@@ -62,6 +63,7 @@ namespace hcmus_shop.ViewModels.Products
         public ObservableCollection<FilterOptionViewModel> BrandOptions { get; } = [];
 
         public IRelayCommand AddProductCommand { get; }
+        public IRelayCommand<int> EditProductCommand { get; }
         public IAsyncRelayCommand<int> GoToPageCommand { get; }
         public IAsyncRelayCommand BulkToggleStatusCommand { get; }
         public IAsyncRelayCommand BulkDeleteCommand { get; }
@@ -69,6 +71,7 @@ namespace hcmus_shop.ViewModels.Products
         public IAsyncRelayCommand InitializeCommand { get; }
 
         public event EventHandler? NavigateToAddProductRequested;
+        public event Action<int>? NavigateToEditProductRequested;
 
         public string SearchQuery
         {
@@ -216,6 +219,16 @@ namespace hcmus_shop.ViewModels.Products
         private void AddProduct()
         {
             NavigateToAddProductRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void EditProduct(int productId)
+        {
+            if (productId <= 0)
+            {
+                return;
+            }
+
+            NavigateToEditProductRequested?.Invoke(productId);
         }
 
         private async Task InitializeAsync()

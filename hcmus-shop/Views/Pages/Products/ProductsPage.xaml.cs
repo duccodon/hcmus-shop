@@ -16,6 +16,7 @@ namespace hcmus_shop.Views
             ViewModel = Ioc.Default.GetRequiredService<ProductsViewModel>();
             DataContext = ViewModel;
             ViewModel.NavigateToAddProductRequested += ViewModel_NavigateToAddProductRequested;
+            ViewModel.NavigateToEditProductRequested += ViewModel_NavigateToEditProductRequested;
             Loaded += ProductsPage_Loaded;
             Unloaded += ProductsPage_Unloaded;
         }
@@ -33,11 +34,17 @@ namespace hcmus_shop.Views
             Loaded -= ProductsPage_Loaded;
             Unloaded -= ProductsPage_Unloaded;
             ViewModel.NavigateToAddProductRequested -= ViewModel_NavigateToAddProductRequested;
+            ViewModel.NavigateToEditProductRequested -= ViewModel_NavigateToEditProductRequested;
         }
 
         private void ViewModel_NavigateToAddProductRequested(object? sender, EventArgs e)
         {
             Frame?.Navigate(typeof(AddProductPage));
+        }
+
+        private void ViewModel_NavigateToEditProductRequested(int productId)
+        {
+            Frame?.Navigate(typeof(EditProductPage), productId);
         }
 
         private void DateFromPicker_DateChanged(CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs args)
