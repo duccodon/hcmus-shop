@@ -119,17 +119,33 @@
                                     </StackPanel>
                                 </Button>
 
-                                <Button Content="Status" Padding="12,8" CornerRadius="8" />
-                                <Button Content="Category" Padding="12,8" CornerRadius="8" />
+                                <ComboBox
+                                    Width="160"
+                                    PlaceholderText="Brand"
+                                    ItemsSource="{x:Bind ViewModel.BrandOptions, Mode=OneWay}"
+                                    DisplayMemberPath="Name"
+                                    SelectedValuePath="Id"
+                                    SelectedValue="{x:Bind ViewModel.SelectedBrandId, Mode=TwoWay}" />
 
-                                <Button Padding="12,8" CornerRadius="8">
+                                <ComboBox
+                                    Width="180"
+                                    PlaceholderText="Category"
+                                    ItemsSource="{x:Bind ViewModel.CategoryOptions, Mode=OneWay}"
+                                    DisplayMemberPath="Name"
+                                    SelectedValuePath="Id"
+                                    SelectedValue="{x:Bind ViewModel.SelectedCategoryId, Mode=TwoWay}" />
+
+                                <Button
+                                    Padding="12,8"
+                                    CornerRadius="8"
+                                    Command="{x:Bind ViewModel.ClearFiltersCommand}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon
                                             FontFamily="Segoe Fluent Icons"
-                                            Glyph="&#xE71C;"
+                                            Glyph="&#xE894;"
                                             FontSize="12"
                                             VerticalAlignment="Center" />
-                                        <TextBlock Text="Filter" FontSize="12" VerticalAlignment="Center" />
+                                        <TextBlock Text="Clear" FontSize="12" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -196,6 +212,14 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
+
+                            <InfoBar
+                                Grid.RowSpan="2"
+                                Margin="0,0,0,12"
+                                IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
+                                IsClosable="False"
+                                Severity="Error"
+                                Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
 
                             <!-- Table header -->
                             <Grid>
@@ -361,6 +385,30 @@
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </ScrollViewer>
+
+                            <Border
+                                Grid.RowSpan="2"
+                                Background="#66FFFFFF"
+                                Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <ProgressRing
+                                    IsActive="True"
+                                    Width="36"
+                                    Height="36"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+                            </Border>
+
+                            <Border
+                                Grid.Row="1"
+                                Background="Transparent"
+                                Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Foreground="{StaticResource TextSecondary}"
+                                    FontSize="14"
+                                    Text="No products found." />
+                            </Border>
                         </Grid>
 
                         <!-- ── Row 5: Footer ── -->
