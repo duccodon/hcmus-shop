@@ -3,6 +3,7 @@ using hcmus_shop.ViewModels.Products;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using System.Threading.Tasks;
 
 namespace hcmus_shop.Views
 {
@@ -17,6 +18,7 @@ namespace hcmus_shop.Views
             DataContext = ViewModel;
             ViewModel.NavigateToAddProductRequested += ViewModel_NavigateToAddProductRequested;
             ViewModel.NavigateToEditProductRequested += ViewModel_NavigateToEditProductRequested;
+            ViewModel.ConfirmBulkDeleteAsync = ShowBulkDeleteConfirmAsync;
             Loaded += ProductsPage_Loaded;
             Unloaded += ProductsPage_Unloaded;
         }
@@ -35,6 +37,7 @@ namespace hcmus_shop.Views
             Unloaded -= ProductsPage_Unloaded;
             ViewModel.NavigateToAddProductRequested -= ViewModel_NavigateToAddProductRequested;
             ViewModel.NavigateToEditProductRequested -= ViewModel_NavigateToEditProductRequested;
+            ViewModel.ConfirmBulkDeleteAsync = null;
         }
 
         private void ViewModel_NavigateToAddProductRequested(object? sender, EventArgs e)
@@ -71,6 +74,22 @@ namespace hcmus_shop.Views
             var fromText = from?.ToString("dd MMM") ?? "...";
             var toText = to?.ToString("dd MMM yyyy") ?? "...";
             DateRangeLabel.Text = $"{fromText} - {toText}";
+        }
+
+        private async Task<bool> ShowBulkDeleteConfirmAsync(int selectedCount)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = "Delete Products",
+                Content = $"Delete {selectedCount} selected products? This will deactivate them.",
+                PrimaryButtonText = "Delete",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = XamlRoot
+            };
+
+            var result = await dialog.ShowAsync();
+            return result == ContentDialogResult.Primary;
         }
     }
 }

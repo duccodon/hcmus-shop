@@ -82,6 +82,7 @@ namespace hcmus_shop.ViewModels.Products
 
         public event EventHandler? NavigateToAddProductRequested;
         public event Action<int>? NavigateToEditProductRequested;
+        public Func<int, Task<bool>>? ConfirmBulkDeleteAsync { get; set; }
 
         public string SearchQuery
         {
@@ -401,6 +402,17 @@ namespace hcmus_shop.ViewModels.Products
                 .ToList();
 
             if (selectedIds.Count == 0)
+            {
+                return;
+            }
+
+            if (ConfirmBulkDeleteAsync is null)
+            {
+                return;
+            }
+
+            var confirmed = await ConfirmBulkDeleteAsync(selectedIds.Count);
+            if (!confirmed)
             {
                 return;
             }
