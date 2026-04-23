@@ -33,10 +33,11 @@ namespace hcmus_shop.ViewModels.Products
         private bool _isInitialized;
         private int? _selectedCategoryId;
         private int? _selectedBrandId;
-        private readonly string _sortBy = "createdAt";
-        private readonly string _sortOrder = "desc";
+        private string _selectedSortField = "name";
+        private string _selectedSortOrder = "asc";
         private int _loadVersion;
         private bool _suppressFilterReload;
+        private bool _suppressSortReload;
 
         public ProductsViewModel(
             IProductService productService,
@@ -54,6 +55,13 @@ namespace hcmus_shop.ViewModels.Products
             BulkDeleteCommand = new AsyncRelayCommand(BulkDeleteAsync);
             ClearFiltersCommand = new AsyncRelayCommand(ClearFiltersAsync, () => !IsLoading);
             InitializeCommand = new AsyncRelayCommand(InitializeAsync, () => !IsInitialized && !IsLoading);
+
+            SortFieldOptions.Add(new SortOptionViewModel("name", "Name"));
+            SortFieldOptions.Add(new SortOptionViewModel("sellingPrice", "Price"));
+            SortFieldOptions.Add(new SortOptionViewModel("stockQuantity", "Stock"));
+
+            SortOrderOptions.Add(new SortOptionViewModel("asc", "Asc"));
+            SortOrderOptions.Add(new SortOptionViewModel("desc", "Desc"));
         }
 
         public ObservableCollection<ProductRowViewModel> PagedProducts { get; } = [];
@@ -61,6 +69,8 @@ namespace hcmus_shop.ViewModels.Products
         public ObservableCollection<PageButtonItem> PageButtons { get; } = [];
         public ObservableCollection<FilterOptionViewModel> CategoryOptions { get; } = [];
         public ObservableCollection<FilterOptionViewModel> BrandOptions { get; } = [];
+        public ObservableCollection<SortOptionViewModel> SortFieldOptions { get; } = [];
+        public ObservableCollection<SortOptionViewModel> SortOrderOptions { get; } = [];
 
         public IRelayCommand AddProductCommand { get; }
         public IRelayCommand<int> EditProductCommand { get; }
@@ -140,6 +150,42 @@ namespace hcmus_shop.ViewModels.Products
 
         public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
         public bool IsEmpty => !IsLoading && !HasError && PagedProducts.Count == 0;
+
+        public string SelectedSortField
+        {
+            get => _selectedSortField;
+            set
+            {
+                if (SetProperty(ref _selectedSortField, value))
+                {
+                    if (_suppressSortReload)
+                    {
+                        return;
+                    }
+
+                    _currentPage = 1;
+                    _ = LoadProductsAsync();
+                }
+            }
+        }
+
+        public string SelectedSortOrder
+        {
+            get => _selectedSortOrder;
+            set
+            {
+                if (SetProperty(ref _selectedSortOrder, value))
+                {
+                    if (_suppressSortReload)
+                    {
+                        return;
+                    }
+
+                    _currentPage = 1;
+                    _ = LoadProductsAsync();
+                }
+            }
+        }
 
         public int? SelectedCategoryId
         {
@@ -240,12 +286,25 @@ namespace hcmus_shop.ViewModels.Products
 
             try
             {
+                _suppressSortReload = true;
+                if (!SortFieldOptions.Any(option => option.Value == SelectedSortField))
+                {
+                    SelectedSortField = "name";
+                }
+
+                if (!SortOrderOptions.Any(option => option.Value == SelectedSortOrder))
+                {
+                    SelectedSortOrder = "asc";
+                }
+                _suppressSortReload = false;
+
                 await LoadFilterOptionsAsync();
                 await LoadProductsAsync(clearError: false);
                 IsInitialized = true;
             }
             catch (Exception ex)
             {
+                _suppressSortReload = false;
                 ErrorMessage = $"Failed to initialize products page: {ex.Message}";
             }
         }
@@ -390,8 +449,8 @@ namespace hcmus_shop.ViewModels.Products
                     Search = string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery.Trim(),
                     CategoryId = SelectedCategoryId,
                     BrandId = SelectedBrandId,
-                    SortBy = _sortBy,
-                    SortOrder = _sortOrder,
+                    SortBy = SelectedSortField,
+                    SortOrder = SelectedSortOrder,
                     Page = _currentPage,
                     PageSize = SelectedPageSize
                 });

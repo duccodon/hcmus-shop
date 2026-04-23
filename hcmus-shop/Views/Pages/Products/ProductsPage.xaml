@@ -135,6 +135,22 @@
                                     SelectedValuePath="Id"
                                     SelectedValue="{x:Bind ViewModel.SelectedCategoryId, Mode=TwoWay}" />
 
+                                <ComboBox
+                                    Width="120"
+                                    PlaceholderText="Sort By"
+                                    ItemsSource="{x:Bind ViewModel.SortFieldOptions, Mode=OneWay}"
+                                    DisplayMemberPath="Name"
+                                    SelectedValuePath="Value"
+                                    SelectedValue="{x:Bind ViewModel.SelectedSortField, Mode=TwoWay}" />
+
+                                <ComboBox
+                                    Width="95"
+                                    PlaceholderText="Order"
+                                    ItemsSource="{x:Bind ViewModel.SortOrderOptions, Mode=OneWay}"
+                                    DisplayMemberPath="Name"
+                                    SelectedValuePath="Value"
+                                    SelectedValue="{x:Bind ViewModel.SelectedSortOrder, Mode=TwoWay}" />
+
                                 <Button
                                     Padding="12,8"
                                     CornerRadius="8"
