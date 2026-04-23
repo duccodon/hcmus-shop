@@ -119,17 +119,33 @@
                                     </StackPanel>
                                 </Button>
 
-                                <Button Content="Status" Padding="12,8" CornerRadius="8" />
-                                <Button Content="Category" Padding="12,8" CornerRadius="8" />
+                                <ComboBox
+                                    Width="160"
+                                    PlaceholderText="Brand"
+                                    ItemsSource="{x:Bind ViewModel.BrandOptions, Mode=OneWay}"
+                                    DisplayMemberPath="Name"
+                                    SelectedValuePath="Id"
+                                    SelectedValue="{x:Bind ViewModel.SelectedBrandId, Mode=TwoWay}" />
 
-                                <Button Padding="12,8" CornerRadius="8">
+                                <ComboBox
+                                    Width="180"
+                                    PlaceholderText="Category"
+                                    ItemsSource="{x:Bind ViewModel.CategoryOptions, Mode=OneWay}"
+                                    DisplayMemberPath="Name"
+                                    SelectedValuePath="Id"
+                                    SelectedValue="{x:Bind ViewModel.SelectedCategoryId, Mode=TwoWay}" />
+
+                                <Button
+                                    Padding="12,8"
+                                    CornerRadius="8"
+                                    Command="{x:Bind ViewModel.ClearFiltersCommand}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon
                                             FontFamily="Segoe Fluent Icons"
-                                            Glyph="&#xE71C;"
+                                            Glyph="&#xE894;"
                                             FontSize="12"
                                             VerticalAlignment="Center" />
-                                        <TextBlock Text="Filter" FontSize="12" VerticalAlignment="Center" />
+                                        <TextBlock Text="Clear" FontSize="12" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
