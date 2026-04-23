@@ -80,6 +80,14 @@
                         Text="{x:Bind ViewModel.SaveErrorMessage, Mode=OneWay}"
                         Foreground="{StaticResource DangerForeground}" />
 
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Margin="0,22,0,10"
+                        Text="{x:Bind ViewModel.SaveStatusMessage, Mode=OneWay}"
+                        Foreground="{StaticResource TextSecondary}"
+                        Visibility="{x:Bind ViewModel.HasSaveStatus, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
                     <Grid RowSpacing="16">
                         <Grid.Margin>0,26,0,0</Grid.Margin>
                         <Grid.RowDefinitions>

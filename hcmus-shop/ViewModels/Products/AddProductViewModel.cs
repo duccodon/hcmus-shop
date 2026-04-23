@@ -5,6 +5,7 @@ using hcmus_shop.Services.Brands;
 using hcmus_shop.Services.Categories;
 using hcmus_shop.Services.Products;
 using hcmus_shop.Services.Series;
+using hcmus_shop.Services.Uploads;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,6 +20,7 @@ namespace hcmus_shop.ViewModels.Products
         private readonly IBrandService _brandService;
         private readonly ICategoryService _categoryService;
         private readonly ISeriesService _seriesService;
+        private readonly IFileUploadService _fileUploadService;
         private ImagePreview _mainPreview = new();
         private int? _selectedBrandId;
         private int? _selectedSeriesId;
@@ -29,17 +31,20 @@ namespace hcmus_shop.ViewModels.Products
         private string _categoryErrorMessage = string.Empty;
         private string _newCategoryName = string.Empty;
         private string _newCategoryDescription = string.Empty;
+        private string _saveStatusMessage = string.Empty;
 
         public AddProductViewModel(
             IProductService productService,
             IBrandService brandService,
             ICategoryService categoryService,
-            ISeriesService seriesService)
+            ISeriesService seriesService,
+            IFileUploadService fileUploadService)
         {
             _productService = productService;
             _brandService = brandService;
             _categoryService = categoryService;
             _seriesService = seriesService;
+            _fileUploadService = fileUploadService;
 
             SelectPreviewCommand = new RelayCommand<ImagePreview?>(SelectPreview);
             AddCategoryCommand = new AsyncRelayCommand(AddCategoryAsync, () => !IsAddingCategory);
@@ -121,6 +126,20 @@ namespace hcmus_shop.ViewModels.Products
             get => _saveErrorMessage;
             private set => SetProperty(ref _saveErrorMessage, value);
         }
+
+        public string SaveStatusMessage
+        {
+            get => _saveStatusMessage;
+            private set
+            {
+                if (SetProperty(ref _saveStatusMessage, value))
+                {
+                    OnPropertyChanged(nameof(HasSaveStatus));
+                }
+            }
+        }
+
+        public bool HasSaveStatus => !string.IsNullOrWhiteSpace(SaveStatusMessage);
 
         public string CategoryErrorMessage
         {
@@ -368,6 +387,7 @@ namespace hcmus_shop.ViewModels.Products
             }
 
             SaveErrorMessage = string.Empty;
+            SaveStatusMessage = string.Empty;
             if (string.IsNullOrWhiteSpace(DraftProduct.Sku) || string.IsNullOrWhiteSpace(DraftProduct.Name))
             {
                 SaveErrorMessage = "SKU and product name are required.";
@@ -387,21 +407,26 @@ namespace hcmus_shop.ViewModels.Products
                     .Select(option => option.CategoryId)
             ];
 
-            DraftProduct.ImageUrls =
-            [
-                .. PreviewImages
-                    .Where(preview => preview.File is not null)
-                    .Select(preview => preview.File!.Path)
-            ];
-
             IsSaving = true;
             try
             {
+                SaveStatusMessage = "Uploading images...";
+                var uploadedImageUrls = new List<string>();
+                foreach (var preview in PreviewImages.Where(preview => preview.File is not null))
+                {
+                    var imageUrl = await _fileUploadService.UploadImageAsync(preview.File!);
+                    uploadedImageUrls.Add(imageUrl);
+                }
+
+                DraftProduct.ImageUrls = uploadedImageUrls;
+                SaveStatusMessage = "Saving product...";
                 await _productService.CreateAsync(DraftProduct);
+                SaveStatusMessage = string.Empty;
                 ProductSaved?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
+                SaveStatusMessage = string.Empty;
                 SaveErrorMessage = ex.Message;
             }
             finally

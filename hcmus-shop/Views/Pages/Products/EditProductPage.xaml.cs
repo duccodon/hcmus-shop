@@ -5,6 +5,9 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Threading.Tasks;
+using Windows.Storage;
+using Windows.Storage.Pickers;
+using WinRT.Interop;
 
 namespace hcmus_shop.Views
 {
@@ -91,6 +94,48 @@ namespace hcmus_shop.Views
             }
 
             Frame?.Navigate(typeof(ProductsPage));
+        }
+
+        private async void PickLocalImagesButton_Click(object sender, RoutedEventArgs e)
+        {
+            var picker = new FileOpenPicker();
+            picker.FileTypeFilter.Add(".png");
+            picker.FileTypeFilter.Add(".jpg");
+            picker.FileTypeFilter.Add(".jpeg");
+            picker.FileTypeFilter.Add(".webp");
+            picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+
+            var window = (Application.Current as App)?.CurrentWindow;
+            if (window is null)
+            {
+                return;
+            }
+
+            InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(window));
+
+            var files = await picker.PickMultipleFilesAsync();
+            if (files is null || files.Count == 0)
+            {
+                return;
+            }
+
+            foreach (StorageFile file in files)
+            {
+                ViewModel.AddPendingImageFile(file);
+            }
+        }
+
+        private void RemovePendingImageButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button)
+            {
+                return;
+            }
+
+            if (button.Tag is PendingImageFileViewModel pending)
+            {
+                ViewModel.RemovePendingImageFile(pending);
+            }
         }
     }
 }

@@ -5,11 +5,13 @@ using hcmus_shop.Services.Brands;
 using hcmus_shop.Services.Categories;
 using hcmus_shop.Services.Products;
 using hcmus_shop.Services.Series;
+using hcmus_shop.Services.Uploads;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace hcmus_shop.ViewModels.Products
 {
@@ -19,6 +21,7 @@ namespace hcmus_shop.ViewModels.Products
         private readonly IBrandService _brandService;
         private readonly ICategoryService _categoryService;
         private readonly ISeriesService _seriesService;
+        private readonly IFileUploadService _fileUploadService;
 
         private int _productId;
         private bool _isInitialized;
@@ -37,17 +40,20 @@ namespace hcmus_shop.ViewModels.Products
         private double _warrantyMonths = 12;
         private bool _isActive = true;
         private string _newImageUrl = string.Empty;
+        private string _saveStatusMessage = string.Empty;
 
         public EditProductViewModel(
             IProductService productService,
             IBrandService brandService,
             ICategoryService categoryService,
-            ISeriesService seriesService)
+            ISeriesService seriesService,
+            IFileUploadService fileUploadService)
         {
             _productService = productService;
             _brandService = brandService;
             _categoryService = categoryService;
             _seriesService = seriesService;
+            _fileUploadService = fileUploadService;
 
             SaveProductCommand = new AsyncRelayCommand(SaveProductAsync, CanSaveOrDelete);
             DeleteProductCommand = new AsyncRelayCommand(DeleteProductAsync, CanSaveOrDelete);
@@ -59,6 +65,7 @@ namespace hcmus_shop.ViewModels.Products
         public ObservableCollection<LookupOptionViewModel> SeriesOptions { get; } = [];
         public ObservableCollection<CategoryOptionViewModel> CategoryOptions { get; } = [];
         public ObservableCollection<string> ImageUrls { get; } = [];
+        public ObservableCollection<PendingImageFileViewModel> PendingImageFiles { get; } = [];
 
         public IAsyncRelayCommand SaveProductCommand { get; }
         public IAsyncRelayCommand DeleteProductCommand { get; }
@@ -116,6 +123,20 @@ namespace hcmus_shop.ViewModels.Products
             get => _saveErrorMessage;
             private set => SetProperty(ref _saveErrorMessage, value);
         }
+
+        public string SaveStatusMessage
+        {
+            get => _saveStatusMessage;
+            private set
+            {
+                if (SetProperty(ref _saveStatusMessage, value))
+                {
+                    OnPropertyChanged(nameof(HasSaveStatus));
+                }
+            }
+        }
+
+        public bool HasSaveStatus => !string.IsNullOrWhiteSpace(SaveStatusMessage);
 
         public string Sku
         {
@@ -199,6 +220,7 @@ namespace hcmus_shop.ViewModels.Products
 
             IsLoading = true;
             SaveErrorMessage = string.Empty;
+            SaveStatusMessage = string.Empty;
 
             try
             {
@@ -299,6 +321,7 @@ namespace hcmus_shop.ViewModels.Products
             }
 
             SaveErrorMessage = string.Empty;
+            SaveStatusMessage = string.Empty;
 
             if (string.IsNullOrWhiteSpace(Sku) || string.IsNullOrWhiteSpace(Name))
             {
@@ -315,6 +338,19 @@ namespace hcmus_shop.ViewModels.Products
             IsSaving = true;
             try
             {
+                SaveStatusMessage = "Uploading images...";
+                var mergedImageUrls = ImageUrls
+                    .Where(url => !string.IsNullOrWhiteSpace(url))
+                    .Select(url => url.Trim())
+                    .ToList();
+
+                foreach (var pendingFile in PendingImageFiles.ToList())
+                {
+                    var uploadedUrl = await _fileUploadService.UploadImageAsync(pendingFile.File);
+                    mergedImageUrls.Add(uploadedUrl);
+                }
+
+                SaveStatusMessage = "Saving product...";
                 await _productService.UpdateAsync(_productId, new UpdateProductInput
                 {
                     Sku = Sku.Trim(),
@@ -334,16 +370,17 @@ namespace hcmus_shop.ViewModels.Products
                     ],
                     ImageUrls =
                     [
-                        .. ImageUrls
-                            .Where(url => !string.IsNullOrWhiteSpace(url))
-                            .Select(url => url.Trim())
+                        .. mergedImageUrls
                     ]
                 });
 
+                PendingImageFiles.Clear();
+                SaveStatusMessage = string.Empty;
                 ProductSaved?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
+                SaveStatusMessage = string.Empty;
                 SaveErrorMessage = ex.Message;
             }
             finally
@@ -401,6 +438,32 @@ namespace hcmus_shop.ViewModels.Products
             NewImageUrl = string.Empty;
         }
 
+        public void AddPendingImageFile(StorageFile file)
+        {
+            if (file is null)
+            {
+                return;
+            }
+
+            if (PendingImageFiles.Any(item =>
+                    string.Equals(item.File.Path, file.Path, StringComparison.OrdinalIgnoreCase)))
+            {
+                return;
+            }
+
+            PendingImageFiles.Add(new PendingImageFileViewModel(file));
+        }
+
+        public void RemovePendingImageFile(PendingImageFileViewModel? item)
+        {
+            if (item is null)
+            {
+                return;
+            }
+
+            PendingImageFiles.Remove(item);
+        }
+
         private void RemoveImageUrl(string? imageUrl)
         {
             if (string.IsNullOrWhiteSpace(imageUrl))
@@ -421,5 +484,17 @@ namespace hcmus_shop.ViewModels.Products
             SaveProductCommand.NotifyCanExecuteChanged();
             DeleteProductCommand.NotifyCanExecuteChanged();
         }
+    }
+
+    public class PendingImageFileViewModel
+    {
+        public PendingImageFileViewModel(StorageFile file)
+        {
+            File = file;
+            Name = file.Name;
+        }
+
+        public StorageFile File { get; }
+        public string Name { get; }
     }
 }

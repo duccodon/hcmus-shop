@@ -83,6 +83,14 @@
                         Text="{x:Bind ViewModel.SaveErrorMessage, Mode=OneWay}"
                         Foreground="{StaticResource DangerForeground}" />
 
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Margin="0,22,0,10"
+                        Text="{x:Bind ViewModel.SaveStatusMessage, Mode=OneWay}"
+                        Foreground="{StaticResource TextSecondary}"
+                        Visibility="{x:Bind ViewModel.HasSaveStatus, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
                     <Grid RowSpacing="16">
                         <Grid.Margin>0,26,0,0</Grid.Margin>
                         <Grid.RowDefinitions>
@@ -272,7 +280,39 @@
                                         Content="Add" />
                                 </Grid>
 
-                                <ItemsControl Grid.Row="2" ItemsSource="{x:Bind ViewModel.ImageUrls, Mode=OneWay}">
+                                <StackPanel Grid.Row="2" Spacing="8">
+                                    <Button
+                                        HorizontalAlignment="Left"
+                                        Padding="12,8"
+                                        Click="PickLocalImagesButton_Click"
+                                        Content="Pick Local Images" />
+
+                                    <ItemsControl ItemsSource="{x:Bind ViewModel.PendingImageFiles, Mode=OneWay}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="productVm:PendingImageFileViewModel">
+                                                <Grid Margin="0,0,0,6">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock
+                                                        Text="{x:Bind Name, Mode=OneWay}"
+                                                        VerticalAlignment="Center"
+                                                        Foreground="{StaticResource TextSecondary}" />
+                                                    <Button
+                                                        Grid.Column="1"
+                                                        Margin="8,0,0,0"
+                                                        Padding="8,4"
+                                                        Click="RemovePendingImageButton_Click"
+                                                        Tag="{x:Bind}">
+                                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74D;" Foreground="{StaticResource DangerForeground}" />
+                                                    </Button>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <ItemsControl ItemsSource="{x:Bind ViewModel.ImageUrls, Mode=OneWay}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="x:String">
                                             <Grid Margin="0,0,0,6">
@@ -296,7 +336,8 @@
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
-                                </ItemsControl>
+                                    </ItemsControl>
+                                </StackPanel>
                             </Grid>
                         </Border>
 

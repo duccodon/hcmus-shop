@@ -11,6 +11,7 @@ using hcmus_shop.Services.Brands;
 using hcmus_shop.Services.Categories;
 using hcmus_shop.Services.Series;
 using hcmus_shop.Services.Products;
+using hcmus_shop.Services.Uploads;
 using hcmus_shop.ViewModels;
 using hcmus_shop.ViewModels.Products;
 using hcmus_shop.Views;
@@ -62,6 +63,7 @@ namespace hcmus_shop
             services.AddTransient<ICategoryService, CategoryService>();
             services.AddTransient<ISeriesService, SeriesService>();
             services.AddTransient<IProductService, ProductService>();
+            services.AddTransient<IFileUploadService, FileUploadService>();
 
             // ViewModels
             services.AddTransient<LoginViewModel>();
