@@ -380,13 +380,28 @@
                                 <Button
                                     Grid.Row="3"
                                     Margin="0,6,0,0"
-                                    Content="Add Category"
+                                    Content="{x:Bind ViewModel.AddCategoryButtonText, Mode=OneWay}"
                                     Padding="16,8"
                                     CornerRadius="999"
                                     HorizontalAlignment="Left"
                                     Command="{x:Bind ViewModel.AddCategoryCommand}"
                                     Background="{StaticResource LoginPrimaryBrush}"
                                     Foreground="White" />
+
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Margin="150,12,0,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{StaticResource TextSecondary}"
+                                    Text="Working..."
+                                    Visibility="{x:Bind ViewModel.IsAddingCategory, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Margin="0,44,0,0"
+                                    Foreground="{StaticResource DangerForeground}"
+                                    Text="{x:Bind ViewModel.CategoryErrorMessage, Mode=OneWay}"
+                                    Visibility="{x:Bind ViewModel.HasCategoryError, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
                             </Grid>
                         </Border>
                     </Grid>
