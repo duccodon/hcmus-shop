@@ -1,16 +1,14 @@
 using hcmus_shop.ViewModels;
+using hcmus_shop.ViewModels.Products;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
-using Windows.UI.Text;
 
 namespace hcmus_shop.Views.Dashboard.Components.Tables
 {
@@ -279,11 +277,7 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
 
             if (ItemsSource is not null)
             {
-                foreach (var item in ItemsSource)
-                {
-                    ApplyStatusStyling(item);
-                    _allItems.Add(item);
-                }
+                _allItems.AddRange(ItemsSource);
             }
 
             ApplyFilterAndSort(resetPage: true);
@@ -398,24 +392,13 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
 
             var totalPages = TotalPages;
             var currentPage = _currentPage;
-            var accentBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 111, 126, 255));
-            var defaultBrush = new SolidColorBrush(Colors.Transparent);
-            var fgAccent = new SolidColorBrush(Colors.White);
-            var fgDefault = Application.Current.Resources.TryGetValue("TextPrimary", out var tp) && tp is SolidColorBrush tpBrush
-                ? tpBrush : new SolidColorBrush(Colors.Black);
 
-            SolidColorBrush Bg(bool active) => active ? accentBrush : defaultBrush;
-            SolidColorBrush Fg(bool active) => active ? fgAccent : fgDefault;
-
-            // Helper: navigation button (never a page target itself beyond its semantics)
             PageButtonItem NavBtn(string label, int target, bool enabled) => new()
             {
                 Label = label,
                 PageNumber = target,
                 IsEnabled = enabled,
-                Background = defaultBrush,
-                Foreground = fgDefault,
-                FontWeight = new FontWeight { Weight = 400 },
+                IsCurrent = false,
             };
 
             PageButtonItem PageBtn(int page) => new()
@@ -423,9 +406,7 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
                 Label = page.ToString(),
                 PageNumber = page,
                 IsEnabled = page != currentPage,
-                Background = Bg(page == currentPage),
-                Foreground = Fg(page == currentPage),
-                FontWeight = page == currentPage ? new FontWeight { Weight = 600 } : new FontWeight { Weight = 400 },
+                IsCurrent = page == currentPage,
             };
 
             PageButtonItem Ellipsis() => new()
@@ -433,9 +414,7 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
                 Label = LabelEllipsis,
                 PageNumber = -1,
                 IsEnabled = false,
-                Background = defaultBrush,
-                Foreground = fgDefault,
-                FontWeight = new FontWeight { Weight = 400 },
+                IsCurrent = false,
             };
 
             PageButtons.Add(NavBtn(LabelPrev, currentPage - 1, currentPage > 1));
@@ -486,24 +465,6 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
                 ? source.OrderBy(keySelector)
                 : source.OrderByDescending(keySelector);
         }
-
-        // ──────────────────────────────────────────────
-        // Status Styling
-        // ──────────────────────────────────────────────
-
-        private static void ApplyStatusStyling(RecentInvoiceItem item)
-        {
-            (item.StatusBackground, item.StatusForeground) = item.Status switch
-            {
-                "Paid" => (MakeBrush(220, 240, 253, 232), MakeBrush(255, 22, 163, 74)),
-                "Pending" => (MakeBrush(220, 254, 243, 199), MakeBrush(255, 161, 98, 7)),
-                "Cancelled" => (MakeBrush(220, 254, 226, 226), MakeBrush(255, 220, 38, 38)),
-                _ => (MakeBrush(220, 243, 244, 246), MakeBrush(255, 107, 114, 128)),
-            };
-        }
-
-        private static SolidColorBrush MakeBrush(byte a, byte r, byte g, byte b) =>
-            new(ColorHelper.FromArgb(a, r, g, b));
 
         // ──────────────────────────────────────────────
         // Field / Parse Helpers

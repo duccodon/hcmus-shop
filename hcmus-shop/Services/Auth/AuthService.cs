@@ -1,4 +1,7 @@
+using hcmus_shop.Contracts.Services;
+using hcmus_shop.GraphQL.Operations;
 using hcmus_shop.Models.DTOs;
+using hcmus_shop.Services.Auth.Dto;
 using hcmus_shop.Services.GraphQL;
 using System;
 using System.Threading.Tasks;
@@ -19,76 +22,74 @@ namespace hcmus_shop.Services.Auth
         public UserDto? CurrentUser { get; private set; }
         public string? Token { get; private set; }
 
+        // ========================
+        // LOGIN
+        // ========================
         public async Task<bool> LoginAsync(string username, string password)
         {
-            try
+            var request = new LoginRequest
             {
-                var query = @"
-                    mutation Login($username: String!, $password: String!) {
-                        login(username: $username, password: $password) {
-                            token
-                            user {
-                                userId
-                                username
-                                fullName
-                                role
-                            }
-                        }
-                    }";
+                Username = username,
+                Password = password
+            };
 
-                var result = await _graphQL.MutateAsync<LoginResponse>(query, new { username, password });
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.MutateAsync<LoginResponse>(
+                        AuthQueries.Login,
+                        request
+                    )
+                );
 
-                Token = result.Login.Token;
-                CurrentUser = result.Login.User;
-                _graphQL.SetAuthToken(Token);
-                SaveToken(Token);
-
-                return true;
-            }
-            catch
+            if (!result.IsSuccess)
             {
                 return false;
             }
+
+            Token = result.Value!.Login.Token;
+            CurrentUser = result.Value.Login.User;
+
+            _graphQL.SetAuthToken(Token);
+            SaveToken(Token);
+
+            return true;
         }
 
+        // ========================
+        // AUTO LOGIN
+        // ========================
         public async Task<bool> TryAutoLoginAsync()
         {
             var savedToken = LoadToken();
-            if (string.IsNullOrEmpty(savedToken)) return false;
+            if (string.IsNullOrEmpty(savedToken))
+                return false;
 
-            try
-            {
-                _graphQL.SetAuthToken(savedToken);
+            _graphQL.SetAuthToken(savedToken);
 
-                var query = @"
-                    query {
-                        me {
-                            userId
-                            username
-                            fullName
-                            role
-                        }
-                    }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.QueryAsync<MeResponse>(AuthQueries.Me)
+                );
 
-                var result = await _graphQL.QueryAsync<MeResponse>(query);
-
-                if (result.Me == null) return false;
-
-                Token = savedToken;
-                CurrentUser = result.Me;
-                return true;
-            }
-            catch
+            if (!result.IsSuccess || result.Value?.Me == null)
             {
                 _graphQL.SetAuthToken(null);
                 ClearToken();
                 return false;
             }
+
+            Token = savedToken;
+            CurrentUser = result.Value.Me;
+            return true;
         }
 
+        // ========================
+        // ROLE CHECK
+        // ========================
         public bool HasRole(string role)
         {
-            if (CurrentUser is null) return false;
+            if (CurrentUser is null)
+                return false;
 
             if (string.Equals(CurrentUser.Role, "Admin", StringComparison.OrdinalIgnoreCase))
                 return true;
@@ -96,14 +97,21 @@ namespace hcmus_shop.Services.Auth
             return string.Equals(CurrentUser.Role, role, StringComparison.OrdinalIgnoreCase);
         }
 
+        // ========================
+        // LOGOUT
+        // ========================
         public void Logout()
         {
             CurrentUser = null;
             Token = null;
+
             _graphQL.SetAuthToken(null);
             ClearToken();
         }
 
+        // ========================
+        // TOKEN STORAGE
+        // ========================
         private void SaveToken(string token)
         {
             ApplicationData.Current.LocalSettings.Values[TokenKey] = token;
@@ -117,17 +125,6 @@ namespace hcmus_shop.Services.Auth
         private void ClearToken()
         {
             ApplicationData.Current.LocalSettings.Values.Remove(TokenKey);
-        }
-
-        // Response types for deserialization
-        private class LoginResponse
-        {
-            public AuthPayloadDto Login { get; set; } = new();
-        }
-
-        private class MeResponse
-        {
-            public UserDto? Me { get; set; }
         }
     }
 }

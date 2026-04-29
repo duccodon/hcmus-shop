@@ -9,7 +9,7 @@
         <TextBlock
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            FontSize="28"
+            Style="{StaticResource CardTitleStyle}"
             Text="MessagesPage" />
 
         <CheckBox x:Name="MyCheckBox" 

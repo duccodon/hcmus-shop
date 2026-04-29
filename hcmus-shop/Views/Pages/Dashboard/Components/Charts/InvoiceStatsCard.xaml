@@ -17,7 +17,7 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel>
-                <TextBlock Text="Invoice Statistics" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" FontSize="18" />
+                <TextBlock Text="Invoice Statistics" Style="{StaticResource SectionTitleStyle}" />
                 <lvc:PieChart
                     Height="200"
                     Series="{x:Bind Series, Mode=OneWay}"
@@ -35,7 +35,11 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <Ellipse Width="10" Height="10" Fill="{x:Bind MarkerBrush}" VerticalAlignment="Center" />
+                                <Ellipse
+                                    Width="10"
+                                    Height="10"
+                                    Fill="{x:Bind Label, Converter={StaticResource InvoiceLegendMarkerConverter}}"
+                                    VerticalAlignment="Center" />
                                 <TextBlock Grid.Column="1" Margin="8,0,0,0" Foreground="{StaticResource TextSecondary}" Text="{x:Bind Label}" />
                                 <TextBlock Grid.Column="2" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" Text="{x:Bind Value}" />
                             </Grid>

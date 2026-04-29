@@ -1,11 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using hcmus_shop.Models.Common;
 using hcmus_shop.Models.DTOs;
-using hcmus_shop.Services.Brands;
-using hcmus_shop.Services.Categories;
-using hcmus_shop.Services.Products;
-using Microsoft.UI;
-using Microsoft.UI.Xaml.Media;
+using hcmus_shop.Contracts.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,27 +13,44 @@ using System.Threading.Tasks;
 
 namespace hcmus_shop.ViewModels.Products
 {
-    public class ProductsViewModel : ObservableObject
+    public partial class ProductsViewModel : ObservableObject
     {
         private readonly IProductService _productService;
         private readonly IBrandService _brandService;
         private readonly ICategoryService _categoryService;
         private CancellationTokenSource? _searchDebounceCts;
 
+        [ObservableProperty]
         private string _searchQuery = string.Empty;
+
+        [ObservableProperty]
         private int _selectedPageSize = 10;
+
+        [ObservableProperty]
         private bool _isAllOnPageSelected;
+
+        [ObservableProperty]
+        private bool _isBusy;
+
+        [ObservableProperty]
+        private string? _errorMessage;
+
+        [ObservableProperty]
+        private bool _isInitialized;
+
+        [ObservableProperty]
+        private int? _selectedCategoryId;
+
+        [ObservableProperty]
+        private int? _selectedBrandId;
+
         private int _currentPage = 1;
         private int _totalCount;
-        private bool _isLoading;
-        private string _errorMessage = string.Empty;
-        private bool _isInitialized;
-        private int? _selectedCategoryId;
-        private int? _selectedBrandId;
         private readonly string _sortBy = "createdAt";
         private readonly string _sortOrder = "desc";
         private int _loadVersion;
         private bool _suppressFilterReload;
+        private bool _suppressSelectAllChange;
 
         public ProductsViewModel(
             IProductService productService,
@@ -46,13 +60,6 @@ namespace hcmus_shop.ViewModels.Products
             _productService = productService;
             _brandService = brandService;
             _categoryService = categoryService;
-
-            AddProductCommand = new RelayCommand(AddProduct);
-            GoToPageCommand = new AsyncRelayCommand<int>(GoToPageAsync);
-            BulkToggleStatusCommand = new AsyncRelayCommand(BulkToggleStatusAsync);
-            BulkDeleteCommand = new AsyncRelayCommand(BulkDeleteAsync);
-            ClearFiltersCommand = new AsyncRelayCommand(ClearFiltersAsync, () => !IsLoading);
-            InitializeCommand = new AsyncRelayCommand(InitializeAsync, () => !IsInitialized && !IsLoading);
         }
 
         public ObservableCollection<ProductRowViewModel> PagedProducts { get; } = [];
@@ -61,138 +68,11 @@ namespace hcmus_shop.ViewModels.Products
         public ObservableCollection<FilterOptionViewModel> CategoryOptions { get; } = [];
         public ObservableCollection<FilterOptionViewModel> BrandOptions { get; } = [];
 
-        public IRelayCommand AddProductCommand { get; }
-        public IAsyncRelayCommand<int> GoToPageCommand { get; }
-        public IAsyncRelayCommand BulkToggleStatusCommand { get; }
-        public IAsyncRelayCommand BulkDeleteCommand { get; }
-        public IAsyncRelayCommand ClearFiltersCommand { get; }
-        public IAsyncRelayCommand InitializeCommand { get; }
-
         public event EventHandler? NavigateToAddProductRequested;
 
-        public string SearchQuery
-        {
-            get => _searchQuery;
-            set
-            {
-                if (SetProperty(ref _searchQuery, value))
-                {
-                    _currentPage = 1;
-                    DebounceSearch();
-                }
-            }
-        }
-
-        public int SelectedPageSize
-        {
-            get => _selectedPageSize;
-            set
-            {
-                if (SetProperty(ref _selectedPageSize, value))
-                {
-                    _currentPage = 1;
-                    _ = LoadProductsAsync();
-                }
-            }
-        }
-
-        public bool IsInitialized
-        {
-            get => _isInitialized;
-            private set
-            {
-                if (SetProperty(ref _isInitialized, value))
-                {
-                    InitializeCommand.NotifyCanExecuteChanged();
-                }
-            }
-        }
-
-        public bool IsLoading
-        {
-            get => _isLoading;
-            private set
-            {
-                if (SetProperty(ref _isLoading, value))
-                {
-                    InitializeCommand.NotifyCanExecuteChanged();
-                    ClearFiltersCommand.NotifyCanExecuteChanged();
-                    OnPropertyChanged(nameof(IsEmpty));
-                }
-            }
-        }
-
-        public string ErrorMessage
-        {
-            get => _errorMessage;
-            private set
-            {
-                if (SetProperty(ref _errorMessage, value))
-                {
-                    OnPropertyChanged(nameof(HasError));
-                    OnPropertyChanged(nameof(IsEmpty));
-                }
-            }
-        }
-
         public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
-        public bool IsEmpty => !IsLoading && !HasError && PagedProducts.Count == 0;
-
-        public int? SelectedCategoryId
-        {
-            get => _selectedCategoryId;
-            set
-            {
-                if (SetProperty(ref _selectedCategoryId, value))
-                {
-                    if (_suppressFilterReload)
-                    {
-                        return;
-                    }
-
-                    _currentPage = 1;
-                    _ = LoadProductsAsync();
-                }
-            }
-        }
-
-        public int? SelectedBrandId
-        {
-            get => _selectedBrandId;
-            set
-            {
-                if (SetProperty(ref _selectedBrandId, value))
-                {
-                    if (_suppressFilterReload)
-                    {
-                        return;
-                    }
-
-                    _currentPage = 1;
-                    _ = LoadProductsAsync();
-                }
-            }
-        }
-
-        public bool IsAllOnPageSelected
-        {
-            get => _isAllOnPageSelected;
-            set
-            {
-                if (SetProperty(ref _isAllOnPageSelected, value))
-                {
-                    foreach (var row in PagedProducts)
-                    {
-                        row.IsSelected = value;
-                    }
-
-                    NotifySelectionChanged();
-                }
-            }
-        }
-
+        public bool IsEmpty => !IsBusy && !HasError && PagedProducts.Count == 0;
         public bool HasSelection => PagedProducts.Any(p => p.IsSelected);
-
         public string SelectionActionText => $"{PagedProducts.Count(p => p.IsSelected)} selected";
 
         public string ResultText
@@ -203,7 +83,6 @@ namespace hcmus_shop.ViewModels.Products
                 {
                     return "Result 0 of 0";
                 }
-
                 var start = ((_currentPage - 1) * SelectedPageSize) + 1;
                 var end = Math.Min(_currentPage * SelectedPageSize, _totalCount);
                 return $"Result {start}-{end} of {_totalCount}";
@@ -213,20 +92,21 @@ namespace hcmus_shop.ViewModels.Products
         private int TotalPages =>
             Math.Max(1, (int)Math.Ceiling((double)Math.Max(_totalCount, 1) / SelectedPageSize));
 
+        [RelayCommand]
         private void AddProduct()
         {
             NavigateToAddProductRequested?.Invoke(this, EventArgs.Empty);
         }
 
+        [RelayCommand(CanExecute = nameof(CanInitialize))]
         private async Task InitializeAsync()
         {
-            if (IsInitialized)
-            {
-                return;
-            }
+            if (IsInitialized) return;
 
             try
             {
+                IsBusy = true;
+                ErrorMessage = null;
                 await LoadFilterOptionsAsync();
                 await LoadProductsAsync(clearError: false);
                 IsInitialized = true;
@@ -235,26 +115,27 @@ namespace hcmus_shop.ViewModels.Products
             {
                 ErrorMessage = $"Failed to initialize products page: {ex.Message}";
             }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
+        [RelayCommand(CanExecute = nameof(CanModifyPage))]
         private async Task GoToPageAsync(int page)
         {
-            if (page < 1 || page > TotalPages || page == _currentPage)
-            {
-                return;
-            }
-
+            if (page < 1 || page > TotalPages || page == _currentPage) return;
             _currentPage = page;
             await LoadProductsAsync();
         }
 
+        [RelayCommand(CanExecute = nameof(CanModifyPage))]
         private async Task ClearFiltersAsync()
         {
             _suppressFilterReload = true;
             SelectedCategoryId = null;
             SelectedBrandId = null;
             _suppressFilterReload = false;
-
             _currentPage = 1;
             await LoadProductsAsync();
         }
@@ -265,21 +146,26 @@ namespace hcmus_shop.ViewModels.Products
             {
                 var brandsTask = _brandService.GetAllAsync();
                 var categoriesTask = _categoryService.GetAllAsync();
-
                 await Task.WhenAll(brandsTask, categoriesTask);
 
                 BrandOptions.Clear();
                 BrandOptions.Add(new FilterOptionViewModel(null, "All brands"));
-                foreach (var brand in brandsTask.Result.OrderBy(b => b.Name))
+                if (brandsTask.Result.IsSuccess && brandsTask.Result.Value != null)
                 {
-                    BrandOptions.Add(new FilterOptionViewModel(brand.BrandId, brand.Name));
+                    foreach (var brand in brandsTask.Result.Value.OrderBy(b => b.Name))
+                    {
+                        BrandOptions.Add(new FilterOptionViewModel(brand.BrandId, brand.Name));
+                    }
                 }
 
                 CategoryOptions.Clear();
                 CategoryOptions.Add(new FilterOptionViewModel(null, "All categories"));
-                foreach (var category in categoriesTask.Result.OrderBy(c => c.Name))
+                if (categoriesTask.Result.IsSuccess && categoriesTask.Result.Value != null)
                 {
-                    CategoryOptions.Add(new FilterOptionViewModel(category.CategoryId, category.Name));
+                    foreach (var category in categoriesTask.Result.Value.OrderBy(c => c.Name))
+                    {
+                        CategoryOptions.Add(new FilterOptionViewModel(category.CategoryId, category.Name));
+                    }
                 }
             }
             catch (Exception ex)
@@ -288,17 +174,14 @@ namespace hcmus_shop.ViewModels.Products
             }
         }
 
+        [RelayCommand(CanExecute = nameof(CanModifyPage))]
         private async Task BulkToggleStatusAsync()
         {
             var selectedRows = PagedProducts.Where(p => p.IsSelected).ToList();
-            if (selectedRows.Count == 0)
-            {
-                return;
-            }
+            if (selectedRows.Count == 0) return;
 
-            IsLoading = true;
-            ErrorMessage = string.Empty;
-
+            IsBusy = true;
+            ErrorMessage = null;
             try
             {
                 foreach (var row in selectedRows)
@@ -308,7 +191,6 @@ namespace hcmus_shop.ViewModels.Products
                         IsActive = !row.IsActive
                     });
                 }
-
                 await LoadProductsAsync();
             }
             catch (Exception ex)
@@ -317,25 +199,21 @@ namespace hcmus_shop.ViewModels.Products
             }
             finally
             {
-                IsLoading = false;
+                IsBusy = false;
             }
         }
 
+        [RelayCommand(CanExecute = nameof(CanModifyPage))]
         private async Task BulkDeleteAsync()
         {
             var selectedIds = PagedProducts
                 .Where(p => p.IsSelected)
                 .Select(p => p.ProductId)
                 .ToList();
+            if (selectedIds.Count == 0) return;
 
-            if (selectedIds.Count == 0)
-            {
-                return;
-            }
-
-            IsLoading = true;
-            ErrorMessage = string.Empty;
-
+            IsBusy = true;
+            ErrorMessage = null;
             try
             {
                 foreach (var productId in selectedIds)
@@ -347,7 +225,6 @@ namespace hcmus_shop.ViewModels.Products
                 {
                     _currentPage--;
                 }
-
                 await LoadProductsAsync();
             }
             catch (Exception ex)
@@ -356,23 +233,19 @@ namespace hcmus_shop.ViewModels.Products
             }
             finally
             {
-                IsLoading = false;
+                IsBusy = false;
             }
         }
 
         public async Task LoadProductsAsync(bool clearError = true)
         {
             var requestVersion = ++_loadVersion;
-
-            IsLoading = true;
-            if (clearError)
-            {
-                ErrorMessage = string.Empty;
-            }
+            IsBusy = true;
+            if (clearError) ErrorMessage = null;
 
             try
             {
-                var page = await _productService.GetAllAsync(new ProductFilterDto
+                var result = await _productService.GetAllAsync(new ProductFilterDto
                 {
                     Search = string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery.Trim(),
                     CategoryId = SelectedCategoryId,
@@ -383,16 +256,28 @@ namespace hcmus_shop.ViewModels.Products
                     PageSize = SelectedPageSize
                 });
 
-                if (requestVersion != _loadVersion)
+                if (requestVersion != _loadVersion) return;
+
+                if (!result.IsSuccess)
                 {
+                    if (requestVersion == _loadVersion)
+                    {
+                        _totalCount = 0;
+                        PagedProducts.Clear();
+                        RebuildPageButtons();
+                        UpdateSelectAllState();
+                        NotifySelectionChanged();
+                        OnPropertyChanged(nameof(ResultText));
+                        OnPropertyChanged(nameof(IsEmpty));
+                        ErrorMessage = result.Error ?? "Failed to load products";
+                    }
                     return;
                 }
 
+                var page = result.Value!;
                 _totalCount = page.TotalCount;
-                if (_currentPage > TotalPages)
-                {
-                    _currentPage = TotalPages;
-                }
+
+                if (_currentPage > TotalPages) _currentPage = TotalPages;
 
                 PagedProducts.Clear();
                 foreach (var item in page.Items)
@@ -405,7 +290,6 @@ namespace hcmus_shop.ViewModels.Products
                         item.StockQuantity,
                         Convert.ToDecimal(item.SellingPrice),
                         item.IsActive);
-
                     row.PropertyChanged += Row_PropertyChanged;
                     PagedProducts.Add(row);
                 }
@@ -432,10 +316,7 @@ namespace hcmus_shop.ViewModels.Products
             }
             finally
             {
-                if (requestVersion == _loadVersion)
-                {
-                    IsLoading = false;
-                }
+                if (requestVersion == _loadVersion) IsBusy = false;
             }
         }
 
@@ -445,7 +326,6 @@ namespace hcmus_shop.ViewModels.Products
             _searchDebounceCts?.Dispose();
             _searchDebounceCts = new CancellationTokenSource();
             var token = _searchDebounceCts.Token;
-
             _ = DebounceSearchAsync(token);
         }
 
@@ -454,39 +334,87 @@ namespace hcmus_shop.ViewModels.Products
             try
             {
                 await Task.Delay(400, token);
-                if (!token.IsCancellationRequested)
-                {
-                    await LoadProductsAsync();
-                }
+                if (!token.IsCancellationRequested) await LoadProductsAsync();
             }
-            catch (TaskCanceledException)
-            {
-            }
+            catch (TaskCanceledException) { }
+        }
+
+        private bool CanInitialize() => !IsBusy && !IsInitialized;
+        private bool CanModifyPage() => !IsBusy;
+
+        private void UpdateSelectAll(bool value)
+        {
+            _suppressSelectAllChange = true;
+            IsAllOnPageSelected = value;
+            _suppressSelectAllChange = false;
+        }
+
+        partial void OnSearchQueryChanged(string value)
+        {
+            _currentPage = 1;
+            DebounceSearch();
+        }
+
+        partial void OnSelectedPageSizeChanged(int value)
+        {
+            _currentPage = 1;
+            _ = LoadProductsAsync();
+        }
+
+        partial void OnIsAllOnPageSelectedChanged(bool value)
+        {
+            if (_suppressSelectAllChange) return;
+            foreach (var row in PagedProducts) row.IsSelected = value;
+            NotifySelectionChanged();
+        }
+
+        partial void OnIsBusyChanged(bool value)
+        {
+            InitializeCommand.NotifyCanExecuteChanged();
+            ClearFiltersCommand.NotifyCanExecuteChanged();
+            GoToPageCommand.NotifyCanExecuteChanged();
+            BulkToggleStatusCommand.NotifyCanExecuteChanged();
+            BulkDeleteCommand.NotifyCanExecuteChanged();
+            OnPropertyChanged(nameof(IsEmpty));
+        }
+
+        partial void OnErrorMessageChanged(string? value)
+        {
+            OnPropertyChanged(nameof(HasError));
+            OnPropertyChanged(nameof(IsEmpty));
+        }
+
+        partial void OnSelectedCategoryIdChanged(int? value)
+        {
+            if (_suppressFilterReload) return;
+            _currentPage = 1;
+            _ = LoadProductsAsync();
+        }
+
+        partial void OnSelectedBrandIdChanged(int? value)
+        {
+            if (_suppressFilterReload) return;
+            _currentPage = 1;
+            _ = LoadProductsAsync();
+        }
+
+        partial void OnIsInitializedChanged(bool value)
+        {
+            InitializeCommand.NotifyCanExecuteChanged();
         }
 
         private void RebuildPageButtons()
         {
             PageButtons.Clear();
-
-            var accentBackground = new SolidColorBrush(ColorHelper.FromArgb(255, 111, 126, 255));
-            var normalBackground = new SolidColorBrush(Colors.Transparent);
-            var activeForeground = new SolidColorBrush(Colors.White);
-            var normalForeground = App.Current.Resources["TextPrimary"] as Brush
-                ?? new SolidColorBrush(Colors.Black);
-
             PageButtons.Add(new PageButtonItem
             {
                 Label = "<- Previous",
                 PageNumber = _currentPage - 1,
                 IsEnabled = _currentPage > 1,
                 IsCurrent = false,
-                Background = normalBackground,
-                Foreground = normalForeground,
             });
-
             var pages = BuildPageNumbers(_currentPage, TotalPages);
             int? previousPage = null;
-
             foreach (var page in pages)
             {
                 if (previousPage.HasValue && page - previousPage.Value > 1)
@@ -497,42 +425,29 @@ namespace hcmus_shop.ViewModels.Products
                         PageNumber = -1,
                         IsEnabled = false,
                         IsCurrent = false,
-                        Background = normalBackground,
-                        Foreground = normalForeground,
                     });
                 }
-
                 PageButtons.Add(new PageButtonItem
                 {
                     Label = page.ToString(),
                     PageNumber = page,
                     IsEnabled = page != _currentPage,
                     IsCurrent = page == _currentPage,
-                    Background = page == _currentPage ? accentBackground : normalBackground,
-                    Foreground = page == _currentPage ? activeForeground : normalForeground,
                 });
-
                 previousPage = page;
             }
-
             PageButtons.Add(new PageButtonItem
             {
                 Label = "Next ->",
                 PageNumber = _currentPage + 1,
                 IsEnabled = _currentPage < TotalPages,
                 IsCurrent = false,
-                Background = normalBackground,
-                Foreground = normalForeground,
             });
         }
 
         private void Row_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(ProductRowViewModel.IsSelected))
-            {
-                return;
-            }
-
+            if (e.PropertyName != nameof(ProductRowViewModel.IsSelected)) return;
             NotifySelectionChanged();
             UpdateSelectAllState();
         }
@@ -541,19 +456,13 @@ namespace hcmus_shop.ViewModels.Products
         {
             if (PagedProducts.Count == 0)
             {
-                if (_isAllOnPageSelected)
-                {
-                    _isAllOnPageSelected = false;
-                    OnPropertyChanged(nameof(IsAllOnPageSelected));
-                }
+                UpdateSelectAll(false);
                 return;
             }
-
             var allSelected = PagedProducts.All(p => p.IsSelected);
             if (IsAllOnPageSelected != allSelected)
             {
-                _isAllOnPageSelected = allSelected;
-                OnPropertyChanged(nameof(IsAllOnPageSelected));
+                UpdateSelectAll(allSelected);
             }
         }
 
@@ -574,7 +483,6 @@ namespace hcmus_shop.ViewModels.Products
                     pages.Add(value);
                 }
             }
-
             return pages;
         }
     }

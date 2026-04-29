@@ -18,7 +18,7 @@
                 Width="34"
                 Height="34"
                 Margin="0,0,12,0"
-                Background="#1E3A50"
+                Background="{StaticResource KpiIconBackground}"
                 CornerRadius="17"
                 VerticalAlignment="Top">
                 <TextBlock
@@ -34,9 +34,7 @@
                     Foreground="{StaticResource TextSecondary}"
                     Text="{x:Bind Title, Mode=OneWay}" />
                 <TextBlock
-                    FontSize="22"
-                    FontWeight="SemiBold"
-                    Foreground="{StaticResource TextPrimary}"
+                    Style="{StaticResource PageTitleStyle}"
                     Text="{x:Bind Value, Mode=OneWay}" />
                 <TextBlock
                     Foreground="{x:Bind DeltaBrush, Mode=OneWay}"

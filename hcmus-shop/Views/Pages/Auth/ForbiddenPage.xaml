@@ -10,11 +10,11 @@
             Spacing="8">
             <TextBlock
                 HorizontalAlignment="Center"
-                FontSize="28"
+                Style="{StaticResource CardTitleStyle}"
                 Text="Forbidden" />
             <TextBlock
                 HorizontalAlignment="Center"
-                Opacity="0.8"
+                Style="{StaticResource BodySecondaryTextStyle}"
                 Text="You do not have permission to access this page." />
         </StackPanel>
     </Grid>

@@ -6,7 +6,6 @@
     xmlns:components="using:hcmus_shop.Views.Components.Pagination"
     xmlns:vm="using:hcmus_shop.ViewModels.Products"
     x:Name="Root">
-
     <Grid Background="{StaticResource DashboardBackground}">
         <ScrollViewer>
             <Grid Margin="24">
@@ -24,37 +23,30 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <!-- ── Row 0: Title + Action Buttons ── -->
+                        <!-- Row 0: Title + Action Buttons -->
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-
                             <TextBlock
                                 VerticalAlignment="Center"
                                 Text="Products List"
-                                FontSize="22"
-                                FontWeight="SemiBold"
-                                Foreground="{StaticResource TextPrimary}" />
-
+                                Style="{StaticResource PageTitleStyle}" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                <Button Content="Import" Padding="16,8" CornerRadius="8" />
-                                <Button Content="Export" Padding="16,8" CornerRadius="8" />
+                                <Button Content="Import" Style="{StaticResource PrimaryButtonStyle}" />
+                                <Button Content="Export" Style="{StaticResource PrimaryButtonStyle}" />
                                 <Button
                                     Content="+ Add Product"
-                                    Padding="16,8"
-                                    CornerRadius="8"
-                                    Command="{x:Bind ViewModel.AddProductCommand}"
-                                    Background="{StaticResource AccentPurple}"
-                                    Foreground="White" />
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Command="{x:Bind ViewModel.AddProductCommand}" />
                             </StackPanel>
                         </Grid>
 
-                        <!-- ── Row 1: Divider ── -->
+                        <!-- Row 1: Divider -->
                         <Border Grid.Row="1" Height="1" Background="{StaticResource DividerBrush}" />
 
-                        <!-- ── Row 2: Search + Date range + Filter buttons ── -->
+                        <!-- Row 2: Search + Filters -->
                         <Grid Grid.Row="2">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" MaxWidth="320" />
@@ -66,8 +58,7 @@
                                 <TextBox
                                     x:Name="SearchBox"
                                     PlaceholderText="Search"
-                                    Padding="12,9,40,9"
-                                    CornerRadius="8"
+                                    Style="{StaticResource SearchTextBoxStyle}"
                                     Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                 <FontIcon
                                     HorizontalAlignment="Right"
@@ -86,18 +77,16 @@
                                 Spacing="8"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center">
-
-                                <!-- Date range flyout -->
-                                <Button Padding="12,8" CornerRadius="8">
+                                <Button Style="{StaticResource PrimaryButtonStyle}">
                                     <Button.Flyout>
                                         <Flyout Placement="Bottom">
                                             <StackPanel Spacing="10" Padding="4">
-                                                <TextBlock Text="From" FontSize="12" Foreground="{StaticResource TextSecondary}" />
+                                                <TextBlock Text="From" Style="{StaticResource BodySecondaryTextStyle}" />
                                                 <CalendarDatePicker
                                                     x:Name="DateFromPicker"
                                                     PlaceholderText="Start date"
                                                     DateChanged="DateFromPicker_DateChanged" />
-                                                <TextBlock Text="To" FontSize="12" Foreground="{StaticResource TextSecondary}" />
+                                                <TextBlock Text="To" Style="{StaticResource BodySecondaryTextStyle}" />
                                                 <CalendarDatePicker
                                                     x:Name="DateToPicker"
                                                     PlaceholderText="End date"
@@ -114,30 +103,28 @@
                                         <TextBlock
                                             x:Name="DateRangeLabel"
                                             Text="Date Range"
-                                            FontSize="12"
+                                            Style="{StaticResource BodySecondaryTextStyle}"
                                             VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
-
                                 <ComboBox
                                     Width="160"
                                     PlaceholderText="Brand"
+                                    Style="{StaticResource FormComboBoxStyle}"
                                     ItemsSource="{x:Bind ViewModel.BrandOptions, Mode=OneWay}"
                                     DisplayMemberPath="Name"
                                     SelectedValuePath="Id"
                                     SelectedValue="{x:Bind ViewModel.SelectedBrandId, Mode=TwoWay}" />
-
                                 <ComboBox
                                     Width="180"
                                     PlaceholderText="Category"
+                                    Style="{StaticResource FormComboBoxStyle}"
                                     ItemsSource="{x:Bind ViewModel.CategoryOptions, Mode=OneWay}"
                                     DisplayMemberPath="Name"
                                     SelectedValuePath="Id"
                                     SelectedValue="{x:Bind ViewModel.SelectedCategoryId, Mode=TwoWay}" />
-
                                 <Button
-                                    Padding="12,8"
-                                    CornerRadius="8"
+                                    Style="{StaticResource PrimaryButtonStyle}"
                                     Command="{x:Bind ViewModel.ClearFiltersCommand}">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <FontIcon
@@ -145,13 +132,13 @@
                                             Glyph="&#xE894;"
                                             FontSize="12"
                                             VerticalAlignment="Center" />
-                                        <TextBlock Text="Clear" FontSize="12" VerticalAlignment="Center" />
+                                        <TextBlock Text="Clear" Style="{StaticResource BodySecondaryTextStyle}" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
                         </Grid>
 
-                        <!-- ── Row 3: Bulk-action bar (visible only when items selected) ── -->
+                        <!-- Row 3: Bulk-action bar -->
                         <Grid
                             Grid.Row="3"
                             Visibility="{x:Bind ViewModel.HasSelection, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -164,33 +151,26 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-
                                     <TextBlock
                                         VerticalAlignment="Center"
                                         Text="{x:Bind ViewModel.SelectionActionText, Mode=OneWay}"
-                                        FontSize="13"
-                                        Foreground="{StaticResource TextSecondary}" />
-
+                                        Style="{StaticResource BodySecondaryTextStyle}" />
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
                                         <Button
                                             Command="{x:Bind ViewModel.BulkToggleStatusCommand}"
-                                            Padding="10,6"
-                                            CornerRadius="8"
+                                            Style="{StaticResource PrimaryButtonStyle}"
                                             ToolTipService.ToolTip="Toggle active / inactive">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <FontIcon
                                                     FontFamily="Segoe Fluent Icons"
                                                     Glyph="&#xE70F;"
                                                     FontSize="13" />
-                                                <TextBlock Text="Update Status" FontSize="12" VerticalAlignment="Center" />
+                                                <TextBlock Text="Update Status" Style="{StaticResource BodySecondaryTextStyle}" VerticalAlignment="Center" />
                                             </StackPanel>
                                         </Button>
-
                                         <Button
                                             Command="{x:Bind ViewModel.BulkDeleteCommand}"
-                                            Padding="10,6"
-                                            CornerRadius="8"
-                                            Background="{StaticResource DangerBackgroundSubtle}"
+                                            Style="{StaticResource DangerButtonStyle}"
                                             ToolTipService.ToolTip="Delete selected">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <FontIcon
@@ -198,7 +178,7 @@
                                                     Glyph="&#xE74D;"
                                                     FontSize="13"
                                                     Foreground="{StaticResource DangerForeground}" />
-                                                <TextBlock Text="Delete" FontSize="12" Foreground="{StaticResource DangerForeground}" VerticalAlignment="Center" />
+                                                <TextBlock Text="Delete" Style="{StaticResource BodySecondaryTextStyle}" Foreground="{StaticResource DangerForeground}" VerticalAlignment="Center" />
                                             </StackPanel>
                                         </Button>
                                     </StackPanel>
@@ -206,7 +186,7 @@
                             </Border>
                         </Grid>
 
-                        <!-- ── Row 4: Table ── -->
+                        <!-- Row 4: Table -->
                         <Grid Grid.Row="4" MinHeight="300">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -232,40 +212,30 @@
                                     <ColumnDefinition Width="1.4*" />
                                     <ColumnDefinition Width="80" />
                                 </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0"
-                                    Padding="12,10"
-                                    Background="{StaticResource TableHeaderBackground}"
-                                    BorderBrush="{StaticResource TableHeaderBorder}"
-                                    BorderThickness="0,0,0,1">
+                                <Border Grid.Column="0" Style="{StaticResource TableHeaderBorderStyle}">
                                     <CheckBox
                                         x:Name="SelectAllCheckBox"
                                         Width="22"
                                         Height="22"
                                         IsChecked="{x:Bind ViewModel.IsAllOnPageSelected, Mode=TwoWay}" />
                                 </Border>
-
-                                <Border Grid.Column="1" Padding="12,10" Background="{StaticResource TableHeaderBackground}" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
-                                    <TextBlock Text="Product Name" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource TextSecondary}" />
+                                <Border Grid.Column="1" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Product Name" Style="{StaticResource TableHeaderTextStyle}" />
                                 </Border>
-
-                                <Border Grid.Column="2" Padding="12,10" Background="{StaticResource TableHeaderBackground}" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
-                                    <TextBlock Text="Category" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource TextSecondary}" />
+                                <Border Grid.Column="2" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Category" Style="{StaticResource TableHeaderTextStyle}" />
                                 </Border>
-
-                                <Border Grid.Column="3" Padding="12,10" Background="{StaticResource TableHeaderBackground}" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
-                                    <TextBlock Text="Stock" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource TextSecondary}" />
+                                <Border Grid.Column="3" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Stock" Style="{StaticResource TableHeaderTextStyle}" />
                                 </Border>
-
-                                <Border Grid.Column="4" Padding="12,10" Background="{StaticResource TableHeaderBackground}" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
-                                    <TextBlock Text="Price" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource TextSecondary}" />
+                                <Border Grid.Column="4" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Price" Style="{StaticResource TableHeaderTextStyle}" />
                                 </Border>
-
-                                <Border Grid.Column="5" Padding="12,10" Background="{StaticResource TableHeaderBackground}" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
-                                    <TextBlock Text="Status" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource TextSecondary}" />
+                                <Border Grid.Column="5" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Status" Style="{StaticResource TableHeaderTextStyle}" />
                                 </Border>
-
-                                <Border Grid.Column="6" Padding="12,10" Background="{StaticResource TableHeaderBackground}" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
-                                    <TextBlock Text="Action" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource TextSecondary}" />
+                                <Border Grid.Column="6" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Action" Style="{StaticResource TableHeaderTextStyle}" />
                                 </Border>
                             </Grid>
 
@@ -285,98 +255,50 @@
                                                     <ColumnDefinition Width="80" />
                                                 </Grid.ColumnDefinitions>
 
-                                                <!-- Checkbox column in row -->
-                                                <Border Grid.Column="0"
-                                                        Padding="12,12"
-                                                        BorderBrush="{StaticResource TableRowBorder}"
-                                                        BorderThickness="0,0,0,1">
-                                                    <CheckBox
-                                                        Width="22"
-                                                        Height="22"
-                                                        IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
+                                                <Border Grid.Column="0" Style="{StaticResource TableRowBorderStyle}">
+                                                    <CheckBox Width="22" Height="22" IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
                                                 </Border>
 
-                                                <!-- Product name + SKU -->
-                                                <Border Grid.Column="1" Padding="12,12" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
+                                                <Border Grid.Column="1" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
                                                     <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                                        <Border
-                                                            Width="32" Height="32"
-                                                            CornerRadius="8"
-                                                            Background="#12000000"
-                                                            VerticalAlignment="Center">
-                                                            <FontIcon
-                                                                HorizontalAlignment="Center"
-                                                                VerticalAlignment="Center"
-                                                                FontFamily="Segoe Fluent Icons"
-                                                                Glyph="&#xEC8A;"
-                                                                FontSize="14"
-                                                                Foreground="{StaticResource TextSecondary}" />
+                                                        <Border Width="32" Height="32" CornerRadius="8" Background="{StaticResource CardBackground}" VerticalAlignment="Center">
+                                                            <FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe Fluent Icons" Glyph="&#xEC8A;" FontSize="14" Foreground="{StaticResource TextSecondary}" />
                                                         </Border>
                                                         <StackPanel VerticalAlignment="Center">
-                                                            <TextBlock Text="{x:Bind Name, Mode=OneWay}" FontSize="13" Foreground="{StaticResource TextPrimary}" />
-                                                            <TextBlock Text="{x:Bind Sku, Mode=OneWay}" FontSize="11" Foreground="{StaticResource TextSecondary}" />
+                                                            <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+                                                            <TextBlock Text="{x:Bind Sku, Mode=OneWay}" Style="{StaticResource CaptionSecondaryTextStyle}" />
                                                         </StackPanel>
                                                     </StackPanel>
                                                 </Border>
 
-                                                <!-- Category -->
-                                                <Border Grid.Column="2" Padding="12,12" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
-                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind CategoryDisplay, Mode=OneWay}" FontSize="13" Foreground="{StaticResource TextPrimary}" />
+                                                <Border Grid.Column="2" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind CategoryDisplay, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
                                                 </Border>
 
-                                                <!-- Stock -->
-                                                <Border Grid.Column="3" Padding="12,12" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
+                                                <Border Grid.Column="3" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
                                                     <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                                        <TextBlock Text="{x:Bind StockQuantity, Mode=OneWay}" FontSize="13" Foreground="{StaticResource TextPrimary}" />
-                                                        <TextBlock Text="{x:Bind StockLabel, Mode=OneWay}" FontSize="12" Foreground="{x:Bind StockTone, Mode=OneWay, Converter={StaticResource StockToneForegroundConverter}}" />
+                                                        <TextBlock Text="{x:Bind StockQuantity, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+                                                        <TextBlock Text="{x:Bind StockLabel, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" Foreground="{x:Bind StockTone, Mode=OneWay, Converter={StaticResource StockToneForegroundConverter}}" />
                                                     </StackPanel>
                                                 </Border>
 
-                                                <!-- Price -->
-                                                <Border Grid.Column="4" Padding="12,12" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
-                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind PriceDisplay, Mode=OneWay}" FontSize="13" Foreground="{StaticResource TextPrimary}" />
+                                                <Border Grid.Column="4" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind PriceDisplay, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
                                                 </Border>
 
-                                                <!-- Status badge -->
-                                                <Border Grid.Column="5" Padding="12,8" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
-                                                    <Border
-                                                        Padding="10,5"
-                                                        CornerRadius="99"
-                                                        Background="{x:Bind StatusTone, Mode=OneWay, Converter={StaticResource StatusToneBackgroundConverter}}"
-                                                        HorizontalAlignment="Left">
-                                                        <TextBlock
-                                                            VerticalAlignment="Center"
-                                                            Text="{x:Bind StatusText, Mode=OneWay}"
-                                                            FontSize="12"
-                                                            FontWeight="SemiBold"
-                                                            Foreground="{x:Bind StatusTone, Mode=OneWay, Converter={StaticResource StatusToneForegroundConverter}}" />
+                                                <Border Grid.Column="5" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <Border Padding="10,5" CornerRadius="99" Background="{x:Bind StatusTone, Mode=OneWay, Converter={StaticResource StatusToneBackgroundConverter}}" HorizontalAlignment="Left">
+                                                        <TextBlock VerticalAlignment="Center" Text="{x:Bind StatusText, Mode=OneWay}" Style="{StaticResource StatusBadgeTextStyle}" Foreground="{x:Bind StatusTone, Mode=OneWay, Converter={StaticResource StatusToneForegroundConverter}}" />
                                                     </Border>
                                                 </Border>
 
-                                                <!-- Action: pen + trash per row -->
-                                                <Border Grid.Column="6" Padding="8,8" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
+                                                <Border Grid.Column="6" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
                                                     <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                        <Button
-                                                            Padding="6"
-                                                            CornerRadius="6"
-                                                            Background="Transparent"
-                                                            ToolTipService.ToolTip="Edit product">
-                                                            <FontIcon
-                                                                FontFamily="Segoe Fluent Icons"
-                                                                Glyph="&#xE70F;"
-                                                                FontSize="13"
-                                                                Foreground="{StaticResource TextSecondary}" />
+                                                        <Button Style="{StaticResource GhostButtonStyle}" ToolTipService.ToolTip="Edit product">
+                                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE70F;" FontSize="13" Foreground="{StaticResource TextSecondary}" />
                                                         </Button>
-                                                        <Button
-                                                            Padding="6"
-                                                            CornerRadius="6"
-                                                            Background="Transparent"
-                                                            ToolTipService.ToolTip="Delete product">
-                                                            <FontIcon
-                                                                FontFamily="Segoe Fluent Icons"
-                                                                Glyph="&#xE74D;"
-                                                                FontSize="13"
-                                                                Foreground="{StaticResource DangerForeground}" />
+                                                        <Button Style="{StaticResource GhostButtonStyle}" ToolTipService.ToolTip="Delete product">
+                                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74D;" FontSize="13" Foreground="{StaticResource DangerForeground}" />
                                                         </Button>
                                                     </StackPanel>
                                                 </Border>
@@ -388,14 +310,10 @@
 
                             <Border
                                 Grid.RowSpan="2"
-                                Background="#66FFFFFF"
-                                Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <ProgressRing
-                                    IsActive="True"
-                                    Width="36"
-                                    Height="36"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center" />
+                                Background="{StaticResource CardBackground}"
+                                Opacity="0.85"
+                                Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <ProgressRing IsActive="True" Width="36" Height="36" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
 
                             <Border
@@ -405,13 +323,12 @@
                                 <TextBlock
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
-                                    Foreground="{StaticResource TextSecondary}"
-                                    FontSize="14"
+                                    Style="{StaticResource EmptyStateTextStyle}"
                                     Text="No products found." />
                             </Border>
                         </Grid>
 
-                        <!-- ── Row 5: Footer ── -->
+                        <!-- Row 5: Footer -->
                         <components:PaginationFooter
                             Grid.Row="5"
                             ResultText="{x:Bind ViewModel.ResultText, Mode=OneWay}"
@@ -419,7 +336,6 @@
                             SelectedPageSize="{x:Bind ViewModel.SelectedPageSize, Mode=TwoWay}"
                             PageButtons="{x:Bind ViewModel.PageButtons, Mode=OneWay}"
                             PageButtonClickCommand="{x:Bind ViewModel.GoToPageCommand}" />
-
                     </Grid>
                 </Border>
             </Grid>

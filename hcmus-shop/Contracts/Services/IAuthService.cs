@@ -1,7 +1,7 @@
 using hcmus_shop.Models.DTOs;
 using System.Threading.Tasks;
 
-namespace hcmus_shop.Services.Auth
+namespace hcmus_shop.Contracts.Services
 {
     public interface IAuthService
     {

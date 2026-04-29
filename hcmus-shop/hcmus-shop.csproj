@@ -68,7 +68,7 @@
 
 	<!-- Resources -->
 	<ItemGroup>
-		<Page Include="Resources\Styles\ThemeResources.xaml" />
+		<Page Include="Resources\Styles\*.xaml" />
 		<Page Include="Resources\Auth\**\*.xaml" />
 	</ItemGroup>
 
@@ -115,7 +115,6 @@
 	<!-- Folders (kept for IDE visibility) -->
 	<ItemGroup>
 		<Folder Include="Resources\Auth\" />
-		<Folder Include="Resources\Styles\" />
 		<Folder Include="Views\Pages\Admin\" />
 		<Folder Include="Views\Pages\Sale\" />
 	</ItemGroup>
@@ -136,13 +135,19 @@
 		<PRIResource Remove="Components\**" />
 	</ItemGroup>
 
-	<ItemGroup>
+ <ItemGroup>
 		<Page Update="Views\Pages\Dashboard\Components\Tables\*.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</Page>
-		<None Update="Views\Pages\Products\AddProductPage.xaml">
+		<Page Update="Resources\Styles\ButtonStyles.xaml">
 		  <Generator>MSBuild:Compile</Generator>
-		</None>
+		</Page>
+		<Page Update="Resources\Styles\FormStyles.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="Resources\Styles\TextStyles.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
 		<Page Update="Views\Pages\Messages\MessagesPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>

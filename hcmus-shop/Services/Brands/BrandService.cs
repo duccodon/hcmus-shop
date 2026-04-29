@@ -1,3 +1,6 @@
+using hcmus_shop.Contracts.Services;
+using hcmus_shop.GraphQL.Operations;
+using hcmus_shop.Models.Common;
 using hcmus_shop.Models.DTOs;
 using hcmus_shop.Services.GraphQL;
 using System.Collections.Generic;
@@ -14,81 +17,86 @@ namespace hcmus_shop.Services.Brands
             _graphQL = graphQL;
         }
 
-        public async Task<List<BrandDto>> GetAllAsync()
+        public async Task<Result<List<BrandDto>>> GetAllAsync()
         {
-            var query = @"
-                query {
-                    brands {
-                        brandId
-                        name
-                        description
-                        productCount
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.QueryAsync<BrandsResponse>(
+                        BrandQueries.GetAll
+                    )
+                );
 
-            var result = await _graphQL.QueryAsync<BrandsResponse>(query);
-            return result.Brands;
+            if (!result.IsSuccess)
+                return Result<List<BrandDto>>.Failure(result.Error!);
+
+            return Result<List<BrandDto>>.Success(result.Value!.Brands);
         }
 
-        public async Task<BrandDto?> GetByIdAsync(int brandId)
+        public async Task<Result<BrandDto?>> GetByIdAsync(int brandId)
         {
-            var query = @"
-                query Brand($brandId: Int!) {
-                    brand(brandId: $brandId) {
-                        brandId
-                        name
-                        description
-                        series { seriesId name targetSegment }
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.QueryAsync<BrandResponse>(
+                        BrandQueries.GetById,
+                        new { brandId }
+                    )
+                );
 
-            var result = await _graphQL.QueryAsync<BrandResponse>(query, new { brandId });
-            return result.Brand;
+            if (!result.IsSuccess)
+                return Result<BrandDto?>.Failure(result.Error!);
+
+            return Result<BrandDto?>.Success(result.Value!.Brand);
         }
 
-        public async Task<BrandDto> CreateAsync(string name, string? description = null)
+        public async Task<Result<BrandDto>> CreateAsync(string name, string? description = null)
         {
-            var query = @"
-                mutation CreateBrand($name: String!, $description: String) {
-                    createBrand(name: $name, description: $description) {
-                        brandId
-                        name
-                        description
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.MutateAsync<CreateBrandResponse>(
+                        BrandQueries.Create,
+                        new { name, description }
+                    )
+                );
 
-            var result = await _graphQL.MutateAsync<CreateBrandResponse>(query, new { name, description });
-            return result.CreateBrand;
+            if (!result.IsSuccess)
+                return Result<BrandDto>.Failure(result.Error!);
+
+            return Result<BrandDto>.Success(result.Value!.CreateBrand);
         }
 
-        public async Task<BrandDto> UpdateAsync(int brandId, string? name = null, string? description = null)
+        public async Task<Result<BrandDto>> UpdateAsync(int brandId, string? name = null, string? description = null)
         {
-            var query = @"
-                mutation UpdateBrand($brandId: Int!, $name: String, $description: String) {
-                    updateBrand(brandId: $brandId, name: $name, description: $description) {
-                        brandId
-                        name
-                        description
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.MutateAsync<UpdateBrandResponse>(
+                        BrandQueries.Update,
+                        new { brandId, name, description }
+                    )
+                );
 
-            var result = await _graphQL.MutateAsync<UpdateBrandResponse>(query, new { brandId, name, description });
-            return result.UpdateBrand;
+            if (!result.IsSuccess)
+                return Result<BrandDto>.Failure(result.Error!);
+
+            return Result<BrandDto>.Success(result.Value!.UpdateBrand);
         }
 
-        public async Task<bool> DeleteAsync(int brandId)
+        public async Task<Result<bool>> DeleteAsync(int brandId)
         {
-            var query = @"
-                mutation DeleteBrand($brandId: Int!) {
-                    deleteBrand(brandId: $brandId) {
-                        brandId
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.MutateAsync<DeleteBrandResponse>(
+                        BrandQueries.Delete,
+                        new { brandId }
+                    )
+                );
 
-            await _graphQL.MutateAsync<DeleteBrandResponse>(query, new { brandId });
-            return true;
+            if (!result.IsSuccess)
+                return Result<bool>.Failure(result.Error!);
+
+            return Result<bool>.Success(true);
         }
 
+        // Private response wrappers
         private class BrandsResponse { public List<BrandDto> Brands { get; set; } = new(); }
         private class BrandResponse { public BrandDto? Brand { get; set; } }
         private class CreateBrandResponse { public BrandDto CreateBrand { get; set; } = new(); }

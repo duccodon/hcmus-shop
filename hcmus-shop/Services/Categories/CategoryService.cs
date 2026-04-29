@@ -1,3 +1,6 @@
+using hcmus_shop.Contracts.Services;
+using hcmus_shop.GraphQL.Operations;
+using hcmus_shop.Models.Common;
 using hcmus_shop.Models.DTOs;
 using hcmus_shop.Services.GraphQL;
 using System.Collections.Generic;
@@ -14,78 +17,83 @@ namespace hcmus_shop.Services.Categories
             _graphQL = graphQL;
         }
 
-        public async Task<List<CategoryDto>> GetAllAsync()
+        public async Task<Result<List<CategoryDto>>> GetAllAsync()
         {
-            var query = @"
-                query {
-                    categories {
-                        categoryId
-                        name
-                        description
-                        productCount
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.QueryAsync<CategoriesResponse>(
+                        CategoryQueries.GetAll
+                    )
+                );
 
-            var result = await _graphQL.QueryAsync<CategoriesResponse>(query);
-            return result.Categories;
+            if (!result.IsSuccess)
+                return Result<List<CategoryDto>>.Failure(result.Error!);
+
+            return Result<List<CategoryDto>>.Success(result.Value!.Categories);
         }
 
-        public async Task<CategoryDto?> GetByIdAsync(int categoryId)
+        public async Task<Result<CategoryDto?>> GetByIdAsync(int categoryId)
         {
-            var query = @"
-                query Category($categoryId: Int!) {
-                    category(categoryId: $categoryId) {
-                        categoryId
-                        name
-                        description
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.QueryAsync<CategoryResponse>(
+                        CategoryQueries.GetById,
+                        new { categoryId }
+                    )
+                );
 
-            var result = await _graphQL.QueryAsync<CategoryResponse>(query, new { categoryId });
-            return result.Category;
+            if (!result.IsSuccess)
+                return Result<CategoryDto?>.Failure(result.Error!);
+
+            return Result<CategoryDto?>.Success(result.Value!.Category);
         }
 
-        public async Task<CategoryDto> CreateAsync(string name, string? description = null)
+        public async Task<Result<CategoryDto>> CreateAsync(string name, string? description = null)
         {
-            var query = @"
-                mutation CreateCategory($name: String!, $description: String) {
-                    createCategory(name: $name, description: $description) {
-                        categoryId
-                        name
-                        description
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.MutateAsync<CreateCategoryResponse>(
+                        CategoryQueries.Create,
+                        new { name, description }
+                    )
+                );
 
-            var result = await _graphQL.MutateAsync<CreateCategoryResponse>(query, new { name, description });
-            return result.CreateCategory;
+            if (!result.IsSuccess)
+                return Result<CategoryDto>.Failure(result.Error!);
+
+            return Result<CategoryDto>.Success(result.Value!.CreateCategory);
         }
 
-        public async Task<CategoryDto> UpdateAsync(int categoryId, string? name = null, string? description = null)
+        public async Task<Result<CategoryDto>> UpdateAsync(int categoryId, string? name = null, string? description = null)
         {
-            var query = @"
-                mutation UpdateCategory($categoryId: Int!, $name: String, $description: String) {
-                    updateCategory(categoryId: $categoryId, name: $name, description: $description) {
-                        categoryId
-                        name
-                        description
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.MutateAsync<UpdateCategoryResponse>(
+                        CategoryQueries.Update,
+                        new { categoryId, name, description }
+                    )
+                );
 
-            var result = await _graphQL.MutateAsync<UpdateCategoryResponse>(query, new { categoryId, name, description });
-            return result.UpdateCategory;
+            if (!result.IsSuccess)
+                return Result<CategoryDto>.Failure(result.Error!);
+
+            return Result<CategoryDto>.Success(result.Value!.UpdateCategory);
         }
 
-        public async Task<bool> DeleteAsync(int categoryId)
+        public async Task<Result<bool>> DeleteAsync(int categoryId)
         {
-            var query = @"
-                mutation DeleteCategory($categoryId: Int!) {
-                    deleteCategory(categoryId: $categoryId) {
-                        categoryId
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.MutateAsync<DeleteCategoryResponse>(
+                        CategoryQueries.Delete,
+                        new { categoryId }
+                    )
+                );
 
-            await _graphQL.MutateAsync<DeleteCategoryResponse>(query, new { categoryId });
-            return true;
+            if (!result.IsSuccess)
+                return Result<bool>.Failure(result.Error!);
+
+            return Result<bool>.Success(true);
         }
 
         private class CategoriesResponse { public List<CategoryDto> Categories { get; set; } = new(); }

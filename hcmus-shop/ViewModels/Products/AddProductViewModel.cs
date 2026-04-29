@@ -1,10 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using hcmus_shop.Models.DTOs;
-using hcmus_shop.Services.Brands;
-using hcmus_shop.Services.Categories;
-using hcmus_shop.Services.Products;
-using hcmus_shop.Services.Series;
+using hcmus_shop.Contracts.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -12,18 +9,36 @@ using System.Threading.Tasks;
 
 namespace hcmus_shop.ViewModels.Products
 {
-    public class AddProductViewModel : ObservableObject
+    public partial class AddProductViewModel : ObservableObject
     {
         private readonly IProductService _productService;
         private readonly IBrandService _brandService;
         private readonly ICategoryService _categoryService;
         private readonly ISeriesService _seriesService;
-        private ImagePreview _mainPreview = new();
-        private int? _selectedBrandId;
+
+        [ObservableProperty]
+        public partial ImagePreview MainPreview { get; set; } = new();
+
+        [ObservableProperty]
+        public partial int? SelectedBrandId { get; set; }
+
+        [ObservableProperty]
         private int? _selectedSeriesId;
-        private bool _isSaving;
+
+        [ObservableProperty]
+        private bool _isBusy;
+
+        [ObservableProperty]
         private bool _isInitialized;
-        private string _saveErrorMessage = string.Empty;
+
+        [ObservableProperty]
+        private string? _errorMessage;
+        public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
+
+        partial void OnErrorMessageChanged(string? value)
+        {
+            OnPropertyChanged(nameof(HasError));
+        }
 
         public AddProductViewModel(
             IProductService productService,
@@ -35,11 +50,6 @@ namespace hcmus_shop.ViewModels.Products
             _brandService = brandService;
             _categoryService = categoryService;
             _seriesService = seriesService;
-
-            SelectPreviewCommand = new RelayCommand<ImagePreview?>(SelectPreview);
-            AddCategoryCommand = new RelayCommand(AddCategory);
-            SaveProductCommand = new AsyncRelayCommand(SaveProductAsync, () => !IsSaving);
-            InitializeCommand = new AsyncRelayCommand(InitializeAsync, () => !IsInitialized);
 
             DraftProduct = new CreateProductInput
             {
@@ -63,83 +73,7 @@ namespace hcmus_shop.ViewModels.Products
 
         public ObservableCollection<CategoryOptionViewModel> CategoryOptions { get; } = [];
 
-        public IRelayCommand<ImagePreview?> SelectPreviewCommand { get; }
-
-        public IRelayCommand AddCategoryCommand { get; }
-
-        public IAsyncRelayCommand SaveProductCommand { get; }
-
-        public IAsyncRelayCommand InitializeCommand { get; }
-
         public event EventHandler? ProductSaved;
-
-        public bool IsInitialized
-        {
-            get => _isInitialized;
-            private set
-            {
-                if (SetProperty(ref _isInitialized, value))
-                {
-                    InitializeCommand.NotifyCanExecuteChanged();
-                }
-            }
-        }
-
-        public bool IsSaving
-        {
-            get => _isSaving;
-            private set
-            {
-                if (SetProperty(ref _isSaving, value))
-                {
-                    SaveProductCommand.NotifyCanExecuteChanged();
-                }
-            }
-        }
-
-        public string SaveErrorMessage
-        {
-            get => _saveErrorMessage;
-            private set => SetProperty(ref _saveErrorMessage, value);
-        }
-
-        public int? SelectedBrandId
-        {
-            get => _selectedBrandId;
-            set
-            {
-                if (SetProperty(ref _selectedBrandId, value))
-                {
-                    DraftProduct.BrandId = value ?? 0;
-                    SelectedSeriesId = null;
-                    _ = LoadSeriesOptionsAsync();
-                }
-            }
-        }
-
-        public int? SelectedSeriesId
-        {
-            get => _selectedSeriesId;
-            set
-            {
-                if (SetProperty(ref _selectedSeriesId, value))
-                {
-                    DraftProduct.SeriesId = value;
-                }
-            }
-        }
-
-        public ImagePreview MainPreview
-        {
-            get => _mainPreview;
-            private set
-            {
-                if (SetProperty(ref _mainPreview, value))
-                {
-                    OnPropertyChanged(nameof(HasMainPreview));
-                }
-            }
-        }
 
         public bool HasMainPreview => MainPreview.Bitmap is not null;
 
@@ -184,6 +118,7 @@ namespace hcmus_shop.ViewModels.Products
             }
         }
 
+        [RelayCommand]
         private void SelectPreview(ImagePreview? preview)
         {
             if (preview is null)
@@ -194,68 +129,91 @@ namespace hcmus_shop.ViewModels.Products
             MainPreview = preview;
         }
 
+        [RelayCommand]
         private void AddCategory()
         {
         }
 
+        [RelayCommand(CanExecute = nameof(CanInitialize))]
         private async Task InitializeAsync()
         {
-            if (IsInitialized)
+            if (IsInitialized) return;
+
+            IsBusy = true;
+            ErrorMessage = null;
+
+            var brandsResult = await _brandService.GetAllAsync();
+            if (!brandsResult.IsSuccess)
             {
+                ErrorMessage = brandsResult.Error;
+                IsBusy = false;
                 return;
             }
 
-            var brands = await _brandService.GetAllAsync();
-            var categories = await _categoryService.GetAllAsync();
+            var categoriesResult = await _categoryService.GetAllAsync();
+            if (!categoriesResult.IsSuccess)
+            {
+                ErrorMessage = categoriesResult.Error;
+                IsBusy = false;
+                return;
+            }
 
             BrandOptions.Clear();
-            foreach (var brand in brands)
+            foreach (var brand in brandsResult.Value)
             {
                 BrandOptions.Add(new LookupOptionViewModel(brand.BrandId, brand.Name));
             }
 
             CategoryOptions.Clear();
-            foreach (var category in categories)
+            foreach (var category in categoriesResult.Value)
             {
                 CategoryOptions.Add(new CategoryOptionViewModel(category.CategoryId, category.Name));
             }
 
             SelectedBrandId = BrandOptions.FirstOrDefault()?.Id;
+
             IsInitialized = true;
+            IsBusy = false;
         }
 
         private async Task LoadSeriesOptionsAsync()
         {
             SeriesOptions.Clear();
-            if (!SelectedBrandId.HasValue)
+
+            if (!SelectedBrandId.HasValue) return;
+
+            var result = await _seriesService.GetByBrandAsync(SelectedBrandId.Value);
+
+            if (!result.IsSuccess)
             {
+                ErrorMessage = result.Error;
                 return;
             }
 
-            var seriesItems = await _seriesService.GetByBrandAsync(SelectedBrandId.Value);
-            foreach (var series in seriesItems)
+            foreach (var series in result.Value)
             {
                 SeriesOptions.Add(new LookupOptionViewModel(series.SeriesId, series.Name));
             }
         }
 
+        [RelayCommand(CanExecute = nameof(CanSaveProduct))]
         private async Task SaveProductAsync()
         {
-            if (IsSaving)
+            if (IsBusy)
             {
                 return;
             }
 
-            SaveErrorMessage = string.Empty;
+            ErrorMessage = null;
             if (string.IsNullOrWhiteSpace(DraftProduct.Sku) || string.IsNullOrWhiteSpace(DraftProduct.Name))
             {
-                SaveErrorMessage = "SKU and product name are required.";
+                ErrorMessage = "SKU and product name are required.";
                 return;
             }
 
             if (DraftProduct.BrandId <= 0)
             {
-                SaveErrorMessage = "Please select a brand.";
+                ErrorMessage = "Please select a brand.";
                 return;
             }
 
@@ -273,7 +231,11 @@ namespace hcmus_shop.ViewModels.Products
                     .Select(preview => preview.File!.Path)
             ];
 
-            IsSaving = true;
+            DraftProduct.Specifications = string.IsNullOrWhiteSpace(DraftProduct.Specifications)
+                ? null
+                : DraftProduct.Specifications;
+
+            IsBusy = true;
             try
             {
                 await _productService.CreateAsync(DraftProduct);
@@ -281,12 +243,44 @@ namespace hcmus_shop.ViewModels.Products
             }
             catch (Exception ex)
             {
-                SaveErrorMessage = ex.Message;
+                ErrorMessage = ex.Message;
             }
             finally
             {
-                IsSaving = false;
+                IsBusy = false;
             }
+        }
+
+        private bool CanSaveProduct() => !IsBusy;
+
+        private bool CanInitialize() => !IsBusy && !IsInitialized;
+
+        partial void OnMainPreviewChanged(ImagePreview value)
+        {
+            OnPropertyChanged(nameof(HasMainPreview));
+        }
+
+        partial void OnSelectedBrandIdChanged(int? value)
+        {
+            DraftProduct.BrandId = value ?? 0;
+            SelectedSeriesId = null;
+            _ = LoadSeriesOptionsAsync();
+        }
+
+        partial void OnSelectedSeriesIdChanged(int? value)
+        {
+            DraftProduct.SeriesId = value;
+        }
+
+        partial void OnIsBusyChanged(bool value)
+        {
+            SaveProductCommand.NotifyCanExecuteChanged();
+            InitializeCommand.NotifyCanExecuteChanged();
+        }
+
+        partial void OnIsInitializedChanged(bool value)
+        {
+            InitializeCommand.NotifyCanExecuteChanged();
         }
 
     }

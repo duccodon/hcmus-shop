@@ -8,7 +8,7 @@
         <TextBlock
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            FontSize="28"
+            Style="{StaticResource CardTitleStyle}"
             Text="StorePage" />
     </Grid>
 </Page>

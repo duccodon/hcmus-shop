@@ -23,7 +23,7 @@ namespace hcmus_shop.Views
             var config = Ioc.Default.GetRequiredService<IConfiguration>();
             VersionText = $"v{config["AppSettings:AppVersion"] ?? "1.0.0"}";
 
-            var graphQL = Ioc.Default.GetRequiredService<IGraphQLClientService>();
+            var graphQL = Ioc.Default.GetRequiredService<Contracts.Services.IGraphQLClientService>();
             ServerUrlText = $"Server: {graphQL.ServerUrl}";
         }
 
