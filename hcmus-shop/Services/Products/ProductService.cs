@@ -1,5 +1,9 @@
+using hcmus_shop.Contracts.Services;
+using hcmus_shop.GraphQL.Operations;
 using hcmus_shop.Models.DTOs;
+using hcmus_shop.Models.Common;
 using hcmus_shop.Services.GraphQL;
+using hcmus_shop.Services.Products.Dto;
 using System.Threading.Tasks;
 
 namespace hcmus_shop.Services.Products
@@ -13,141 +17,97 @@ namespace hcmus_shop.Services.Products
             _graphQL = graphQL;
         }
 
-        public async Task<ProductPageDto> GetAllAsync(ProductFilterDto filter)
+        public async Task<Result<ProductPageDto>> GetAllAsync(ProductFilterDto filter)
         {
-            var query = @"
-                query Products(
-                    $search: String
-                    $categoryId: Int
-                    $brandId: Int
-                    $minPrice: Float
-                    $maxPrice: Float
-                    $sortBy: String
-                    $sortOrder: String
-                    $page: Int
-                    $pageSize: Int
-                ) {
-                    products(
-                        search: $search
-                        categoryId: $categoryId
-                        brandId: $brandId
-                        minPrice: $minPrice
-                        maxPrice: $maxPrice
-                        sortBy: $sortBy
-                        sortOrder: $sortOrder
-                        page: $page
-                        pageSize: $pageSize
-                    ) {
-                        items {
-                            productId
-                            sku
-                            name
-                            sellingPrice
-                            importPrice
-                            stockQuantity
-                            isActive
-                            brand { brandId name }
-                            categories { categoryId name }
-                            images { imageId imageUrl displayOrder }
-                        }
-                        totalCount
-                        page
-                        pageSize
-                    }
-                }";
-
-            var result = await _graphQL.QueryAsync<ProductsResponse>(query, new
+            var request = new GetProductsRequest
             {
-                filter.Search,
-                filter.CategoryId,
-                filter.BrandId,
-                filter.MinPrice,
-                filter.MaxPrice,
-                filter.SortBy,
-                filter.SortOrder,
-                filter.Page,
-                filter.PageSize,
-            });
+                Search = filter.Search,
+                CategoryId = filter.CategoryId,
+                BrandId = filter.BrandId,
+                MinPrice = filter.MinPrice,
+                MaxPrice = filter.MaxPrice,
+                SortBy = filter.SortBy,
+                SortOrder = filter.SortOrder,
+                Page = filter.Page,
+                PageSize = filter.PageSize
+            };
 
-            return result.Products;
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.QueryAsync<ProductsResponse>(
+                        ProductQueries.GetProducts,
+                        request
+                    )
+                );
+
+            if (!result.IsSuccess)
+                return Result<ProductPageDto>.Failure(result.Error!);
+
+            return Result<ProductPageDto>.Success(result.Value!.Products);
         }
 
-        public async Task<ProductDto?> GetByIdAsync(int productId)
+        public async Task<Result<ProductDto?>> GetByIdAsync(int productId)
         {
-            var query = @"
-                query Product($productId: Int!) {
-                    product(productId: $productId) {
-                        productId
-                        sku
-                        name
-                        description
-                        importPrice
-                        sellingPrice
-                        stockQuantity
-                        warrantyMonths
-                        isActive
-                        brand { brandId name }
-                        series { seriesId name }
-                        categories { categoryId name }
-                        images { imageId imageUrl displayOrder }
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.QueryAsync<ProductResponse>(
+                        ProductQueries.GetById,
+                        new { productId }
+                    )
+                );
 
-            var result = await _graphQL.QueryAsync<ProductResponse>(query, new { productId });
-            return result.Product;
+            if (!result.IsSuccess)
+                return Result<ProductDto?>.Failure(result.Error!);
+
+            return Result<ProductDto?>.Success(result.Value!.Product);
         }
 
-        public async Task<ProductDto> CreateAsync(CreateProductInput input)
+        public async Task<Result<ProductDto>> CreateAsync(CreateProductInput input)
         {
-            var query = @"
-                mutation CreateProduct($input: CreateProductInput!) {
-                    createProduct(input: $input) {
-                        productId
-                        sku
-                        name
-                        sellingPrice
-                        stockQuantity
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.MutateAsync<CreateProductResponse>(
+                        ProductQueries.Create,
+                        new { input }
+                    )
+                );
 
-            var result = await _graphQL.MutateAsync<CreateProductResponse>(query, new { input });
-            return result.CreateProduct;
+            if (!result.IsSuccess)
+                return Result<ProductDto>.Failure(result.Error!);
+
+            return Result<ProductDto>.Success(result.Value!.CreateProduct);
         }
 
-        public async Task<ProductDto> UpdateAsync(int productId, UpdateProductInput input)
+        public async Task<Result<ProductDto>> UpdateAsync(int productId, UpdateProductInput input)
         {
-            var query = @"
-                mutation UpdateProduct($productId: Int!, $input: UpdateProductInput!) {
-                    updateProduct(productId: $productId, input: $input) {
-                        productId
-                        sku
-                        name
-                        sellingPrice
-                        stockQuantity
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.MutateAsync<UpdateProductResponse>(
+                        ProductQueries.Update,
+                        new { productId, input }
+                    )
+                );
 
-            var result = await _graphQL.MutateAsync<UpdateProductResponse>(query, new { productId, input });
-            return result.UpdateProduct;
+            if (!result.IsSuccess)
+                return Result<ProductDto>.Failure(result.Error!);
+
+            return Result<ProductDto>.Success(result.Value!.UpdateProduct);
         }
 
-        public async Task<bool> DeleteAsync(int productId)
+        public async Task<Result<bool>> DeleteAsync(int productId)
         {
-            var query = @"
-                mutation DeleteProduct($productId: Int!) {
-                    deleteProduct(productId: $productId) {
-                        productId
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.MutateAsync<DeleteProductResponse>(
+                        ProductQueries.Delete,
+                        new { productId }
+                    )
+                );
 
-            await _graphQL.MutateAsync<DeleteProductResponse>(query, new { productId });
-            return true;
+            if (!result.IsSuccess)
+                return Result<bool>.Failure(result.Error!);
+
+            return Result<bool>.Success(true);
         }
-
-        private class ProductsResponse { public ProductPageDto Products { get; set; } = new(); }
-        private class ProductResponse { public ProductDto? Product { get; set; } }
-        private class CreateProductResponse { public ProductDto CreateProduct { get; set; } = new(); }
-        private class UpdateProductResponse { public ProductDto UpdateProduct { get; set; } = new(); }
-        private class DeleteProductResponse { public ProductDto DeleteProduct { get; set; } = new(); }
     }
 }

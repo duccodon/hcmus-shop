@@ -28,6 +28,7 @@
 
                     <ComboBox
                         x:Name="SearchFieldCombo"
+                        Style="{StaticResource FormComboBoxStyle}"
                         Width="170"
                         SelectedIndex="0"
                         SelectionChanged="SearchFieldCombo_SelectionChanged">
@@ -39,6 +40,7 @@
 
                     <TextBox
                         x:Name="SearchTextBox"
+                        Style="{StaticResource FormTextBoxStyle}"
                         MinWidth="220"
                         PlaceholderText="Type to search"
                         TextChanged="SearchTextBox_TextChanged" />
@@ -72,57 +74,55 @@
                     <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Padding="10,8" BorderBrush="#26000000" BorderThickness="0,0,0,1">
-                    <Button Click="SortHeader_Click" Tag="No" HorizontalAlignment="Center" Padding="0" Background="Transparent" BorderThickness="0">
+                <Border Grid.Column="0" Padding="10,8" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="0,0,0,1">
+                    <Button Click="SortHeader_Click" Tag="No" HorizontalAlignment="Center" Style="{StaticResource GhostButtonStyle}" BorderThickness="0">
                         <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="No" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" />
+                            <TextBlock Text="No" Style="{StaticResource TableHeaderTextStyle}" />
                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind NoSortGlyph, Mode=OneWay}" Foreground="{StaticResource TextSecondary}" FontSize="14" />
                         </StackPanel>
                     </Button>
                 </Border>
 
-                <Border Grid.Column="1" Padding="10,8" BorderBrush="#26000000" BorderThickness="1,0,0,1">
-                    <Button Click="SortHeader_Click" Tag="Customer" HorizontalAlignment="Center" Padding="0" Background="Transparent" BorderThickness="0">
+                <Border Grid.Column="1" Padding="10,8" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
+                    <Button Click="SortHeader_Click" Tag="Customer" HorizontalAlignment="Center" Style="{StaticResource GhostButtonStyle}" BorderThickness="0">
                         <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="Customer" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" />
+                            <TextBlock Text="Customer" Style="{StaticResource TableHeaderTextStyle}" />
                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind CustomerSortGlyph, Mode=OneWay}" Foreground="{StaticResource TextSecondary}" FontSize="14" />
                         </StackPanel>
                     </Button>
                 </Border>
 
-                <Border Grid.Column="2" Padding="10,8" BorderBrush="#26000000" BorderThickness="1,0,0,1">
-                    <Button Click="SortHeader_Click" Tag="Product" HorizontalAlignment="Center" Padding="0" Background="Transparent" BorderThickness="0">
+                <Border Grid.Column="2" Padding="10,8" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
+                    <Button Click="SortHeader_Click" Tag="Product" HorizontalAlignment="Center" Style="{StaticResource GhostButtonStyle}" BorderThickness="0">
                         <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="Product" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" />
+                            <TextBlock Text="Product" Style="{StaticResource TableHeaderTextStyle}" />
                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind ProductSortGlyph, Mode=OneWay}" Foreground="{StaticResource TextSecondary}" FontSize="14" />
                         </StackPanel>
                     </Button>
                 </Border>
 
-                <Border Grid.Column="3" Padding="10,8" BorderBrush="#26000000" BorderThickness="1,0,0,1">
-                    <Button Click="SortHeader_Click" Tag="Date" HorizontalAlignment="Center" Padding="0" Background="Transparent" BorderThickness="0">
+                <Border Grid.Column="3" Padding="10,8" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
+                    <Button Click="SortHeader_Click" Tag="Date" HorizontalAlignment="Center" Style="{StaticResource GhostButtonStyle}" BorderThickness="0">
                         <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="Date" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" />
+                            <TextBlock Text="Date" Style="{StaticResource TableHeaderTextStyle}" />
                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind DateSortGlyph, Mode=OneWay}" Foreground="{StaticResource TextSecondary}" FontSize="14" />
                         </StackPanel>
                     </Button>
                 </Border>
 
                 <!-- Status header with filter dropdown -->
-                <Border Grid.Column="4" Padding="6,4" BorderBrush="#26000000" BorderThickness="1,0,0,1">
+                <Border Grid.Column="4" Padding="6,4" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
                     <Button
                         x:Name="StatusHeaderButton"
                         Click="StatusHeader_Click"
                         HorizontalAlignment="Center"
-                        Padding="6,4"
-                        Background="Transparent"
+                        Style="{StaticResource GhostButtonStyle}"
                         BorderThickness="0">    
                         <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
                             <TextBlock
                                 x:Name="StatusHeaderLabel"
                                 Text="Status: All"
-                                FontWeight="SemiBold"
-                                Foreground="{StaticResource TextSecondary}" />
+                                Style="{StaticResource TableHeaderTextStyle}" />
                                         <FontIcon
                                 FontFamily="Segoe Fluent Icons"
                                 Glyph="&#xE70D;"
@@ -140,10 +140,10 @@
                     </Button>
                 </Border>
 
-                <Border Grid.Column="5" Padding="10,8" BorderBrush="#26000000" BorderThickness="1,0,0,1">
-                    <Button Click="SortHeader_Click" Tag="Price" HorizontalAlignment="Center" Padding="0" Background="Transparent" BorderThickness="0">
+                <Border Grid.Column="5" Padding="10,8" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
+                    <Button Click="SortHeader_Click" Tag="Price" HorizontalAlignment="Center" Style="{StaticResource GhostButtonStyle}" BorderThickness="0">
                         <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="Price" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" />
+                            <TextBlock Text="Price" Style="{StaticResource TableHeaderTextStyle}" />
                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind PriceSortGlyph, Mode=OneWay}" Foreground="{StaticResource TextSecondary}" FontSize="14" />
                         </StackPanel>
                     </Button>
@@ -168,63 +168,62 @@
                                     <ColumnDefinition Width="1*" />
                                 </Grid.ColumnDefinitions>
 
-                                <Border Grid.Column="0" Padding="10,10" BorderBrush="#22000000" BorderThickness="0,0,0,1">
+                                <Border Grid.Column="0" Padding="10,10" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="0,0,0,1">
                                     <TextBlock
                                         Text="{Binding No}"
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
-                                        Foreground="{StaticResource TextPrimary}" />
+                                        Style="{StaticResource BodyTextStyle}" />
                                 </Border>
 
-                                <Border Grid.Column="1" Padding="10,10" BorderBrush="#22000000" BorderThickness="1,0,0,1">
+                                <Border Grid.Column="1" Padding="10,10" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
                                     <TextBlock
                                         Text="{Binding Customer}"
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
-                                        Foreground="{StaticResource TextPrimary}" />
+                                        Style="{StaticResource BodyTextStyle}" />
                                 </Border>
 
-                                <Border Grid.Column="2" Padding="10,10" BorderBrush="#22000000" BorderThickness="1,0,0,1">
+                                <Border Grid.Column="2" Padding="10,10" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
                                     <TextBlock
                                         Text="{Binding Product}"
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
-                                        Foreground="{StaticResource TextPrimary}" />
+                                        Style="{StaticResource BodyTextStyle}" />
                                 </Border>
 
-                                <Border Grid.Column="3" Padding="10,10" BorderBrush="#22000000" BorderThickness="1,0,0,1">
+                                <Border Grid.Column="3" Padding="10,10" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
                                     <TextBlock
                                         Text="{Binding Date}"
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
-                                        Foreground="{StaticResource TextPrimary}" />
+                                        Style="{StaticResource BodyTextStyle}" />
                                 </Border>
 
                                 <!-- Status Badge -->
-                                <Border Grid.Column="4" Padding="10,6" BorderBrush="#22000000" BorderThickness="1,0,0,1">
+                                <Border Grid.Column="4" Padding="10,6" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
                                     <Border
-                                        Background="{Binding StatusBackground}"
+                                        Background="{Binding Status, Converter={StaticResource InvoiceStatusBackgroundConverter}}"
                                         CornerRadius="12"
                                         Padding="10,4"
                                         HorizontalAlignment="Center">
                                         <TextBlock
                                             Text="{Binding Status}"
-                                            Foreground="{Binding StatusForeground}"
-                                            FontWeight="SemiBold"
-                                            FontSize="12"
+                                            Foreground="{Binding Status, Converter={StaticResource InvoiceStatusForegroundConverter}}"
+                                            Style="{StaticResource StatusBadgeTextStyle}"
                                             VerticalAlignment="Center"
                                             HorizontalAlignment="Center" />
                                     </Border>
                                 </Border>
 
                                 <!-- Price with accent styling -->
-                                <Border Grid.Column="5" Padding="10,10" BorderBrush="#22000000" BorderThickness="1,0,0,1">
+                                <Border Grid.Column="5" Padding="10,10" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
                                     <TextBlock
                                         Text="{Binding Price}"
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
-                                        FontWeight="SemiBold"
-                                        Foreground="{StaticResource SystemAccentColor}" />
+                                        Style="{StaticResource FieldLabelStyle}"
+                                        Foreground="{StaticResource AccentPurple}" />
                                 </Border>
                             </Grid>
                         </DataTemplate>

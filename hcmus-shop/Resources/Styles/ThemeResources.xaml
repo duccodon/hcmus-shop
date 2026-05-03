@@ -30,4 +30,11 @@
     <SolidColorBrush x:Key="LoginOutlineBrush" Color="#6F7EFF" />
     <SolidColorBrush x:Key="LoginInputBorderBrush" Color="#D1C9C2" />
     <SolidColorBrush x:Key="LoginErrorBrush" Color="#B42318" />
+
+    <SolidColorBrush x:Key="ImageUploadPanelBackground" Color="#FFEAF4E8" />
+    <SolidColorBrush x:Key="ImageUploadPlaceholderBackground" Color="#FFDCF0D9" />
+    <SolidColorBrush x:Key="ImageUploadButtonBackground" Color="#FFE7F6E4" />
+    <SolidColorBrush x:Key="ImageUploadPreviewBackground" Color="#FFF1F5F0" />
+    <SolidColorBrush x:Key="KpiIconBackground" Color="#1E3A50" />
+    <SolidColorBrush x:Key="DashboardDividerBrush" Color="#32000000" />
 </ResourceDictionary>

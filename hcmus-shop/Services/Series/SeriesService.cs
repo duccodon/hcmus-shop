@@ -1,3 +1,6 @@
+using hcmus_shop.Contracts.Services;
+using hcmus_shop.GraphQL.Operations;
+using hcmus_shop.Models.Common;
 using hcmus_shop.Models.DTOs;
 using hcmus_shop.Services.GraphQL;
 using System.Collections.Generic;
@@ -14,64 +17,68 @@ namespace hcmus_shop.Services.Series
             _graphQL = graphQL;
         }
 
-        public async Task<List<SeriesDto>> GetByBrandAsync(int brandId)
+        public async Task<Result<List<SeriesDto>>> GetByBrandAsync(int brandId)
         {
-            var query = @"
-                query SeriesByBrand($brandId: Int!) {
-                    seriesByBrand(brandId: $brandId) {
-                        seriesId
-                        name
-                        description
-                        targetSegment
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.QueryAsync<SeriesByBrandResponse>(
+                        SeriesQueries.GetByBrand,
+                        new { brandId }
+                    )
+                );
 
-            var result = await _graphQL.QueryAsync<SeriesByBrandResponse>(query, new { brandId });
-            return result.SeriesByBrand;
+            if (!result.IsSuccess)
+                return Result<List<SeriesDto>>.Failure(result.Error!);
+
+            return Result<List<SeriesDto>>.Success(result.Value!.SeriesByBrand);
         }
 
-        public async Task<SeriesDto?> GetByIdAsync(int seriesId)
+        public async Task<Result<SeriesDto?>> GetByIdAsync(int seriesId)
         {
-            var query = @"
-                query Series($seriesId: Int!) {
-                    series(seriesId: $seriesId) {
-                        seriesId
-                        brandId
-                        name
-                        description
-                        targetSegment
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.QueryAsync<SeriesResponse>(
+                        SeriesQueries.GetById,
+                        new { seriesId }
+                    )
+                );
 
-            var result = await _graphQL.QueryAsync<SeriesResponse>(query, new { seriesId });
-            return result.Series;
+            if (!result.IsSuccess)
+                return Result<SeriesDto?>.Failure(result.Error!);
+
+            return Result<SeriesDto?>.Success(result.Value!.Series);
         }
 
-        public async Task<SeriesDto> CreateAsync(int brandId, string name, string? description = null, string? targetSegment = null)
+        public async Task<Result<SeriesDto>> CreateAsync(int brandId, string name, string? description = null, string? targetSegment = null)
         {
-            var query = @"
-                mutation CreateSeries($brandId: Int!, $name: String!, $description: String, $targetSegment: String) {
-                    createSeries(brandId: $brandId, name: $name, description: $description, targetSegment: $targetSegment) {
-                        seriesId
-                        name
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.MutateAsync<CreateSeriesResponse>(
+                        SeriesQueries.Create,
+                        new { brandId, name, description, targetSegment }
+                    )
+                );
 
-            var result = await _graphQL.MutateAsync<CreateSeriesResponse>(query, new { brandId, name, description, targetSegment });
-            return result.CreateSeries;
+            if (!result.IsSuccess)
+                return Result<SeriesDto>.Failure(result.Error!);
+
+            return Result<SeriesDto>.Success(result.Value!.CreateSeries);
         }
 
-        public async Task<bool> DeleteAsync(int seriesId)
+        public async Task<Result<bool>> DeleteAsync(int seriesId)
         {
-            var query = @"
-                mutation DeleteSeries($seriesId: Int!) {
-                    deleteSeries(seriesId: $seriesId) {
-                        seriesId
-                    }
-                }";
+            var result = await (_graphQL as GraphQLClientService)!
+                .SafeExecuteAsync(() =>
+                    _graphQL.MutateAsync<DeleteSeriesResponse>(
+                        SeriesQueries.Delete,
+                        new { seriesId }
+                    )
+                );
 
-            await _graphQL.MutateAsync<DeleteSeriesResponse>(query, new { seriesId });
-            return true;
+            if (!result.IsSuccess)
+                return Result<bool>.Failure(result.Error!);
+
+            return Result<bool>.Success(true);
         }
 
         private class SeriesByBrandResponse { public List<SeriesDto> SeriesByBrand { get; set; } = new(); }

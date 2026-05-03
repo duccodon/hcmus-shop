@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace hcmus_shop.Services.GraphQL
+namespace hcmus_shop.Contracts.Services
 {
     public interface IGraphQLClientService
     {

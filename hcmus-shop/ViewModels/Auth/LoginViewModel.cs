@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using hcmus_shop.Services.Auth;
+using hcmus_shop.Contracts.Services;
 using System;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -30,19 +30,27 @@ namespace hcmus_shop.ViewModels
         private bool rememberMe;
 
         [ObservableProperty]
-        private string errorMessage = string.Empty;
+        private bool isBusy;
+
+        [ObservableProperty]
+        private string? errorMessage;
 
         public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
 
-        partial void OnErrorMessageChanged(string value)
+        partial void OnErrorMessageChanged(string? value)
         {
             OnPropertyChanged(nameof(HasError));
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanLogin))]
         private async Task LoginAsync()
         {
-            ErrorMessage = string.Empty;
+            if (IsBusy)
+            {
+                return;
+            }
+
+            ErrorMessage = null;
 
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
             {
@@ -50,15 +58,27 @@ namespace hcmus_shop.ViewModels
                 return;
             }
 
-            var isLoggedIn = await _authService.LoginAsync(Username.Trim(), Password);
-            if (!isLoggedIn)
+            IsBusy = true;
+            try
             {
-                ErrorMessage = "Invalid username or password.";
-                return;
-            }
+                var isLoggedIn = await _authService.LoginAsync(Username.Trim(), Password);
+                if (!isLoggedIn)
+                {
+                    ErrorMessage = "Invalid username or password.";
+                    return;
+                }
 
-            SaveRememberedUsername();
-            LoginSucceeded?.Invoke(this, EventArgs.Empty);
+                SaveRememberedUsername();
+                LoginSucceeded?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = ex.Message;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         [RelayCommand]
@@ -71,6 +91,13 @@ namespace hcmus_shop.ViewModels
         private void OpenConfig()
         {
             ErrorMessage = "Config screen is not implemented yet.";
+        }
+
+        private bool CanLogin() => !IsBusy;
+
+        partial void OnIsBusyChanged(bool value)
+        {
+            LoginCommand.NotifyCanExecuteChanged();
         }
 
         private void LoadRememberedUsername()

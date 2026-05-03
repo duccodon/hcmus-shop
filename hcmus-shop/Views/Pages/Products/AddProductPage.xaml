@@ -5,7 +5,6 @@
     xmlns:vm="using:hcmus_shop.ViewModels"
     xmlns:productVm="using:hcmus_shop.ViewModels.Products"
     x:Name="Root">
-
     <Grid Background="{StaticResource DashboardBackground}">
         <ScrollViewer>
             <Grid Margin="24" RowSpacing="16">
@@ -13,24 +12,20 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-
                     <Button
-                        Padding="12,8"
-                        CornerRadius="8"
+                        Style="{StaticResource GhostButtonStyle}"
                         Click="BackButton_Click">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE72B;" />
                             <TextBlock Text="Return" />
                         </StackPanel>
                     </Button>
-
                     <StackPanel
                         Grid.Column="1"
                         Orientation="Horizontal"
@@ -40,53 +35,47 @@
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEC8A;" FontSize="18" Foreground="{StaticResource TextPrimary}" />
                         <TextBlock
                             Text="Add New Product"
-                            FontSize="28"
-                            FontWeight="SemiBold"
-                            Foreground="{StaticResource TextPrimary}" />
+                            Style="{StaticResource CardTitleStyle}" />
                     </StackPanel>
-
                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
-                        <Button Padding="18,8" CornerRadius="999">
+                        <Button Style="{StaticResource PillButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE70B;" />
-                                <TextBlock Text="Save Draft" FontWeight="SemiBold" />
+                                <TextBlock Text="Save Draft" Style="{StaticResource FieldLabelStyle}" />
                             </StackPanel>
                         </Button>
-
                         <Button
-                            Padding="18,8"
-                            CornerRadius="999"
+                            Style="{StaticResource PrimaryPillButtonStyle}"
                             Command="{x:Bind ViewModel.SaveProductCommand}"
+                            IsEnabled="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource InverseBooleanConverter}}"
                             Background="{StaticResource LoginPrimaryBrush}"
                             Foreground="White">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE73E;" />
-                                <TextBlock Text="Add Product" FontWeight="SemiBold" />
+                                <TextBlock Text="Add Product" Style="{StaticResource FieldLabelStyle}" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
                 </Grid>
-
                 <Grid Grid.Row="1" ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1.65*" />
                         <ColumnDefinition Width="1*" />
                     </Grid.ColumnDefinitions>
-
-                    <TextBlock
+                    <InfoBar
                         Grid.Column="0"
                         Grid.ColumnSpan="2"
                         Margin="0,0,0,10"
-                        Text="{x:Bind ViewModel.SaveErrorMessage, Mode=OneWay}"
-                        Foreground="{StaticResource DangerForeground}" />
-
+                        IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
+                        IsClosable="False"
+                        Severity="Error"
+                        Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
                     <Grid RowSpacing="16">
                         <Grid.Margin>0,26,0,0</Grid.Margin>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-
                         <Border
                             Background="{StaticResource CardBackground}"
                             CornerRadius="16"
@@ -100,78 +89,73 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
-
-                                <TextBlock Text="General Information" FontSize="26" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
-
+                                <TextBlock Text="General Information" Style="{StaticResource CardTitleStyle}" />
                                 <Grid Grid.Row="1" RowSpacing="6">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-                                    <TextBlock Text="SKU" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
-                                    <TextBox Grid.Row="1" Text="{x:Bind ViewModel.DraftProduct.Sku, Mode=TwoWay}" PlaceholderText="SKU" />
+                                    <TextBlock Text="SKU" Style="{StaticResource FieldLabelStyle}" />
+                                    <TextBox Grid.Row="1" Style="{StaticResource FormTextBoxStyle}" Text="{x:Bind ViewModel.DraftProduct.Sku, Mode=TwoWay}" PlaceholderText="SKU" />
                                 </Grid>
-
                                 <Grid Grid.Row="2" RowSpacing="6">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-                                    <TextBlock Text="Name Product" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
-                                    <TextBox Grid.Row="1" Text="{x:Bind ViewModel.DraftProduct.Name, Mode=TwoWay}" />
+                                    <TextBlock Text="Name Product" Style="{StaticResource FieldLabelStyle}" />
+                                    <TextBox Grid.Row="1" Style="{StaticResource FormTextBoxStyle}" Text="{x:Bind ViewModel.DraftProduct.Name, Mode=TwoWay}" />
                                 </Grid>
-
                                 <Grid Grid.Row="3" RowSpacing="6">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-                                    <TextBlock Text="Description Product" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
+                                    <TextBlock Text="Description Product" Style="{StaticResource FieldLabelStyle}" />
                                     <TextBox
                                         Grid.Row="1"
+                                        Style="{StaticResource FormTextBoxStyle}"
                                         Text="{x:Bind ViewModel.DraftProduct.Description, Mode=TwoWay}"
                                         TextWrapping="Wrap"
                                         AcceptsReturn="True"
                                         MinHeight="110" />
                                 </Grid>
-
                                 <Grid Grid.Row="4" ColumnSpacing="12">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-
                                     <Grid RowSpacing="6">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto" />
                                             <RowDefinition Height="Auto" />
                                         </Grid.RowDefinitions>
-                                        <TextBlock Text="Brand" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
+                                        <TextBlock Text="Brand" Style="{StaticResource FieldLabelStyle}" />
                                         <ComboBox
                                             Grid.Row="1"
                                             PlaceholderText="Select brand"
+                                            Style="{StaticResource FormComboBoxStyle}"
                                             ItemsSource="{x:Bind ViewModel.BrandOptions, Mode=OneWay}"
                                             DisplayMemberPath="Name"
                                             SelectedValuePath="Id"
                                             SelectedValue="{x:Bind ViewModel.SelectedBrandId, Mode=TwoWay}" />
                                     </Grid>
-
                                     <Grid Grid.Column="1" RowSpacing="6">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto" />
                                             <RowDefinition Height="Auto" />
                                         </Grid.RowDefinitions>
-                                        <TextBlock Text="Series (Optional)" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
+                                        <TextBlock Text="Series (Optional)" Style="{StaticResource FieldLabelStyle}" />
                                         <ComboBox
                                             Grid.Row="1"
                                             PlaceholderText="Select series"
+                                            Style="{StaticResource FormComboBoxStyle}"
                                             ItemsSource="{x:Bind ViewModel.SeriesOptions, Mode=OneWay}"
                                             DisplayMemberPath="Name"
                                             SelectedValuePath="Id"
                                             SelectedValue="{x:Bind ViewModel.SelectedSeriesId, Mode=TwoWay}" />
                                     </Grid>
                                 </Grid>
-
                                 <Grid Grid.Row="5" RowSpacing="10">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
@@ -179,26 +163,25 @@
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-
-                                    <TextBlock Text="Specifications (JSONB)" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
+                                    <TextBlock Text="Specifications (JSONB)" Style="{StaticResource FieldLabelStyle}" />
                                     <TextBox
                                         Grid.Row="1"
+                                        Style="{StaticResource FormTextBoxStyle}"
                                         Text="{x:Bind ViewModel.DraftProduct.Specifications, Mode=TwoWay}"
                                         TextWrapping="Wrap"
                                         AcceptsReturn="True"
                                         MinHeight="120"
                                         PlaceholderText="Enter JSON specifications" />
-
-                                    <TextBlock Grid.Row="2" Text="Warranty Months" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
+                                    <TextBlock Grid.Row="2" Text="Warranty Months" Style="{StaticResource FieldLabelStyle}" />
                                     <NumberBox
                                         Grid.Row="3"
+                                        Style="{StaticResource FormNumberBoxStyle}"
                                         Value="{x:Bind ViewModel.WarrantyMonthsValue, Mode=TwoWay}"
                                         SpinButtonPlacementMode="Inline"
                                         Minimum="0" />
                                 </Grid>
                             </Grid>
                         </Border>
-
                         <Border
                             Grid.Row="1"
                             Background="{StaticResource CardBackground}"
@@ -209,9 +192,7 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
-
-                                <TextBlock Text="Pricing And Stock" FontSize="26" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
-
+                                <TextBlock Text="Pricing And Stock" Style="{StaticResource CardTitleStyle}" />
                                 <Grid Grid.Row="1" ColumnSpacing="12" RowSpacing="10">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
@@ -221,19 +202,18 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-
-                                    <TextBlock Text="Import Price" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
-                                    <TextBlock Grid.Column="1" Text="Selling Price" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
-
+                                    <TextBlock Text="Import Price" Style="{StaticResource FieldLabelStyle}" />
+                                    <TextBlock Grid.Column="1" Text="Selling Price" Style="{StaticResource FieldLabelStyle}" />
                                     <NumberBox
                                         Grid.Row="1"
+                                        Style="{StaticResource FormNumberBoxStyle}"
                                         Value="{x:Bind ViewModel.ImportPriceValue, Mode=TwoWay}"
                                         SpinButtonPlacementMode="Inline"
                                         Minimum="0" />
-
                                     <NumberBox
                                         Grid.Row="1"
                                         Grid.Column="1"
+                                        Style="{StaticResource FormNumberBoxStyle}"
                                         Value="{x:Bind ViewModel.SellingPriceValue, Mode=TwoWay}"
                                         SpinButtonPlacementMode="Inline"
                                         Minimum="0" />
@@ -241,13 +221,11 @@
                             </Grid>
                         </Border>
                     </Grid>
-
                     <Grid Grid.Column="1" RowSpacing="16">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-
                         <Border
                             Background="{StaticResource CardBackground}"
                             CornerRadius="16"
@@ -258,9 +236,7 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
-
-                                <TextBlock Text="Upload Img" FontSize="26" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
-
+                                <TextBlock Text="Upload Img" Style="{StaticResource CardTitleStyle}" />
                                 <Border
                                     Grid.Row="1"
                                     CornerRadius="12"
@@ -274,7 +250,6 @@
                                             Source="{x:Bind ViewModel.MainPreview.Bitmap, Mode=OneWay}"
                                             Stretch="UniformToFill"
                                             Visibility="{x:Bind ViewModel.HasMainPreview, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-
                                         <StackPanel
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
@@ -284,7 +259,7 @@
                                                 Width="110"
                                                 Height="110"
                                                 CornerRadius="55"
-                                                Background="#FFDCF0D9">
+                                                Background="{StaticResource ImageUploadPlaceholderBackground}">
                                                 <FontIcon
                                                     FontFamily="Segoe Fluent Icons"
                                                     Glyph="&#xEC8A;"
@@ -297,23 +272,20 @@
                                         </StackPanel>
                                     </Grid>
                                 </Border>
-
                                 <Grid Grid.Row="2" ColumnSpacing="8">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-
                                     <Button
                                         Width="72"
                                         Height="72"
-                                        CornerRadius="8"
+                                        Style="{StaticResource GhostButtonStyle}"
                                         Click="AddImageButton_Click"
-                                        Background="#FFE7F6E4"
+                                        Background="{StaticResource ImageUploadButtonBackground}"
                                         Foreground="{StaticResource LoginPrimaryBrush}">
                                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE710;" FontSize="18" />
                                     </Button>
-
                                     <ScrollViewer
                                         Grid.Column="1"
                                         HorizontalScrollBarVisibility="Auto"
@@ -333,8 +305,8 @@
                                                         Width="72"
                                                         Height="72"
                                                         Padding="0"
-                                                        Background="#FFF1F5F0"
-                                                        BorderBrush="#22000000"
+                                                        Background="{StaticResource ImageUploadPreviewBackground}"
+                                                        BorderBrush="{StaticResource TableRowBorder}"
                                                         BorderThickness="1"
                                                         CornerRadius="8"
                                                         Command="{Binding DataContext.SelectPreviewCommand, ElementName=Root}"
@@ -348,7 +320,6 @@
                                 </Grid>
                             </Grid>
                         </Border>
-
                         <Border
                             Grid.Row="1"
                             Background="{StaticResource CardBackground}"
@@ -361,11 +332,8 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
-
-                                <TextBlock Text="Category" FontSize="26" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
-
-                                <TextBlock Grid.Row="1" Text="Product Category (Multiple)" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
-
+                                <TextBlock Text="Category" Style="{StaticResource CardTitleStyle}" />
+                                <TextBlock Grid.Row="1" Text="Product Category (Multiple)" Style="{StaticResource FieldLabelStyle}" />
                                 <ItemsControl Grid.Row="2" ItemsSource="{x:Bind ViewModel.CategoryOptions, Mode=OneWay}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="productVm:CategoryOptionViewModel">
@@ -376,13 +344,11 @@
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-
                                 <Button
                                     Grid.Row="3"
                                     Margin="0,6,0,0"
                                     Content="Add Category"
-                                    Padding="16,8"
-                                    CornerRadius="999"
+                                    Style="{StaticResource PrimaryPillButtonStyle}"
                                     HorizontalAlignment="Left"
                                     Command="{x:Bind ViewModel.AddCategoryCommand}"
                                     Background="{StaticResource LoginPrimaryBrush}"

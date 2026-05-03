@@ -23,18 +23,17 @@
                     HorizontalAlignment="Center"
                     FontFamily="{StaticResource SymbolThemeFontFamily}"
                     FontSize="64"
-                    Foreground="White"
+                    Foreground="{StaticResource LoginCardBackgroundBrush}"
                     Glyph="&#xE719;" />
                 <TextBlock
                     HorizontalAlignment="Center"
-                    FontSize="48"
-                    FontWeight="Bold"
-                    Foreground="White"
+                    Style="{StaticResource CardTitleStyle}"
+                    Foreground="{StaticResource LoginCardBackgroundBrush}"
                     Text="MyShop" />
                 <TextBlock
                     HorizontalAlignment="Center"
-                    FontSize="15"
-                    Foreground="#BBFFFFFF"
+                    Style="{StaticResource BodySecondaryTextStyle}"
+                    Foreground="{StaticResource LoginCardBackgroundBrush}"
                     Text="Laptop Store Management System" />
             </StackPanel>
 
@@ -43,8 +42,8 @@
                 Margin="20,0,0,16"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
-                FontSize="12"
-                Foreground="#88FFFFFF"
+                Style="{StaticResource BodySecondaryTextStyle}"
+                Foreground="{StaticResource LoginCardBackgroundBrush}"
                 Text="{x:Bind VersionText}" />
         </Grid>
 
@@ -54,11 +53,9 @@
             <!-- Config button top-right -->
             <Button
                 Margin="0,16,16,0"
-                Padding="10,6"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
-                Background="Transparent"
-                BorderThickness="0"
+                Style="{StaticResource GhostButtonStyle}"
                 Command="{Binding OpenConfigCommand}"
                 ToolTipService.ToolTip="Server Configuration">
                 <StackPanel Orientation="Horizontal" Spacing="6">
@@ -68,8 +65,7 @@
                         Foreground="{StaticResource TextSecondary}"
                         Glyph="&#xE713;" />
                     <TextBlock
-                        FontSize="13"
-                        Foreground="{StaticResource TextSecondary}"
+                        Style="{StaticResource BodySecondaryTextStyle}"
                         Text="Config" />
                 </StackPanel>
             </Button>
@@ -84,22 +80,17 @@
 
                     <!-- Header -->
                     <TextBlock
-                        FontSize="26"
-                        FontWeight="SemiBold"
-                        Foreground="{StaticResource TextPrimary}"
+                        Style="{StaticResource CardTitleStyle}"
                         Text="Welcome back" />
                     <TextBlock
                         Margin="0,2,0,20"
-                        FontSize="13"
-                        Foreground="{StaticResource TextSecondary}"
+                        Style="{StaticResource BodySecondaryTextStyle}"
                         Text="Sign in to continue to your dashboard" />
 
                     <!-- Username -->
                     <TextBlock
                         Margin="0,0,0,4"
-                        FontSize="13"
-                        FontWeight="Medium"
-                        Foreground="{StaticResource TextPrimary}"
+                        Style="{StaticResource FieldLabelStyle}"
                         Text="Username" />
                     <TextBox
                         PlaceholderText="Enter your username"
@@ -109,9 +100,7 @@
                     <!-- Password -->
                     <TextBlock
                         Margin="0,14,0,4"
-                        FontSize="13"
-                        FontWeight="Medium"
-                        Foreground="{StaticResource TextPrimary}"
+                        Style="{StaticResource FieldLabelStyle}"
                         Text="Password" />
                     <PasswordBox
                         x:Name="PasswordInput"
@@ -141,15 +130,13 @@
                         HorizontalContentAlignment="Center"
                         Command="{Binding LoginCommand}"
                         Content="Sign In"
-                        FontWeight="SemiBold"
                         Style="{StaticResource AccentButtonStyle}" />
 
                     <!-- Server status -->
                     <TextBlock
                         Margin="0,16,0,0"
                         HorizontalAlignment="Center"
-                        FontSize="11"
-                        Foreground="{StaticResource TextSecondary}"
+                        Style="{StaticResource CaptionSecondaryTextStyle}"
                         Text="{x:Bind ServerUrlText}" />
 
                 </StackPanel>

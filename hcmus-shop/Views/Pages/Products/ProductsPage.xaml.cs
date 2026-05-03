@@ -15,7 +15,25 @@ namespace hcmus_shop.Views
             InitializeComponent();
             ViewModel = Ioc.Default.GetRequiredService<ProductsViewModel>();
             DataContext = ViewModel;
+
             ViewModel.NavigateToAddProductRequested += ViewModel_NavigateToAddProductRequested;
+            Loaded += ProductsPage_Loaded;
+            Unloaded += ProductsPage_Unloaded;
+        }
+
+        private async void ProductsPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!ViewModel.IsInitialized)
+            {
+                await ViewModel.InitializeCommand.ExecuteAsync(null);
+            }
+        }
+
+        private void ProductsPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            Loaded -= ProductsPage_Loaded;
+            Unloaded -= ProductsPage_Unloaded;
+            ViewModel.NavigateToAddProductRequested -= ViewModel_NavigateToAddProductRequested;
         }
 
         private void ViewModel_NavigateToAddProductRequested(object? sender, EventArgs e)
@@ -37,13 +55,11 @@ namespace hcmus_shop.Views
         {
             var from = DateFromPicker.Date?.Date;
             var to = DateToPicker.Date?.Date;
-
             if (from is null && to is null)
             {
                 DateRangeLabel.Text = "Date Range";
                 return;
             }
-
             var fromText = from?.ToString("dd MMM") ?? "...";
             var toText = to?.ToString("dd MMM yyyy") ?? "...";
             DateRangeLabel.Text = $"{fromText} - {toText}";
