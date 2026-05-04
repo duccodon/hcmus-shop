@@ -200,12 +200,12 @@ Update this section as work progresses.
 - [ ] 5.10 Skip/never buttons
 - [ ] Commit pushed
 
-### Phase 6 — Tests
-- [ ] 6.1 Jest config
-- [ ] 6.2 Auth test
-- [ ] 6.3 Role test
-- [ ] 6.4 Dashboard test
-- [ ] Commit pushed
+### Phase 6 — Tests ✅ (12/12 passing)
+- [x] 6.1 Jest + ts-jest config (jest.config.js + tsconfig.test.json)
+- [x] 6.2 JWT generate/verify tests (3 tests)
+- [x] 6.3 Role-based access tests (4 tests for importPrice resolver)
+- [x] 6.4 Auth plugin whitelist logic tests (5 tests)
+- [x] `npm test` — 12 passed
 
 ### Phase 7 — Packaging
 - [ ] 7.1 Manifest configured
