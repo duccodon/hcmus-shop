@@ -15,9 +15,11 @@ using hcmus_shop.Services.Series;
 using hcmus_shop.Services.Products;
 using hcmus_shop.Services.Config;
 using hcmus_shop.Services.Dashboard;
+using hcmus_shop.Services.Settings;
 using hcmus_shop.ViewModels;
 using hcmus_shop.ViewModels.Auth;
 using hcmus_shop.ViewModels.Products;
+using hcmus_shop.ViewModels.Settings;
 using hcmus_shop.Views;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -72,11 +74,13 @@ namespace hcmus_shop
             services.AddSingleton<ISeriesService, SeriesService>();
             services.AddSingleton<IProductService, ProductService>();
             services.AddSingleton<IDashboardService, DashboardService>();
+            services.AddSingleton<ISettingsService, SettingsService>();
 
             // ViewModels
             services.AddTransient<LoginViewModel>();
             services.AddTransient<ConfigViewModel>();
             services.AddTransient<DashboardViewModel>();
+            services.AddTransient<SettingsViewModel>();
             services.AddTransient<ProductsViewModel>();
             services.AddTransient<AddProductViewModel>();
 

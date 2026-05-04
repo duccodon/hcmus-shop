@@ -26,6 +26,7 @@
         </NavigationView.MenuItems>
 
         <NavigationView.FooterMenuItems>
+            <NavigationViewItem x:Name="SettingsItem" Content="Settings" Icon="Setting" Tag="Settings" />
             <NavigationViewItem x:Name="LogoutItem" Content="Log Out" Tag="Logout">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xF3B1;" />

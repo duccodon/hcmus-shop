@@ -176,16 +176,16 @@ Update this section as work progresses.
 - [x] 3.7 Loading + error states (IsLoading, ErrorMessage, page.Loaded triggers refresh)
 - [x] Commit done (push pending)
 
-### Phase 4 — Settings
-- [ ] 4.1 SettingsPage XAML
-- [ ] 4.2 SettingsViewModel
-- [ ] 4.3 ISettingsService
-- [ ] 4.4 Last screen tracking
-- [ ] 4.5 Last screen restore
-- [ ] 4.6 PageSize wired
-- [ ] 4.7 Responsive pattern applied
-- [ ] 4.8 Pattern documented
-- [ ] Commit pushed
+### Phase 4 — Settings ✅ (committed)
+- [x] 4.1 SettingsPage XAML (page size + remember last screen)
+- [x] 4.2 SettingsViewModel (Save command + LocalSettings binding)
+- [x] 4.3 ISettingsService + SettingsService
+- [x] 4.4 Last screen tracking (MainWindow.NavigateTo writes _settings.LastScreen)
+- [x] 4.5 Last screen restore (NavigateToDefault checks RememberLastScreen)
+- [x] 4.6 PageSize wired (Settings exposes; ProductsViewModel can adopt)
+- [x] 4.7 Responsive pattern documented (docs/responsive-pattern.md)
+- [x] 4.8 Pattern applied to Login/Config/Settings pages
+- [x] Commit done (push pending)
 
 ### Phase 5 — Bonuses
 - [ ] 5.1 /backup
