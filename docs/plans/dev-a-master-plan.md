@@ -166,15 +166,15 @@ Update this section as work progresses.
 - [x] 2.8 RoleVisibilityConverter created (Dev B applies to import-price column when added)
 - [x] Commit done (push pending)
 
-### Phase 3 — Dashboard
-- [ ] 3.1 dashboard module created
-- [ ] 3.2 dashboardStats resolver
-- [ ] 3.3 DashboardService
-- [ ] 3.4 DashboardDto
-- [ ] 3.5 GraphQL query string
-- [ ] 3.6 ViewModel uses real data
-- [ ] 3.7 Loading/error states
-- [ ] Commit pushed
+### Phase 3 — Dashboard ✅ (committed)
+- [x] 3.1 dashboard module created (resolver + service + repository + typeDef)
+- [x] 3.2 dashboardStats resolver (queries Prisma in parallel via Promise.all)
+- [x] 3.3 DashboardService (client) with Result<T> pattern
+- [x] 3.4 DashboardDto (KPIs + tables + chart data)
+- [x] 3.5 GraphQL query string in DashboardQueries.cs
+- [x] 3.6 DashboardViewModel rewritten — RefreshAsync + ApplyStats, no mock data
+- [x] 3.7 Loading + error states (IsLoading, ErrorMessage, page.Loaded triggers refresh)
+- [x] Commit done (push pending)
 
 ### Phase 4 — Settings
 - [ ] 4.1 SettingsPage XAML
