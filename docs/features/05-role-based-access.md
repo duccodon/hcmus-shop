@@ -1,9 +1,14 @@
 # Feature 05 — Role-based Access Control
 
 **Owner**: Dev A
-**Status**: Planned
+**Status**: ✅ Implemented (commit `9f655e0`)
 **Bonus**: +0.50 pts
 **Phase**: 2
+**Files**:
+- Server filter: `hcmus-shop-server/src/features/product/product.resolver.ts`
+- Schema: `hcmus-shop-server/src/features/product/product.typeDef.graphql` (importPrice nullable)
+- Client hider: `hcmus-shop/Converters/RoleVisibilityConverter.cs`
+- Tests: `hcmus-shop-server/tests/role-filter.test.ts`
 
 ## Summary
 

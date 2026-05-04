@@ -1,8 +1,9 @@
 # Feature 11 — Image Upload Endpoint
 
 **Owner**: Dev A
-**Status**: Planned
+**Status**: ✅ Implemented (commit `a470088`)
 **Phase**: 1 (priority 0 — unblocks Dev B's AddProduct)
+**Files**: `hcmus-shop-server/src/features/upload/upload.routes.ts` + `index.ts` registration
 
 ## Summary
 

@@ -1,9 +1,15 @@
 # Feature 02 — Dashboard
 
 **Owner**: Dev A
-**Status**: Planned (currently uses mock data)
+**Status**: ✅ Implemented (commit `4cd976d`)
 **Base**: B2 = 0.50 pts
 **Phase**: 3
+**Files**:
+- Backend: `hcmus-shop-server/src/features/dashboard/{typeDef.graphql, repository.ts, service.ts, resolver.ts}`
+- Client: `hcmus-shop/Services/Dashboard/DashboardService.cs`, `Models/DTOs/DashboardDto.cs`,
+  `GraphQL/Operations/DashboardQueries.cs`, `ViewModels/Dashboard/DashboardViewModel.cs`,
+  `Views/Pages/Dashboard/DashboardPage.xaml.cs`
+- Flow trace: see [FLOWS.md](../FLOWS.md) Flow 7
 
 ## Summary
 

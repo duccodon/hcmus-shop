@@ -1,9 +1,18 @@
 # Feature 08 — Trial Mode (15-day Lock)
 
 **Owner**: Dev A
-**Status**: Planned
+**Status**: ✅ Implemented (commit `0f82a8a`)
 **Bonus**: +0.50 pts
 **Phase**: 5
+**Files**:
+- Service: `hcmus-shop/Services/Trial/TrialService.cs`, `Contracts/Services/ITrialService.cs`
+- Window: `hcmus-shop/Views/Pages/Auth/TrialExpiredWindow.cs`
+- Page: `hcmus-shop/Views/Pages/Auth/TrialExpiredPage.xaml(.cs)`
+- ViewModel: `hcmus-shop/ViewModels/Auth/TrialExpiredViewModel.cs`
+- Trial check on launch: `hcmus-shop/App.xaml.cs.OnLaunched` (first thing)
+- Activation handler: `hcmus-shop/App.xaml.cs.RelaunchAfterTrialActivation`
+- Activation code: `HCMUS2026` (hardcoded in TrialService)
+- Flow trace: see [FLOWS.md](../FLOWS.md) Flow 10
 
 ## Summary
 

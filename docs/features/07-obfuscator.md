@@ -1,9 +1,12 @@
 # Feature 07 — Code Obfuscator
 
 **Owner**: Dev A
-**Status**: Planned
+**Status**: ✅ Configured (commit `1f55672`); run after Release build
 **Bonus**: +0.25 pts
 **Phase**: 7
+**Files**:
+- Config: `hcmus-shop/obfuscar.xml`
+- Run instructions: [install.md](../install.md) "Build a release > With obfuscation"
 
 ## Summary
 

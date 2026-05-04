@@ -1,8 +1,8 @@
 # Feature 12 — Data Seeding
 
 **Owner**: Dev A
-**Status**: Planned (currently 12 products, target 125)
-**No points** but required for demo + Dev B's testing
+**Status**: ✅ Implemented (commit `a470088`) — procedural variants generate 25+ per category
+**Files**: `hcmus-shop-server/prisma/seed.ts`
 
 ## Summary
 

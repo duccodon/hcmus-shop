@@ -1,9 +1,16 @@
 # Feature 03 — Settings
 
 **Owner**: Dev A
-**Status**: Planned
+**Status**: ✅ Implemented (commit `e615cf8` settings + `0f82a8a` backup UI)
 **Base**: B6 = 0.25 pts
 **Phase**: 4
+**Files**:
+- Service: `hcmus-shop/Services/Settings/SettingsService.cs`, `Contracts/Services/ISettingsService.cs`
+- ViewModel: `hcmus-shop/ViewModels/Settings/SettingsViewModel.cs`
+- Page: `hcmus-shop/Views/Pages/Settings/SettingsPage.xaml(.cs)`
+- Last screen tracking: `hcmus-shop/MainWindow.xaml.cs.NavigateTo` writes `_settings.LastScreen`
+- Last screen restore: `hcmus-shop/MainWindow.xaml.cs.NavigateToDefault` checks `RememberLastScreen`
+- Flow trace: see [FLOWS.md](../FLOWS.md) Flow 8
 
 ## Summary
 

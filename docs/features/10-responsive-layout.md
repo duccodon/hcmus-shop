@@ -2,8 +2,14 @@
 
 **Owner**: Dev A (sets the pattern, owns Login/Config/Dashboard/Settings)
 **Cross-cutting**: Dev B and Dev C apply same pattern to their pages
+**Status**: ✅ Documented + applied to Dev A's pages (commit `e615cf8`)
 **Bonus**: +0.50 pts
 **Phase**: 4
+**Pattern doc**: [../responsive-pattern.md](../responsive-pattern.md)
+**Applied to**:
+- `hcmus-shop/Views/Pages/Auth/LoginPage.xaml` (1.2*/1* split, collapses to single column)
+- `hcmus-shop/Views/Pages/Auth/ConfigPage.xaml` (centered card with MaxWidth)
+- `hcmus-shop/Views/Pages/Settings/SettingsPage.xaml` (ScrollViewer + MaxWidth=800)
 
 ## Summary
 

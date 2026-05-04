@@ -1,9 +1,15 @@
 # Feature 09 — Onboarding Tutorial
 
 **Owner**: Dev A
-**Status**: Planned
+**Status**: ✅ Implemented (commit `0f82a8a`)
 **Bonus**: +0.50 pts
 **Phase**: 5
+**Files**:
+- Service: `hcmus-shop/Services/Onboarding/OnboardingService.cs`, `Contracts/Services/IOnboardingService.cs`
+- TeachingTip controls: `hcmus-shop/MainWindow.xaml` (4 tips at the bottom of the Grid)
+- Event handlers: `hcmus-shop/MainWindow.xaml.cs.OnTipNext`, `OnTipFinish`, `OnTipSkip`
+- Trigger: `hcmus-shop/MainWindow.xaml.cs.StartOnboardingIfFirstTime` (called from constructor)
+- Flow trace: see [FLOWS.md](../FLOWS.md) Flow 11
 
 ## Summary
 

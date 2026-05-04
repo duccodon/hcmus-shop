@@ -1,9 +1,13 @@
 # Feature 04 — MSIX Installer
 
 **Owner**: Dev A
-**Status**: Planned
+**Status**: ⚠️ Configured (commit `1f55672`); MSIX must be built in Visual Studio
 **Base**: B7 = 0.25 pts
-**Phase**: 7 (last — needs all features stable)
+**Phase**: 7
+**Files**:
+- Manifest: `hcmus-shop/Package.appxmanifest`
+- Build instructions: [install.md](../install.md)
+- Verification: build with `Package and Publish` in Visual Studio
 
 ## Summary
 

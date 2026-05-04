@@ -1,9 +1,16 @@
 # Feature 01 — Login + ConfigPage + Auto-login
 
 **Owner**: Dev A
-**Status**: Planned (Login already partially done — see existing AuthService)
+**Status**: ✅ Implemented (commits `9f655e0` config + `d616f6f` initial login)
 **Base**: B1 = 0.25 pts
 **Phase**: 2
+**Files**:
+- Login: `hcmus-shop/ViewModels/Auth/LoginViewModel.cs`, `Views/Pages/Auth/LoginPage.xaml(.cs)`
+- Config: `hcmus-shop/ViewModels/Auth/ConfigViewModel.cs`, `Views/Pages/Auth/ConfigPage.xaml(.cs)`
+- Service: `hcmus-shop/Services/Config/ConfigService.cs`, `Contracts/Services/IConfigService.cs`
+- Window navigation: `hcmus-shop/Views/Pages/Auth/LoginWindow.cs` (Frame-based router)
+- Auto-login: `hcmus-shop/App.xaml.cs.OnLaunched`
+- Flow trace: see [FLOWS.md](../FLOWS.md) Flow 5 (login) and Flow 6 (auto-login)
 
 ## Summary
 

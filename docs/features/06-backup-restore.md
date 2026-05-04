@@ -1,9 +1,15 @@
 # Feature 06 — Backup / Restore Database
 
 **Owner**: Dev A
-**Status**: Planned
+**Status**: ✅ Implemented (commit `0f82a8a`)
 **Bonus**: +0.25 pts
 **Phase**: 5
+**Files**:
+- Backend: `hcmus-shop-server/src/features/backup/backup.routes.ts`
+- Client service: `hcmus-shop/Services/Backup/BackupService.cs`, `Contracts/Services/IBackupService.cs`
+- UI: Backup section in `hcmus-shop/Views/Pages/Settings/SettingsPage.xaml`
+- Commands: `DownloadBackupAsync`, `RestoreAsync` in `SettingsViewModel`
+- Flow trace: see [FLOWS.md](../FLOWS.md) Flow 9
 
 ## Summary
 
