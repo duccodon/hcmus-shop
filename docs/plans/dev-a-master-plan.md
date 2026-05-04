@@ -207,13 +207,13 @@ Update this section as work progresses.
 - [x] 6.4 Auth plugin whitelist logic tests (5 tests)
 - [x] `npm test` — 12 passed
 
-### Phase 7 — Packaging
-- [ ] 7.1 Manifest configured
-- [ ] 7.2 Obfuscar set up
-- [ ] 7.3 MSIX built
-- [ ] 7.4 VM tested
-- [ ] 7.5 Install doc
-- [ ] Commit pushed
+### Phase 7 — Packaging ✅ (config + docs done; MSIX build needs Visual Studio)
+- [x] 7.1 Manifest configured (DisplayName, Description, Publisher updated)
+- [x] 7.2 Obfuscar config (obfuscar.xml with skip rules for Pages/VMs/DTOs/Converters)
+- [ ] 7.3 MSIX built — must run in Visual Studio (Package and Publish)
+- [ ] 7.4 VM tested — needs target Windows machine
+- [x] 7.5 Install doc (docs/install.md)
+- [x] Config + docs committed
 
 ---
 
