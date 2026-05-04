@@ -13,6 +13,7 @@ import { brandResolver } from "./features/brand/brand.resolver";
 import { categoryResolver } from "./features/category/category.resolver";
 import { seriesResolver } from "./features/series/series.resolver";
 import { productResolver } from "./features/product/product.resolver";
+import { uploadRouter } from "./features/upload/upload.routes";
 
 // Load .graphql type definitions
 function loadTypeDef(featurePath: string): string {
@@ -60,9 +61,18 @@ async function main() {
 
   await server.start();
 
+  // Enable CORS for all routes (uploads + static files + graphql)
+  app.use(cors<cors.CorsRequest>());
+
+  // REST: file upload endpoint
+  app.use(uploadRouter);
+
+  // Static: serve uploaded files
+  app.use("/uploads", express.static("uploads"));
+
+  // GraphQL endpoint
   app.use(
     "/graphql",
-    cors<cors.CorsRequest>(),
     express.json(),
     expressMiddleware(server, { context: buildContext })
   );

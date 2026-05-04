@@ -297,6 +297,92 @@ async function main() {
     },
   ];
 
+  // ---- Procedural generation: ensure ≥25 products per category ----
+  const baseTemplates = [...products];
+  const PRODUCTS_PER_CATEGORY = 25;
+  const allCategoryNames = ["Gaming", "Business", "Student", "Ultrabook", "Workstation"];
+  const variantSuffixes = [
+    { suffix: "Pro", priceDelta: 4000000, ramOverride: "32GB" },
+    { suffix: "Lite", priceDelta: -3500000, ramOverride: "8GB" },
+    { suffix: "Plus", priceDelta: 2000000, ramOverride: "32GB" },
+    { suffix: "Max", priceDelta: 6500000, ramOverride: "64GB" },
+    { suffix: "SE", priceDelta: -1500000, ramOverride: "16GB" },
+    { suffix: "Edition 2025", priceDelta: -800000, ramOverride: undefined },
+    { suffix: "Edition 2026", priceDelta: 1500000, ramOverride: undefined },
+    { suffix: "Slim", priceDelta: 800000, ramOverride: undefined },
+    { suffix: "Performance", priceDelta: 5500000, ramOverride: "32GB" },
+    { suffix: "Studio", priceDelta: 4200000, ramOverride: "32GB" },
+    { suffix: "Touch", priceDelta: 2200000, ramOverride: undefined },
+    { suffix: "OLED", priceDelta: 3500000, ramOverride: undefined },
+    { suffix: "X", priceDelta: 7000000, ramOverride: "64GB" },
+    { suffix: "Black", priceDelta: 600000, ramOverride: undefined },
+    { suffix: "Silver", priceDelta: 600000, ramOverride: undefined },
+  ];
+
+  // Count how many products belong to each category from the base templates
+  const categoryCounts = new Map<string, number>(
+    allCategoryNames.map((name) => [name, 0])
+  );
+  for (const product of baseTemplates) {
+    for (const cat of product.categoryNames) {
+      categoryCounts.set(cat, (categoryCounts.get(cat) || 0) + 1);
+    }
+  }
+
+  // For each category that's under target, generate variants from existing
+  // templates that belong to that category until the count reaches the target.
+  for (const category of allCategoryNames) {
+    const templatesInCategory = baseTemplates.filter((p) =>
+      p.categoryNames.includes(category)
+    );
+    let suffixIndex = 0;
+    while ((categoryCounts.get(category) || 0) < PRODUCTS_PER_CATEGORY) {
+      for (const template of templatesInCategory) {
+        if ((categoryCounts.get(category) || 0) >= PRODUCTS_PER_CATEGORY) break;
+        const variant = variantSuffixes[suffixIndex % variantSuffixes.length];
+        suffixIndex++;
+        const sku = `${template.sku}-${variant.suffix.toUpperCase().replace(/\s+/g, "-")}`;
+        // Skip if we already created this variant
+        if (products.some((p) => p.sku === sku)) continue;
+
+        const newImportPrice = Math.max(
+          5000000,
+          template.importPrice + Math.round(variant.priceDelta * 0.85)
+        );
+        const newSellingPrice = Math.max(
+          6500000,
+          template.sellingPrice + variant.priceDelta
+        );
+        const specs = { ...template.specifications };
+        if (variant.ramOverride) {
+          const oldRam = specs.ram || "";
+          specs.ram = oldRam.includes("DDR") || oldRam.includes("LPDDR")
+            ? `${variant.ramOverride} ${oldRam.split(" ").slice(1).join(" ")}`
+            : variant.ramOverride;
+        }
+
+        products.push({
+          sku,
+          name: `${template.name} ${variant.suffix}`,
+          brandName: template.brandName,
+          importPrice: newImportPrice,
+          sellingPrice: newSellingPrice,
+          warrantyMonths: template.warrantyMonths,
+          description: `${template.description} (${variant.suffix} variant)`,
+          specifications: specs,
+          categoryNames: template.categoryNames,
+        });
+
+        // Update counts for ALL categories this new product belongs to
+        for (const cat of template.categoryNames) {
+          categoryCounts.set(cat, (categoryCounts.get(cat) || 0) + 1);
+        }
+      }
+    }
+  }
+
+  console.log(`Generated ${products.length} total products`);
+
   for (const seed of products) {
     const brandId = brandMap.get(seed.brandName);
     if (!brandId) {
@@ -365,7 +451,7 @@ async function main() {
       }
     }
 
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 1; i <= 5; i++) {
       const serialNumber = `${seed.sku}-SN-${String(i).padStart(3, "0")}`;
       await prisma.productInstance.upsert({
         where: { serialNumber },
@@ -380,6 +466,12 @@ async function main() {
         },
       });
     }
+
+    // Update product stock count to match available instances
+    await prisma.product.update({
+      where: { productId: product.productId },
+      data: { stockQuantity: 5 },
+    });
   }
 
   console.log(`Products seeded: ${products.length}`);
