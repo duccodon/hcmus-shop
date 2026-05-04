@@ -62,19 +62,53 @@
                 </StackPanel>
             </Border>
 
-            <!-- Status -->
-            <InfoBar Grid.Row="3"
-                     IsOpen="{Binding StatusMessage, Converter={StaticResource StringToBooleanConverter}}"
-                     IsClosable="False"
-                     Severity="Success"
-                     Message="{Binding StatusMessage}" />
+            <!-- Backup section -->
+            <Border Grid.Row="3" CornerRadius="12" Padding="20"
+                    Background="{StaticResource CardBackground}"
+                    BorderBrush="{StaticResource DividerBrush}" BorderThickness="1">
+                <StackPanel Spacing="12">
+                    <TextBlock FontSize="16" FontWeight="SemiBold" Text="Backup &amp; Restore" />
+                    <TextBlock FontSize="12" Foreground="{StaticResource TextSecondary}"
+                               Text="Export the entire database to a SQL file, or restore from a previous backup." />
 
-            <!-- Save -->
-            <Button Grid.Row="4"
-                    HorizontalAlignment="Right"
-                    Command="{Binding SaveCommand}"
-                    Content="Save changes"
-                    Style="{StaticResource AccentButtonStyle}" />
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Command="{Binding DownloadBackupCommand}"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}"
+                                Content="Download Backup" />
+                        <Button Grid.Column="1"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Command="{Binding RestoreCommand}"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}"
+                                Content="Restore from File" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Status + Save -->
+            <Grid Grid.Row="4" RowSpacing="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <InfoBar Grid.Row="0"
+                         IsOpen="{Binding StatusMessage, Converter={StaticResource StringToBooleanConverter}}"
+                         IsClosable="False"
+                         Severity="{Binding IsStatusError, Converter={StaticResource BooleanToInfoSeverityConverter}}"
+                         Message="{Binding StatusMessage}" />
+                <Button Grid.Row="1"
+                        HorizontalAlignment="Right"
+                        Command="{Binding SaveCommand}"
+                        Content="Save changes"
+                        Style="{StaticResource AccentButtonStyle}" />
+            </Grid>
         </Grid>
     </ScrollViewer>
 </Page>

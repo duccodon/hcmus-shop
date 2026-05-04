@@ -15,6 +15,7 @@ import { seriesResolver } from "./features/series/series.resolver";
 import { productResolver } from "./features/product/product.resolver";
 import { dashboardResolver } from "./features/dashboard/dashboard.resolver";
 import { uploadRouter } from "./features/upload/upload.routes";
+import { backupRouter } from "./features/backup/backup.routes";
 
 // Load .graphql type definitions
 function loadTypeDef(featurePath: string): string {
@@ -69,6 +70,9 @@ async function main() {
 
   // REST: file upload endpoint
   app.use(uploadRouter);
+
+  // REST: backup / restore (admin tooling)
+  app.use(backupRouter);
 
   // Static: serve uploaded files
   app.use("/uploads", express.static("uploads"));

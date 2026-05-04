@@ -14,26 +14,62 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <NavigationView x:Name="AppNavigationView" SelectionChanged="AppNavigationView_SelectionChanged">
-        <NavigationView.MenuItems>
-            <NavigationViewItem x:Name="DashboardItem" Content="Dashboard" Icon="Home" Tag="Dashboard" />
-            <NavigationViewItem x:Name="SalesItem" Content="Sales" Icon="Shop" Tag="Sales" />
-            <NavigationViewItem x:Name="ProductsItem" Content="Products" Icon="AllApps" Tag="Products" />
-            <NavigationViewItem x:Name="StoreItem" Content="Store" Icon="Shop" Tag="Store" />
-            <NavigationViewItem x:Name="MessagesItem" Content="Messages" Icon="Mail" Tag="Messages" />
-            <NavigationViewItem x:Name="InventoryItem" Content="Inventory" Icon="AllApps" Tag="Inventory" />
-            <NavigationViewItem x:Name="AdminItem" Content="Admin" Icon="Admin" Tag="Admin" />
-        </NavigationView.MenuItems>
+    <Grid>
+        <NavigationView x:Name="AppNavigationView" SelectionChanged="AppNavigationView_SelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem x:Name="DashboardItem" Content="Dashboard" Icon="Home" Tag="Dashboard" />
+                <NavigationViewItem x:Name="SalesItem" Content="Sales" Icon="Shop" Tag="Sales" />
+                <NavigationViewItem x:Name="ProductsItem" Content="Products" Icon="AllApps" Tag="Products" />
+                <NavigationViewItem x:Name="StoreItem" Content="Store" Icon="Shop" Tag="Store" />
+                <NavigationViewItem x:Name="MessagesItem" Content="Messages" Icon="Mail" Tag="Messages" />
+                <NavigationViewItem x:Name="InventoryItem" Content="Inventory" Icon="AllApps" Tag="Inventory" />
+                <NavigationViewItem x:Name="AdminItem" Content="Admin" Icon="Admin" Tag="Admin" />
+            </NavigationView.MenuItems>
 
-        <NavigationView.FooterMenuItems>
-            <NavigationViewItem x:Name="SettingsItem" Content="Settings" Icon="Setting" Tag="Settings" />
-            <NavigationViewItem x:Name="LogoutItem" Content="Log Out" Tag="Logout">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xF3B1;" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-        </NavigationView.FooterMenuItems>
-        
-        <Frame x:Name="ContentFrame" />
-    </NavigationView>
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem x:Name="SettingsItem" Content="Settings" Icon="Setting" Tag="Settings" />
+                <NavigationViewItem x:Name="LogoutItem" Content="Log Out" Tag="Logout">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xF3B1;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
+
+            <Frame x:Name="ContentFrame" />
+        </NavigationView>
+
+        <!-- Onboarding TeachingTips. Shown once per machine on first login. -->
+        <TeachingTip x:Name="WelcomeTip"
+                     Title="Welcome to HCMUS Shop!"
+                     Subtitle="A quick tour to get you started. You can skip any time."
+                     PreferredPlacement="Center"
+                     ActionButtonContent="Next"
+                     ActionButtonClick="OnTipNext"
+                     CloseButtonContent="Skip"
+                     CloseButtonClick="OnTipSkip" />
+
+        <TeachingTip x:Name="DashboardTip"
+                     Title="Dashboard"
+                     Subtitle="Get an overview of your shop — sales today, low-stock items, recent orders."
+                     ActionButtonContent="Next"
+                     ActionButtonClick="OnTipNext"
+                     CloseButtonContent="Skip"
+                     CloseButtonClick="OnTipSkip" />
+
+        <TeachingTip x:Name="ProductsTip"
+                     Title="Products"
+                     Subtitle="Browse, search, add and manage your laptops here."
+                     ActionButtonContent="Next"
+                     ActionButtonClick="OnTipNext"
+                     CloseButtonContent="Skip"
+                     CloseButtonClick="OnTipSkip" />
+
+        <TeachingTip x:Name="SettingsTip"
+                     Title="Settings"
+                     Subtitle="Adjust page size, restore the last screen, and back up your data."
+                     ActionButtonContent="Done"
+                     ActionButtonClick="OnTipFinish"
+                     CloseButtonContent="Skip"
+                     CloseButtonClick="OnTipSkip" />
+    </Grid>
 </Window>

@@ -21,6 +21,7 @@ namespace hcmus_shop
         private readonly IAuthService _authService;
         private readonly IFeatureFlagService _featureFlagService;
         private readonly ISettingsService _settings;
+        private readonly IOnboardingService _onboarding;
 
         public MainWindow()
         {
@@ -28,8 +29,50 @@ namespace hcmus_shop
             _authService = Ioc.Default.GetRequiredService<IAuthService>();
             _featureFlagService = Ioc.Default.GetRequiredService<IFeatureFlagService>();
             _settings = Ioc.Default.GetRequiredService<ISettingsService>();
+            _onboarding = Ioc.Default.GetRequiredService<IOnboardingService>();
             ConfigureNavigationByFeatureFlag();
             NavigateToDefault();
+            StartOnboardingIfFirstTime();
+        }
+
+        // ---- Onboarding ----
+
+        private void StartOnboardingIfFirstTime()
+        {
+            if (_onboarding.IsCompleted) return;
+            WelcomeTip.IsOpen = true;
+        }
+
+        private void OnTipNext(TeachingTip sender, object args)
+        {
+            sender.IsOpen = false;
+            if (sender == WelcomeTip)
+            {
+                DashboardTip.Target = DashboardItem;
+                DashboardTip.IsOpen = true;
+            }
+            else if (sender == DashboardTip)
+            {
+                ProductsTip.Target = ProductsItem;
+                ProductsTip.IsOpen = true;
+            }
+            else if (sender == ProductsTip)
+            {
+                SettingsTip.Target = SettingsItem;
+                SettingsTip.IsOpen = true;
+            }
+        }
+
+        private void OnTipFinish(TeachingTip sender, object args)
+        {
+            sender.IsOpen = false;
+            _onboarding.MarkCompleted();
+        }
+
+        private void OnTipSkip(TeachingTip sender, object args)
+        {
+            sender.IsOpen = false;
+            _onboarding.MarkCompleted();
         }
 
         private void ConfigureNavigationByFeatureFlag()

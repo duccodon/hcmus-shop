@@ -16,6 +16,9 @@ using hcmus_shop.Services.Products;
 using hcmus_shop.Services.Config;
 using hcmus_shop.Services.Dashboard;
 using hcmus_shop.Services.Settings;
+using hcmus_shop.Services.Trial;
+using hcmus_shop.Services.Onboarding;
+using hcmus_shop.Services.Backup;
 using hcmus_shop.ViewModels;
 using hcmus_shop.ViewModels.Auth;
 using hcmus_shop.ViewModels.Products;
@@ -75,12 +78,16 @@ namespace hcmus_shop
             services.AddSingleton<IProductService, ProductService>();
             services.AddSingleton<IDashboardService, DashboardService>();
             services.AddSingleton<ISettingsService, SettingsService>();
+            services.AddSingleton<ITrialService, TrialService>();
+            services.AddSingleton<IOnboardingService, OnboardingService>();
+            services.AddSingleton<IBackupService, BackupService>();
 
             // ViewModels
             services.AddTransient<LoginViewModel>();
             services.AddTransient<ConfigViewModel>();
             services.AddTransient<DashboardViewModel>();
             services.AddTransient<SettingsViewModel>();
+            services.AddTransient<TrialExpiredViewModel>();
             services.AddTransient<ProductsViewModel>();
             services.AddTransient<AddProductViewModel>();
 
@@ -89,9 +96,15 @@ namespace hcmus_shop
 
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
-            // Try silent auto-login with the saved JWT token.
-            // If successful, jump straight to MainWindow.
-            // Otherwise, show LoginWindow.
+            // 1. Trial check — if expired and not activated, block everything.
+            var trial = Ioc.Default.GetRequiredService<ITrialService>();
+            if (trial.GetStatus() == TrialStatus.Expired)
+            {
+                ShowTrialExpiredWindow();
+                return;
+            }
+
+            // 2. Try silent auto-login with the saved JWT token.
             var auth = Ioc.Default.GetRequiredService<IAuthService>();
             var loggedIn = await auth.TryAutoLoginAsync();
 
@@ -103,9 +116,41 @@ namespace hcmus_shop
                 return;
             }
 
+            // 3. Otherwise show LoginWindow.
             _loginWindow = new LoginWindow();
             CurrentWindow = _loginWindow;
             _loginWindow.Activate();
+        }
+
+        private Window? _trialWindow;
+
+        private void ShowTrialExpiredWindow()
+        {
+            _trialWindow = new TrialExpiredWindow();
+            CurrentWindow = _trialWindow;
+            _trialWindow.Activate();
+        }
+
+        /// <summary>
+        /// Called from TrialExpiredPage after the user enters a valid code.
+        /// </summary>
+        public async void RelaunchAfterTrialActivation()
+        {
+            _trialWindow?.Close();
+            _trialWindow = null;
+
+            var auth = Ioc.Default.GetRequiredService<IAuthService>();
+            var loggedIn = await auth.TryAutoLoginAsync();
+            if (loggedIn)
+            {
+                _mainWindow = new MainWindow();
+                CurrentWindow = _mainWindow;
+                _mainWindow.Activate();
+            }
+            else
+            {
+                OpenLoginWindow();
+            }
         }
 
         public void OpenMainWindow()

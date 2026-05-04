@@ -187,16 +187,16 @@ Update this section as work progresses.
 - [x] 4.8 Pattern applied to Login/Config/Settings pages
 - [x] Commit done (push pending)
 
-### Phase 5 — Bonuses
-- [ ] 5.1 /backup
-- [ ] 5.2 /restore
-- [ ] 5.3 Backup UI
-- [ ] 5.4 Trial date saved
-- [ ] 5.5 Expiry check
-- [ ] 5.6 TrialExpiredPage
-- [ ] 5.7 Activation code
-- [ ] 5.8 Onboarding flag
-- [ ] 5.9 TeachingTips
+### Phase 5 — Bonuses ✅ (committed)
+- [x] 5.1 /backup endpoint (pg_dump streaming)
+- [x] 5.2 /restore endpoint (multipart psql)
+- [x] 5.3 Backup UI in SettingsPage (Download + Restore buttons)
+- [x] 5.4 Trial start date saved on first launch
+- [x] 5.5 Expiry check (15 days, returns Active/Expired/Activated status)
+- [x] 5.6 TrialExpiredPage + TrialExpiredWindow
+- [x] 5.7 Activation code "HCMUS2026" unlocks app
+- [x] 5.8 Onboarding flag in LocalSettings (IOnboardingService)
+- [x] 5.9 TeachingTips (4-step tour: Welcome → Dashboard → Products → Settings)
 - [ ] 5.10 Skip/never buttons
 - [ ] Commit pushed
 
