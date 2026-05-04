@@ -145,26 +145,26 @@ Estimated: 1.5h
 
 Update this section as work progresses.
 
-### Phase 1 — Unblock
-- [ ] 1.1 multer installed
-- [ ] 1.2 /uploads endpoint
-- [ ] 1.3 static serving
-- [ ] 1.4 CORS for uploads
-- [ ] 1.5 curl test
-- [ ] 1.6 seed expanded
-- [ ] 1.7 seed verified
-- [ ] Commit pushed
+### Phase 1 — Unblock ✅ (committed)
+- [x] 1.1 multer installed
+- [x] 1.2 /uploads endpoint
+- [x] 1.3 static serving
+- [x] 1.4 CORS for uploads
+- [ ] 1.5 curl test (pending: needs running server)
+- [x] 1.6 seed expanded (25+ products per category)
+- [ ] 1.7 seed verified (pending: needs running DB)
+- [x] Commit done (push pending)
 
-### Phase 2 — Auth
-- [ ] 2.1 importPrice role check
-- [ ] 2.2 ConfigService
-- [ ] 2.3 ConfigPage
-- [ ] 2.4 ConfigViewModel
-- [ ] 2.5 OpenConfigCommand wired
-- [ ] 2.6 Cancel button
-- [ ] 2.7 Auto-login on startup
-- [ ] 2.8 Hide importPrice column for Sale
-- [ ] Commit pushed
+### Phase 2 — Auth ✅ (committed)
+- [x] 2.1 importPrice role check (server returns null for non-Admin)
+- [x] 2.2 ConfigService (read/write server URL via LocalSettings)
+- [x] 2.3 ConfigPage (XAML)
+- [x] 2.4 ConfigViewModel (Test Connection + Save + Cancel + Reset)
+- [x] 2.5 OpenConfigCommand wired (LoginPage → LoginWindow → Frame.Navigate)
+- [x] 2.6 Cancel button (returns to LoginPage)
+- [x] 2.7 Auto-login on startup (App.OnLaunched calls TryAutoLoginAsync)
+- [x] 2.8 RoleVisibilityConverter created (Dev B applies to import-price column when added)
+- [x] Commit done (push pending)
 
 ### Phase 3 — Dashboard
 - [ ] 3.1 dashboard module created

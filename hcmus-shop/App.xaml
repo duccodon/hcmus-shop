@@ -18,6 +18,10 @@
             <converters:InvoiceStatusBackgroundConverter x:Key="InvoiceStatusBackgroundConverter" />
             <converters:InvoiceStatusForegroundConverter x:Key="InvoiceStatusForegroundConverter" />
             <converters:InvoiceLegendMarkerConverter x:Key="InvoiceLegendMarkerConverter" />
+            <converters:StringToBooleanConverter x:Key="StringToBooleanConverter" />
+            <converters:BooleanToInfoSeverityConverter x:Key="BooleanToInfoSeverityConverter" />
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <converters:RoleVisibilityConverter x:Key="RoleVisibility" />
 
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />

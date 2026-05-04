@@ -13,9 +13,12 @@ using hcmus_shop.Services.Brands;
 using hcmus_shop.Services.Categories;
 using hcmus_shop.Services.Series;
 using hcmus_shop.Services.Products;
+using hcmus_shop.Services.Config;
 using hcmus_shop.ViewModels;
+using hcmus_shop.ViewModels.Auth;
 using hcmus_shop.ViewModels.Products;
 using hcmus_shop.Views;
+using System.Threading.Tasks;
 using Windows.Storage;
 
 namespace hcmus_shop
@@ -55,6 +58,9 @@ namespace hcmus_shop
             var serverUrl = GetConfiguredServerUrl();
             services.AddSingleton<IGraphQLClientService>(new GraphQLClientService(serverUrl));
 
+            // Config (pre-login server URL)
+            services.AddSingleton<IConfigService, ConfigService>();
+
             // Auth
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IFeatureFlagService, FeatureFlagService>();
@@ -67,14 +73,29 @@ namespace hcmus_shop
 
             // ViewModels
             services.AddTransient<LoginViewModel>();
+            services.AddTransient<ConfigViewModel>();
             services.AddTransient<ProductsViewModel>();
             services.AddTransient<AddProductViewModel>();
 
             Ioc.Default.ConfigureServices(services.BuildServiceProvider());
         }
 
-        protected override void OnLaunched(LaunchActivatedEventArgs args)
+        protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
+            // Try silent auto-login with the saved JWT token.
+            // If successful, jump straight to MainWindow.
+            // Otherwise, show LoginWindow.
+            var auth = Ioc.Default.GetRequiredService<IAuthService>();
+            var loggedIn = await auth.TryAutoLoginAsync();
+
+            if (loggedIn)
+            {
+                _mainWindow = new MainWindow();
+                CurrentWindow = _mainWindow;
+                _mainWindow.Activate();
+                return;
+            }
+
             _loginWindow = new LoginWindow();
             CurrentWindow = _loginWindow;
             _loginWindow.Activate();

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="hcmus_shop.Views.ConfigPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource LoginRightPanelBrush}">
+
+    <Grid>
+        <Border
+            Width="460"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Style="{StaticResource LoginCardBorderStyle}">
+            <StackPanel Spacing="6">
+
+                <!-- Header -->
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <FontIcon
+                        FontFamily="{StaticResource SymbolThemeFontFamily}"
+                        FontSize="22"
+                        Foreground="{StaticResource LoginPrimaryBrush}"
+                        Glyph="&#xE713;" />
+                    <TextBlock
+                        FontSize="24"
+                        FontWeight="SemiBold"
+                        Foreground="{StaticResource TextPrimary}"
+                        Text="Server Configuration" />
+                </StackPanel>
+
+                <TextBlock
+                    Margin="0,2,0,16"
+                    FontSize="13"
+                    Foreground="{StaticResource TextSecondary}"
+                    Text="Set the GraphQL server URL the app will connect to. This must be configured before signing in." />
+
+                <!-- Server URL -->
+                <TextBlock
+                    Margin="0,0,0,4"
+                    FontSize="13"
+                    FontWeight="Medium"
+                    Foreground="{StaticResource TextPrimary}"
+                    Text="Server URL" />
+                <TextBox
+                    PlaceholderText="http://localhost:4000/graphql"
+                    Style="{StaticResource LoginTextBoxStyle}"
+                    Text="{Binding ServerUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock
+                    Margin="0,4,0,0"
+                    FontSize="11"
+                    Foreground="{StaticResource TextSecondary}"
+                    Text="Example: http://192.168.1.10:4000/graphql" />
+
+                <!-- Action row: Test + Reset -->
+                <Grid Margin="0,16,0,0" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        Grid.Column="0"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Command="{Binding TestConnectionCommand}"
+                        IsEnabled="{Binding IsTesting, Converter={StaticResource InverseBooleanConverter}}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <ProgressRing
+                                Width="14" Height="14"
+                                IsActive="{Binding IsTesting}"
+                                Visibility="{Binding IsTesting, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            <TextBlock Text="Test Connection" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Grid.Column="1"
+                        Command="{Binding ResetToDefaultCommand}"
+                        Content="Reset" />
+                </Grid>
+
+                <!-- Status message -->
+                <InfoBar
+                    Margin="0,12,0,0"
+                    IsOpen="{Binding StatusMessage, Converter={StaticResource StringToBooleanConverter}}"
+                    IsClosable="False"
+                    Severity="{Binding IsStatusError, Converter={StaticResource BooleanToInfoSeverityConverter}}"
+                    Message="{Binding StatusMessage}" />
+
+                <!-- Save / Cancel row -->
+                <Grid Margin="0,20,0,0" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        Grid.Column="0"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Command="{Binding CancelCommand}"
+                        Content="Cancel" />
+                    <Button
+                        Grid.Column="1"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Command="{Binding SaveCommand}"
+                        Content="Save"
+                        FontWeight="SemiBold"
+                        Style="{StaticResource AccentButtonStyle}" />
+                </Grid>
+
+            </StackPanel>
+        </Border>
+    </Grid>
+</Page>

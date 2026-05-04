@@ -13,6 +13,7 @@ namespace hcmus_shop.ViewModels
         private readonly IAuthService _authService;
 
         public event EventHandler? LoginSucceeded;
+        public event EventHandler? OpenConfigRequested;
 
         public LoginViewModel(IAuthService authService)
         {
@@ -90,7 +91,7 @@ namespace hcmus_shop.ViewModels
         [RelayCommand]
         private void OpenConfig()
         {
-            ErrorMessage = "Config screen is not implemented yet.";
+            OpenConfigRequested?.Invoke(this, EventArgs.Empty);
         }
 
         private bool CanLogin() => !IsBusy;
