@@ -1,5 +1,6 @@
 using hcmus_shop.Services.GraphQL;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Text.Json;
@@ -45,12 +46,14 @@ namespace hcmus_shop.Services.Uploads
             }
             catch (Exception ex)
             {
+                LogUploadError(uploadUrl, "HTTP upload failed", ex.Message);
                 throw new Exception($"Cannot upload image to {uploadUrl}: {ex.Message}", ex);
             }
 
             var responseBody = await response.Content.ReadAsStringAsync();
             if (!response.IsSuccessStatusCode)
             {
+                LogUploadError(uploadUrl, $"Upload failed with status {(int)response.StatusCode}", responseBody);
                 var serverMessage = ExtractMessage(responseBody);
                 throw new Exception(string.IsNullOrWhiteSpace(serverMessage)
                     ? $"Upload failed with status {(int)response.StatusCode}."
@@ -64,10 +67,18 @@ namespace hcmus_shop.Services.Uploads
 
             if (payload is null || string.IsNullOrWhiteSpace(payload.Url))
             {
+                LogUploadError(uploadUrl, "Upload response is missing url", responseBody);
                 throw new Exception("Upload response is missing url.");
             }
 
             return payload.Url;
+        }
+
+        private static void LogUploadError(string uploadUrl, string title, string details)
+        {
+            var message = $"[FileUploadService] {title}{Environment.NewLine}Endpoint: {uploadUrl}{Environment.NewLine}{details}";
+            Debug.WriteLine(message);
+            Console.Error.WriteLine(message);
         }
 
         private static string BuildUploadEndpoint(string graphQLEndpoint)

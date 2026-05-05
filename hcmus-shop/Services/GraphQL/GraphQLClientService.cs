@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -62,6 +63,7 @@ namespace hcmus_shop.Services.GraphQL
             }
             catch (HttpRequestException ex)
             {
+                LogError("HTTP request failed", ex.Message);
                 throw new GraphQLException($"Cannot connect to server at {_serverUrl}: {ex.Message}");
             }
 
@@ -70,20 +72,30 @@ namespace hcmus_shop.Services.GraphQL
 
             if (result == null)
             {
+                LogError("Empty or invalid GraphQL response", responseBody);
                 throw new GraphQLException("Empty response from server");
             }
 
             if (result.Errors != null && result.Errors.Length > 0)
             {
+                LogError("GraphQL error", responseBody);
                 throw new GraphQLException(result.Errors[0].Message);
             }
 
             if (result.Data == null)
             {
+                LogError("GraphQL response contains no data", responseBody);
                 throw new GraphQLException("No data in response");
             }
 
             return result.Data;
+        }
+
+        private void LogError(string title, string details)
+        {
+            var message = $"[GraphQLClientService] {title}{Environment.NewLine}Endpoint: {_serverUrl}{Environment.NewLine}{details}";
+            Debug.WriteLine(message);
+            Console.Error.WriteLine(message);
         }
     }
 

@@ -97,6 +97,10 @@ async function main() {
   app.post("/uploads", cors<cors.CorsRequest>(), (req, res) => {
     upload.single("file")(req, res, (err) => {
       if (err instanceof multer.MulterError) {
+        console.error("[Uploads] multer error", {
+          code: err.code,
+          message: err.message,
+        });
         if (err.code === "LIMIT_FILE_SIZE") {
           res.status(400).json({ message: "File too large. Max size is 5MB." });
           return;
@@ -107,15 +111,23 @@ async function main() {
       }
 
       if (err) {
+        console.error("[Uploads] upload error", err);
         res.status(400).json({ message: err.message });
         return;
       }
 
       if (!req.file) {
+        console.error("[Uploads] no file uploaded");
         res.status(400).json({ message: "No file uploaded." });
         return;
       }
 
+      console.log("[Uploads] upload success", {
+        fileName: req.file.filename,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        size: req.file.size,
+      });
       res.status(200).json({ url: `/uploads/products/${req.file.filename}` });
     });
   });
