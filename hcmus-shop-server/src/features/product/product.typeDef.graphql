@@ -31,6 +31,11 @@ type ProductPage {
   pageSize: Int!
 }
 
+input ProductSortInput {
+  field: String!
+  direction: String!
+}
+
 input CreateProductInput {
   sku: String!
   name: String!
@@ -76,6 +81,7 @@ extend type Query {
     minPrice: Float
     maxPrice: Float
     inStockOnly: Boolean
+    sorts: [ProductSortInput!]
     sortBy: String
     sortOrder: String
     page: Int

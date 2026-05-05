@@ -31,6 +31,7 @@ namespace hcmus_shop.Services.Products
                 MinPrice = filter.MinPrice,
                 MaxPrice = filter.MaxPrice,
                 InStockOnly = filter.InStockOnly,
+                Sorts = filter.Sorts,
                 SortBy = filter.SortBy,
                 SortOrder = filter.SortOrder,
                 Page = filter.Page,

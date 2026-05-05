@@ -31,11 +31,8 @@ namespace hcmus_shop.ViewModels.Products
         private bool _isInitialized;
         private int? _selectedCategoryId;
         private int? _selectedBrandId;
-        private string _selectedSortField = "name";
-        private string _selectedSortOrder = "asc";
         private int _loadVersion;
         private bool _suppressFilterReload;
-        private bool _suppressSortReload;
         private bool _suppressSelectAllChange;
         private bool _isAdvancedSearchExpanded;
         private string _advancedSku = string.Empty;
@@ -64,13 +61,22 @@ namespace hcmus_shop.ViewModels.Products
             ClearFiltersCommand = new AsyncRelayCommand(ClearFiltersAsync, () => !IsLoading);
             InitializeCommand = new AsyncRelayCommand(InitializeAsync, () => !IsInitialized && !IsLoading);
             ApplyAdvancedFiltersCommand = new AsyncRelayCommand(ApplyAdvancedFiltersAsync, () => !IsLoading);
+            AddSortCriterionCommand = new RelayCommand(AddSortCriterion);
+            RemoveSortCriterionCommand = new RelayCommand<ProductSortCriterionViewModel>(RemoveSortCriterion);
+            MoveSortCriterionUpCommand = new RelayCommand<ProductSortCriterionViewModel>(MoveSortCriterionUp);
+            MoveSortCriterionDownCommand = new RelayCommand<ProductSortCriterionViewModel>(MoveSortCriterionDown);
+            ApplySortCommand = new AsyncRelayCommand(ApplySortAsync, () => !IsLoading);
+            ResetSortCommand = new AsyncRelayCommand(ResetSortAsync, () => !IsLoading);
 
             SortFieldOptions.Add(new SortOptionViewModel("name", "Name"));
             SortFieldOptions.Add(new SortOptionViewModel("sellingPrice", "Price"));
             SortFieldOptions.Add(new SortOptionViewModel("stockQuantity", "Stock"));
+            SortFieldOptions.Add(new SortOptionViewModel("createdAt", "Created"));
 
             SortOrderOptions.Add(new SortOptionViewModel("asc", "Asc"));
             SortOrderOptions.Add(new SortOptionViewModel("desc", "Desc"));
+
+            ResetSortCriteriaToDefault();
         }
 
         public ObservableCollection<ProductRowViewModel> PagedProducts { get; } = [];
@@ -82,6 +88,7 @@ namespace hcmus_shop.ViewModels.Products
         public ObservableCollection<AdvancedFilterOptionViewModel> AdvancedBrandOptions { get; } = [];
         public ObservableCollection<SortOptionViewModel> SortFieldOptions { get; } = [];
         public ObservableCollection<SortOptionViewModel> SortOrderOptions { get; } = [];
+        public ObservableCollection<ProductSortCriterionViewModel> SortCriteria { get; } = [];
 
         public IRelayCommand AddProductCommand { get; }
         public IRelayCommand<int> EditProductCommand { get; }
@@ -92,6 +99,12 @@ namespace hcmus_shop.ViewModels.Products
         public IAsyncRelayCommand ClearFiltersCommand { get; }
         public IAsyncRelayCommand InitializeCommand { get; }
         public IAsyncRelayCommand ApplyAdvancedFiltersCommand { get; }
+        public IRelayCommand AddSortCriterionCommand { get; }
+        public IRelayCommand<ProductSortCriterionViewModel> RemoveSortCriterionCommand { get; }
+        public IRelayCommand<ProductSortCriterionViewModel> MoveSortCriterionUpCommand { get; }
+        public IRelayCommand<ProductSortCriterionViewModel> MoveSortCriterionDownCommand { get; }
+        public IAsyncRelayCommand ApplySortCommand { get; }
+        public IAsyncRelayCommand ResetSortCommand { get; }
 
         public event EventHandler? NavigateToAddProductRequested;
         public event Action<int>? NavigateToEditProductRequested;
@@ -146,6 +159,8 @@ namespace hcmus_shop.ViewModels.Products
                     InitializeCommand.NotifyCanExecuteChanged();
                     ClearFiltersCommand.NotifyCanExecuteChanged();
                     ApplyAdvancedFiltersCommand.NotifyCanExecuteChanged();
+                    ApplySortCommand.NotifyCanExecuteChanged();
+                    ResetSortCommand.NotifyCanExecuteChanged();
                     OnPropertyChanged(nameof(IsBusy));
                     OnPropertyChanged(nameof(IsEmpty));
                 }
@@ -170,41 +185,10 @@ namespace hcmus_shop.ViewModels.Products
         public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
         public bool IsEmpty => !IsLoading && !HasError && PagedProducts.Count == 0;
 
-        public string SelectedSortField
-        {
-            get => _selectedSortField;
-            set
-            {
-                if (SetProperty(ref _selectedSortField, value))
-                {
-                    if (_suppressSortReload)
-                    {
-                        return;
-                    }
-
-                    _currentPage = 1;
-                    _ = LoadProductsAsync();
-                }
-            }
-        }
-
-        public string SelectedSortOrder
-        {
-            get => _selectedSortOrder;
-            set
-            {
-                if (SetProperty(ref _selectedSortOrder, value))
-                {
-                    if (_suppressSortReload)
-                    {
-                        return;
-                    }
-
-                    _currentPage = 1;
-                    _ = LoadProductsAsync();
-                }
-            }
-        }
+        public string SortCriteriaSummary =>
+            SortCriteria.Count == 0
+                ? "Default sort"
+                : string.Join(" -> ", SortCriteria.Select(criteria => $"{criteria.Field} {criteria.Direction}"));
 
         public int? SelectedCategoryId
         {
@@ -345,25 +329,12 @@ namespace hcmus_shop.ViewModels.Products
 
             try
             {
-                _suppressSortReload = true;
-                if (!SortFieldOptions.Any(option => option.Value == SelectedSortField))
-                {
-                    SelectedSortField = "name";
-                }
-
-                if (!SortOrderOptions.Any(option => option.Value == SelectedSortOrder))
-                {
-                    SelectedSortOrder = "asc";
-                }
-                _suppressSortReload = false;
-
                 await LoadFilterOptionsAsync();
                 await LoadProductsAsync(clearError: false);
                 IsInitialized = true;
             }
             catch (Exception ex)
             {
-                _suppressSortReload = false;
                 ErrorMessage = $"Failed to initialize products page: {ex.Message}";
             }
         }
@@ -410,6 +381,75 @@ namespace hcmus_shop.ViewModels.Products
                 return;
             }
 
+            ErrorMessage = string.Empty;
+            _currentPage = 1;
+            await LoadProductsAsync();
+        }
+
+        private void AddSortCriterion()
+        {
+            var criterion = new ProductSortCriterionViewModel("name", "asc");
+            criterion.PropertyChanged += SortCriterion_PropertyChanged;
+            SortCriteria.Add(criterion);
+            OnPropertyChanged(nameof(SortCriteriaSummary));
+        }
+
+        private void RemoveSortCriterion(ProductSortCriterionViewModel? criterion)
+        {
+            if (criterion is null)
+            {
+                return;
+            }
+
+            criterion.PropertyChanged -= SortCriterion_PropertyChanged;
+            SortCriteria.Remove(criterion);
+            OnPropertyChanged(nameof(SortCriteriaSummary));
+        }
+
+        private void MoveSortCriterionUp(ProductSortCriterionViewModel? criterion)
+        {
+            if (criterion is null)
+            {
+                return;
+            }
+
+            var index = SortCriteria.IndexOf(criterion);
+            if (index <= 0)
+            {
+                return;
+            }
+
+            SortCriteria.Move(index, index - 1);
+            OnPropertyChanged(nameof(SortCriteriaSummary));
+        }
+
+        private void MoveSortCriterionDown(ProductSortCriterionViewModel? criterion)
+        {
+            if (criterion is null)
+            {
+                return;
+            }
+
+            var index = SortCriteria.IndexOf(criterion);
+            if (index < 0 || index >= SortCriteria.Count - 1)
+            {
+                return;
+            }
+
+            SortCriteria.Move(index, index + 1);
+            OnPropertyChanged(nameof(SortCriteriaSummary));
+        }
+
+        private async Task ApplySortAsync()
+        {
+            ErrorMessage = string.Empty;
+            _currentPage = 1;
+            await LoadProductsAsync();
+        }
+
+        private async Task ResetSortAsync()
+        {
+            ResetSortCriteriaToDefault();
             ErrorMessage = string.Empty;
             _currentPage = 1;
             await LoadProductsAsync();
@@ -623,8 +663,7 @@ namespace hcmus_shop.ViewModels.Products
                     BrandId = SelectedBrandId,
                     CategoryIds = GetSelectedAdvancedCategoryIds(),
                     BrandIds = GetSelectedAdvancedBrandIds(),
-                    SortBy = SelectedSortField,
-                    SortOrder = SelectedSortOrder,
+                    Sorts = GetSortCriteria(),
                     MinPrice = minPrice,
                     MaxPrice = maxPrice,
                     InStockOnly = InStockOnly ? true : null,
@@ -802,6 +841,15 @@ namespace hcmus_shop.ViewModels.Products
             }
         }
 
+        private void SortCriterion_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ProductSortCriterionViewModel.Field)
+                || e.PropertyName == nameof(ProductSortCriterionViewModel.Direction))
+            {
+                OnPropertyChanged(nameof(SortCriteriaSummary));
+            }
+        }
+
         private void UpdateSelectAllState()
         {
             if (PagedProducts.Count == 0)
@@ -898,6 +946,36 @@ namespace hcmus_shop.ViewModels.Products
                 .ToList();
 
             return selectedIds.Count > 0 ? selectedIds : null;
+        }
+
+        private List<ProductSortCriterionDto>? GetSortCriteria()
+        {
+            var sorts = SortCriteria
+                .Where(criteria => !string.IsNullOrWhiteSpace(criteria.Field) && !string.IsNullOrWhiteSpace(criteria.Direction))
+                .Select(criteria => new ProductSortCriterionDto
+                {
+                    Field = criteria.Field,
+                    Direction = criteria.Direction
+                })
+                .ToList();
+
+            return sorts.Count > 0 ? sorts : null;
+        }
+
+        private void ResetSortCriteriaToDefault()
+        {
+            foreach (var criterion in SortCriteria)
+            {
+                criterion.PropertyChanged -= SortCriterion_PropertyChanged;
+            }
+
+            SortCriteria.Clear();
+
+            var defaultCriterion = new ProductSortCriterionViewModel("name", "asc");
+            defaultCriterion.PropertyChanged += SortCriterion_PropertyChanged;
+            SortCriteria.Add(defaultCriterion);
+
+            OnPropertyChanged(nameof(SortCriteriaSummary));
         }
 
         private void ClearAdvancedSelections()

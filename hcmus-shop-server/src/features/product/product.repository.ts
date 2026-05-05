@@ -67,13 +67,13 @@ export class ProductRepository {
       where.stockQuantity = { gt: 0 };
     }
 
-    const orderBy: Prisma.ProductOrderByWithRelationInput = {};
-    const sortField = filter.sortBy ?? "createdAt";
-    const sortDir = filter.sortOrder === "asc" ? "asc" : "desc";
+    const sorts = filter.sorts?.length
+      ? filter.sorts
+      : [{ field: filter.sortBy ?? "createdAt", direction: filter.sortOrder === "asc" ? "asc" : "desc" }];
 
-    if (["name", "sellingPrice", "stockQuantity", "createdAt"].includes(sortField)) {
-      (orderBy as Record<string, string>)[sortField] = sortDir;
-    }
+    const orderBy = sorts.map((sort) => ({
+      [sort.field]: sort.direction,
+    })) as Prisma.ProductOrderByWithRelationInput[];
 
     const [items, totalCount] = await Promise.all([
       prisma.product.findMany({ where, orderBy, skip, take: pageSize }),

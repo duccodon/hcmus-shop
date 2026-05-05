@@ -1,3 +1,8 @@
+export interface ProductSortDto {
+  field: string;
+  direction: string;
+}
+
 export interface ProductFilterDto {
   search?: string;
   name?: string;
@@ -9,6 +14,7 @@ export interface ProductFilterDto {
   minPrice?: number;
   maxPrice?: number;
   inStockOnly?: boolean;
+  sorts?: ProductSortDto[];
   sortBy?: string;
   sortOrder?: string;
   page?: number;

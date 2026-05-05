@@ -14,6 +14,7 @@ namespace hcmus_shop.GraphQL.Operations
                 $minPrice: Float
                 $maxPrice: Float
                 $inStockOnly: Boolean
+                $sorts: [ProductSortInput!]
                 $sortBy: String
                 $sortOrder: String
                 $page: Int
@@ -30,6 +31,7 @@ namespace hcmus_shop.GraphQL.Operations
                     minPrice: $minPrice
                     maxPrice: $maxPrice
                     inStockOnly: $inStockOnly
+                    sorts: $sorts
                     sortBy: $sortBy
                     sortOrder: $sortOrder
                     page: $page

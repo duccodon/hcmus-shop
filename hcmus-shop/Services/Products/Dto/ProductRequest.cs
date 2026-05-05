@@ -2,6 +2,12 @@ using System.Collections.Generic;
 
 namespace hcmus_shop.Services.Products.Dto
 {
+    public class ProductSortCriterionDto
+    {
+        public string Field { get; set; } = string.Empty;
+        public string Direction { get; set; } = string.Empty;
+    }
+
     public class ProductFilterDto
     {
         public string? Search { get; set; }
@@ -14,6 +20,7 @@ namespace hcmus_shop.Services.Products.Dto
         public double? MinPrice { get; set; }
         public double? MaxPrice { get; set; }
         public bool? InStockOnly { get; set; }
+        public List<ProductSortCriterionDto>? Sorts { get; set; }
         public string? SortBy { get; set; }
         public string? SortOrder { get; set; }
         public int Page { get; set; } = 1;
@@ -64,6 +71,7 @@ namespace hcmus_shop.Services.Products.Dto
         public double? MinPrice { get; set; }
         public double? MaxPrice { get; set; }
         public bool? InStockOnly { get; set; }
+        public List<ProductSortCriterionDto>? Sorts { get; set; }
         public string? SortBy { get; set; }
         public string? SortOrder { get; set; }
         public int Page { get; set; }

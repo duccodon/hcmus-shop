@@ -27,8 +27,6 @@
 
                         <Setter Target="BrandFilter.Width" Value="Auto" />
                         <Setter Target="CategoryFilter.Width" Value="Auto" />
-                        <Setter Target="SortFieldFilter.Width" Value="Auto" />
-                        <Setter Target="SortOrderFilter.Width" Value="Auto" />
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState x:Name="MediumState">
@@ -51,8 +49,6 @@
                         <Setter Target="FilterPanel.Orientation" Value="Horizontal" />
                         <Setter Target="BrandFilter.Width" Value="160" />
                         <Setter Target="CategoryFilter.Width" Value="180" />
-                        <Setter Target="SortFieldFilter.Width" Value="120" />
-                        <Setter Target="SortOrderFilter.Width" Value="95" />
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState x:Name="WideState">
@@ -76,8 +72,6 @@
 
                         <Setter Target="BrandFilter.Width" Value="160" />
                         <Setter Target="CategoryFilter.Width" Value="180" />
-                        <Setter Target="SortFieldFilter.Width" Value="120" />
-                        <Setter Target="SortOrderFilter.Width" Value="95" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
@@ -181,25 +175,6 @@
                                     SelectedValuePath="Id"
                                     SelectedValue="{x:Bind ViewModel.SelectedCategoryId, Mode=TwoWay}" />
 
-                                <ComboBox
-                                    x:Name="SortFieldFilter"
-                                    Width="120"
-                                    Style="{StaticResource FormComboBoxStyle}"
-                                    PlaceholderText="Sort By"
-                                    ItemsSource="{x:Bind ViewModel.SortFieldOptions, Mode=OneWay}"
-                                    DisplayMemberPath="Name"
-                                    SelectedValuePath="Value"
-                                    SelectedValue="{x:Bind ViewModel.SelectedSortField, Mode=TwoWay}" />
-
-                                <ComboBox
-                                    x:Name="SortOrderFilter"
-                                    Width="95"
-                                    Style="{StaticResource FormComboBoxStyle}"
-                                    PlaceholderText="Order"
-                                    ItemsSource="{x:Bind ViewModel.SortOrderOptions, Mode=OneWay}"
-                                    DisplayMemberPath="Name"
-                                    SelectedValuePath="Value"
-                                    SelectedValue="{x:Bind ViewModel.SelectedSortOrder, Mode=TwoWay}" />
                                 <ToggleSwitch
                                     Header="Advanced"
                                     VerticalAlignment="Top"
@@ -228,6 +203,7 @@
                             Visibility="{x:Bind ViewModel.IsAdvancedSearchExpanded, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Grid RowSpacing="14">
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
@@ -328,8 +304,91 @@
                                     </Border>
                                 </Grid>
 
-                                <StackPanel
+                                <Border
                                     Grid.Row="2"
+                                    Padding="12"
+                                    CornerRadius="10"
+                                    Background="{StaticResource CardBackground}">
+                                    <StackPanel Spacing="10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="Sort Criteria" Style="{StaticResource FieldLabelStyle}" />
+                                                <TextBlock Text="{x:Bind ViewModel.SortCriteriaSummary, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" />
+                                            </StackPanel>
+                                            <Button
+                                                Grid.Column="1"
+                                                Content="+ Add Sort"
+                                                Style="{StaticResource GhostButtonStyle}"
+                                                Command="{x:Bind ViewModel.AddSortCriterionCommand}" />
+                                        </Grid>
+
+                                        <ItemsControl ItemsSource="{x:Bind ViewModel.SortCriteria, Mode=OneWay}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:ProductSortCriterionViewModel">
+                                                    <Grid Margin="0,0,0,8">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="1.5*" />
+                                                            <ColumnDefinition Width="1.1*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <ComboBox
+                                                            Style="{StaticResource FormComboBoxStyle}"
+                                                            ItemsSource="{Binding DataContext.SortFieldOptions, ElementName=Root}"
+                                                            DisplayMemberPath="Name"
+                                                            SelectedValuePath="Value"
+                                                            SelectedValue="{x:Bind Field, Mode=TwoWay}" />
+
+                                                        <ComboBox
+                                                            Grid.Column="1"
+                                                            Margin="8,0,0,0"
+                                                            Style="{StaticResource FormComboBoxStyle}"
+                                                            ItemsSource="{Binding DataContext.SortOrderOptions, ElementName=Root}"
+                                                            DisplayMemberPath="Name"
+                                                            SelectedValuePath="Value"
+                                                            SelectedValue="{x:Bind Direction, Mode=TwoWay}" />
+
+                                                        <Button
+                                                            Grid.Column="2"
+                                                            Margin="8,0,0,0"
+                                                            Style="{StaticResource GhostButtonStyle}"
+                                                            Command="{Binding DataContext.MoveSortCriterionUpCommand, ElementName=Root}"
+                                                            CommandParameter="{Binding}">
+                                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74A;" />
+                                                        </Button>
+
+                                                        <Button
+                                                            Grid.Column="3"
+                                                            Margin="4,0,0,0"
+                                                            Style="{StaticResource GhostButtonStyle}"
+                                                            Command="{Binding DataContext.MoveSortCriterionDownCommand, ElementName=Root}"
+                                                            CommandParameter="{Binding}">
+                                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74B;" />
+                                                        </Button>
+
+                                                        <Button
+                                                            Grid.Column="4"
+                                                            Margin="4,0,0,0"
+                                                            Style="{StaticResource GhostButtonStyle}"
+                                                            Command="{Binding DataContext.RemoveSortCriterionCommand, ElementName=Root}"
+                                                            CommandParameter="{Binding}">
+                                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74D;" Foreground="{StaticResource DangerForeground}" />
+                                                        </Button>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+
+                                <StackPanel
+                                    Grid.Row="3"
                                     Orientation="Horizontal"
                                     Spacing="8"
                                     HorizontalAlignment="Right">
@@ -337,6 +396,14 @@
                                         Content="Apply Filters"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Command="{x:Bind ViewModel.ApplyAdvancedFiltersCommand}" />
+                                    <Button
+                                        Content="Apply Sort"
+                                        Style="{StaticResource GhostButtonStyle}"
+                                        Command="{x:Bind ViewModel.ApplySortCommand}" />
+                                    <Button
+                                        Content="Reset Sort"
+                                        Style="{StaticResource GhostButtonStyle}"
+                                        Command="{x:Bind ViewModel.ResetSortCommand}" />
                                     <Button
                                         Content="Clear All Filters"
                                         Style="{StaticResource GhostButtonStyle}"
