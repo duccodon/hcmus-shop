@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Style x:Key="TableHeaderBorderStyle" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource TableHeaderBackground}" />
@@ -9,11 +7,84 @@
         <Setter Property="BorderThickness" Value="0,0,0,1" />
         <Setter Property="Padding" Value="12,8" />
     </Style>
-
     <Style x:Key="TableRowBorderStyle" TargetType="Border">
         <Setter Property="BorderBrush" Value="{StaticResource TableRowBorder}" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
         <Setter Property="Padding" Value="12,10" />
     </Style>
-
+    <Style x:Key="ContentCardBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource CardBackground}" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="20" />
+    </Style>
+    <Style x:Key="FormCardBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource CardBackground}" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="16" />
+    </Style>
+    <Style x:Key="FilterFlyoutContentStyle" TargetType="StackPanel">
+        <Setter Property="Padding" Value="4" />
+    </Style>
+    <Style x:Key="BulkActionBarContainerStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource SelectionHighlight}" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="12,8" />
+    </Style>
+    <Style x:Key="StatusBadgeContainerStyle" TargetType="Border">
+        <Setter Property="Padding" Value="10,5" />
+        <Setter Property="CornerRadius" Value="99" />
+    </Style>
+    <Style x:Key="ProductIconContainerStyle" TargetType="Border">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Background" Value="{StaticResource CardBackground}" />
+    </Style>
+    <Style x:Key="ImageUploadSurfaceStyle" TargetType="Border">
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Background" Value="{StaticResource ImageUploadPanelBackground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource TableRowBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="8" />
+    </Style>
+    <Style x:Key="ImagePlaceholderCircleStyle" TargetType="Border">
+        <Setter Property="Width" Value="110" />
+        <Setter Property="Height" Value="110" />
+        <Setter Property="CornerRadius" Value="55" />
+        <Setter Property="Background" Value="{StaticResource ImageUploadPlaceholderBackground}" />
+    </Style>
+    <Style x:Key="DashboardCardBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource CardBackground}" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="16" />
+    </Style>
+    <Style x:Key="DashboardSidebarBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource SidebarBackground}" />
+        <Setter Property="CornerRadius" Value="0,18,18,0" />
+        <Setter Property="Padding" Value="16" />
+    </Style>
+    <Style x:Key="DashboardOverlayBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource DashboardOverlayBackground}" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="BorderBrush" Value="{StaticResource DashboardCardStrokeBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style x:Key="DashboardPillBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource DashboardPillBackground}" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="10,6" />
+    </Style>
+    <Style x:Key="RecentInvoicesHeaderCellStyle" TargetType="Border">
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="BorderBrush" Value="{StaticResource TableHeaderBorder}" />
+    </Style>
+    <Style x:Key="RecentInvoicesRowCellStyle" TargetType="Border">
+        <Setter Property="Padding" Value="10,10" />
+        <Setter Property="BorderBrush" Value="{StaticResource TableRowBorder}" />
+    </Style>
+    <Style x:Key="RecentInvoicesStatusOuterCellStyle" TargetType="Border">
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="BorderBrush" Value="{StaticResource TableRowBorder}" />
+    </Style>
 </ResourceDictionary>

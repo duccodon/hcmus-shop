@@ -1,39 +1,38 @@
-<UserControl
+﻿<UserControl
     x:Class="hcmus_shop.Views.Dashboard.Components.Controls.HeaderBar"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:hcmus_shop.Views.Dashboard.Components.Controls">
-
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="360" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-
         <TextBlock
             VerticalAlignment="Center"
-            FontSize="24"
-            FontWeight="SemiBold"
-            Foreground="{StaticResource TextPrimary}"
+            Style="{StaticResource HeaderWelcomeTextStyle}"
             Text="{x:Bind WelcomeText, Mode=OneWay}" />
-
         <AutoSuggestBox
             Grid.Column="1"
+            MinHeight="40"
             Margin="16,0,0,0"
-            PlaceholderText="Search anything"
-            QueryIcon="Find"
             CornerRadius="12"
-            MinHeight="40" />
-
+            PlaceholderText="Search anything"
+            QueryIcon="Find" />
         <StackPanel
             Grid.Column="2"
             Margin="16,0,0,0"
+            VerticalAlignment="Center"
             Orientation="Horizontal"
-            Spacing="12"
-            VerticalAlignment="Center">
-            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE7F4;" Foreground="{StaticResource TextSecondary}" />
-            <Ellipse Width="32" Height="32" Fill="{StaticResource AccentPurple}" />
+            Spacing="12">
+            <FontIcon
+                FontFamily="Segoe MDL2 Assets"
+                Foreground="{StaticResource TextSecondary}"
+                Glyph="&#xE7F4;" />
+            <Ellipse
+                Width="32"
+                Height="32"
+                Fill="{StaticResource AccentPurple}" />
         </StackPanel>
     </Grid>
 </UserControl>

@@ -1,8 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using hcmus_shop.Models.Common;
-using hcmus_shop.Models.DTOs;
 using hcmus_shop.Contracts.Services;
+using hcmus_shop.Models.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

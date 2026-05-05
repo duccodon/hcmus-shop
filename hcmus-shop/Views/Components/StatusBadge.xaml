@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="hcmus_shop.Views.Components.StatusBadge"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Name="Root">
+
+    <Border
+        HorizontalAlignment="Left"
+        Background="{x:Bind StatusTone, Mode=OneWay, Converter={StaticResource StatusToneBackgroundConverter}}"
+        Style="{StaticResource StatusBadgeContainerStyle}">
+        <TextBlock
+            VerticalAlignment="Center"
+            Foreground="{x:Bind StatusTone, Mode=OneWay, Converter={StaticResource StatusToneForegroundConverter}}"
+            Style="{StaticResource StatusBadgeTextStyle}"
+            Text="{x:Bind StatusText, Mode=OneWay}" />
+    </Border>
+</UserControl>

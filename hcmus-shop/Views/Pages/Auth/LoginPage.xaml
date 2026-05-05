@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="hcmus_shop.Views.LoginPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -13,7 +13,7 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!-- Left Panel — Branding -->
+        <!-- Left Panel â€” Branding -->
         <Grid Grid.Column="0" Background="{StaticResource LoginPrimaryBrush}">
             <StackPanel
                 HorizontalAlignment="Center"
@@ -22,7 +22,7 @@
                 <FontIcon
                     HorizontalAlignment="Center"
                     FontFamily="{StaticResource SymbolThemeFontFamily}"
-                    FontSize="64"
+                    Style="{StaticResource BrandBigIconStyle}"
                     Foreground="{StaticResource LoginCardBackgroundBrush}"
                     Glyph="&#xE719;" />
                 <TextBlock
@@ -47,7 +47,7 @@
                 Text="{x:Bind VersionText}" />
         </Grid>
 
-        <!-- Right Panel — Login Form -->
+        <!-- Right Panel â€” Login Form -->
         <Grid Grid.Column="1" Background="{StaticResource LoginRightPanelBrush}">
 
             <!-- Config button top-right -->
@@ -59,11 +59,7 @@
                 Command="{Binding OpenConfigCommand}"
                 ToolTipService.ToolTip="Server Configuration">
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                    <FontIcon
-                        FontFamily="{StaticResource SymbolThemeFontFamily}"
-                        FontSize="14"
-                        Foreground="{StaticResource TextSecondary}"
-                        Glyph="&#xE713;" />
+                    <FontIcon`r`n                        FontFamily="{StaticResource SymbolThemeFontFamily}"`r`n                        Style="{StaticResource SortGlyphIconStyle}"`r`n                        Glyph="&#xE713;" />
                     <TextBlock
                         Style="{StaticResource BodySecondaryTextStyle}"
                         Text="Config" />
@@ -144,3 +140,6 @@
         </Grid>
     </Grid>
 </Page>
+
+
+
