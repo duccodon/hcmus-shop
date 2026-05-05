@@ -9,6 +9,7 @@
         <ResourceDictionary>
             <!-- Declare your converter here -->
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
             <converters:StockToneForegroundConverter x:Key="StockToneForegroundConverter" />
             <converters:StatusToneBackgroundConverter x:Key="StatusToneBackgroundConverter" />
