@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using hcmus_shop.Models.DTOs;
 using hcmus_shop.Services.Brands;
 using hcmus_shop.Services.Categories;
+using hcmus_shop.Services.GraphQL;
 using hcmus_shop.Services.Products;
 using Microsoft.UI;
 using Microsoft.UI.Xaml.Media;
@@ -21,6 +22,7 @@ namespace hcmus_shop.ViewModels.Products
         private readonly IProductService _productService;
         private readonly IBrandService _brandService;
         private readonly ICategoryService _categoryService;
+        private readonly IGraphQLClientService _graphQLClientService;
         private CancellationTokenSource? _searchDebounceCts;
 
         private string _searchQuery = string.Empty;
@@ -42,11 +44,13 @@ namespace hcmus_shop.ViewModels.Products
         public ProductsViewModel(
             IProductService productService,
             IBrandService brandService,
-            ICategoryService categoryService)
+            ICategoryService categoryService,
+            IGraphQLClientService graphQLClientService)
         {
             _productService = productService;
             _brandService = brandService;
             _categoryService = categoryService;
+            _graphQLClientService = graphQLClientService;
 
             AddProductCommand = new RelayCommand(AddProduct);
             EditProductCommand = new RelayCommand<int>(EditProduct);
@@ -533,7 +537,8 @@ namespace hcmus_shop.ViewModels.Products
                         item.Categories.Count > 0 ? string.Join(", ", item.Categories.Select(c => c.Name)) : "Uncategorized",
                         item.StockQuantity,
                         Convert.ToDecimal(item.SellingPrice),
-                        item.IsActive);
+                        item.IsActive,
+                        BuildThumbnailUri(item));
 
                     row.PropertyChanged += Row_PropertyChanged;
                     PagedProducts.Add(row);
@@ -690,6 +695,44 @@ namespace hcmus_shop.ViewModels.Products
         {
             OnPropertyChanged(nameof(HasSelection));
             OnPropertyChanged(nameof(SelectionActionText));
+        }
+
+        private Uri? BuildThumbnailUri(ProductDto product)
+        {
+            var imageUrl = product.Images
+                .OrderBy(image => image.DisplayOrder)
+                .Select(image => image.ImageUrl)
+                .FirstOrDefault(url => !string.IsNullOrWhiteSpace(url));
+
+            return NormalizeImageUri(imageUrl);
+        }
+
+        private Uri? NormalizeImageUri(string? imageUrl)
+        {
+            if (string.IsNullOrWhiteSpace(imageUrl))
+            {
+                return null;
+            }
+
+            if (Uri.TryCreate(imageUrl, UriKind.Absolute, out var absoluteUri))
+            {
+                return absoluteUri;
+            }
+
+            var serverUrl = _graphQLClientService.ServerUrl;
+            if (!Uri.TryCreate(serverUrl, UriKind.Absolute, out var graphQlUri))
+            {
+                return null;
+            }
+
+            var baseOrigin = new Uri(graphQlUri.GetLeftPart(UriPartial.Authority));
+            var normalizedPath = imageUrl.StartsWith("/", StringComparison.Ordinal)
+                ? imageUrl
+                : $"/{imageUrl}";
+
+            return Uri.TryCreate(baseOrigin, normalizedPath, out var resolvedUri)
+                ? resolvedUri
+                : null;
         }
 
         private static IEnumerable<int> BuildPageNumbers(int currentPage, int totalPages)

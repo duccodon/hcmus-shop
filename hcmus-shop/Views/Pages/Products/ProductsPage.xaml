@@ -320,13 +320,23 @@
                                                             CornerRadius="8"
                                                             Background="#12000000"
                                                             VerticalAlignment="Center">
-                                                            <FontIcon
-                                                                HorizontalAlignment="Center"
-                                                                VerticalAlignment="Center"
-                                                                FontFamily="Segoe Fluent Icons"
-                                                                Glyph="&#xEC8A;"
-                                                                FontSize="14"
-                                                                Foreground="{StaticResource TextSecondary}" />
+                                                            <Grid>
+                                                                <Image
+                                                                    Stretch="UniformToFill"
+                                                                    Visibility="{x:Bind HasThumbnail, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                    <Image.Source>
+                                                                        <BitmapImage UriSource="{x:Bind ThumbnailUri, Mode=OneWay}" />
+                                                                    </Image.Source>
+                                                                </Image>
+                                                                <FontIcon
+                                                                    HorizontalAlignment="Center"
+                                                                    VerticalAlignment="Center"
+                                                                    FontFamily="Segoe Fluent Icons"
+                                                                    Glyph="{x:Bind FallbackGlyph, Mode=OneWay}"
+                                                                    FontSize="14"
+                                                                    Foreground="{StaticResource TextSecondary}"
+                                                                    Visibility="{x:Bind HasThumbnail, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                                            </Grid>
                                                         </Border>
                                                         <StackPanel VerticalAlignment="Center">
                                                             <TextBlock Text="{x:Bind Name, Mode=OneWay}" FontSize="13" Foreground="{StaticResource TextPrimary}" />
