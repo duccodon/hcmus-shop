@@ -9,16 +9,25 @@
         <ResourceDictionary>
             <!-- Declare your converter here -->
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
             <converters:StockToneForegroundConverter x:Key="StockToneForegroundConverter" />
             <converters:StatusToneBackgroundConverter x:Key="StatusToneBackgroundConverter" />
             <converters:StatusToneForegroundConverter x:Key="StatusToneForegroundConverter" />
             <converters:PageButtonBackgroundConverter x:Key="PageButtonBackgroundConverter" />
             <converters:PageButtonForegroundConverter x:Key="PageButtonForegroundConverter" />
+            <converters:InvoiceStatusBackgroundConverter x:Key="InvoiceStatusBackgroundConverter" />
+            <converters:InvoiceStatusForegroundConverter x:Key="InvoiceStatusForegroundConverter" />
+            <converters:InvoiceLegendMarkerConverter x:Key="InvoiceLegendMarkerConverter" />
 
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
                 <ResourceDictionary Source="ms-appx:///Resources/Styles/ThemeResources.xaml" />
+                <ResourceDictionary Source="ms-appx:///Resources/Styles/ButtonStyles.xaml" />
+                <ResourceDictionary Source="ms-appx:///Resources/Styles/TextStyles.xaml" />
+                <ResourceDictionary Source="ms-appx:///Resources/Styles/FormStyles.xaml" />
+                <ResourceDictionary Source="ms-appx:///Resources/Styles/BadgeStyles.xaml" />
+                <ResourceDictionary Source="ms-appx:///Resources/Styles/TableStyles.xaml" />
                 <ResourceDictionary Source="ms-appx:///Resources/Auth/LoginStyles.xaml" />
                 <!-- Add other merged dictionaries if you have more -->
             </ResourceDictionary.MergedDictionaries>

@@ -24,9 +24,7 @@
                 <TextBlock
                     VerticalAlignment="Center"
                     Text="Product Insights"
-                    FontSize="20"
-                    FontWeight="SemiBold"
-                    Foreground="{StaticResource TextPrimary}" />
+                    Style="{StaticResource SectionTitleStyle}" />
 
                 <StackPanel
                     Grid.Column="1"
@@ -60,8 +58,7 @@
 
                     <TextBlock
                         Text="Top Sold Products"
-                        FontSize="18"
-                        FontWeight="SemiBold"
+                        Style="{StaticResource CardTitleStyle}"
                         HorizontalAlignment="Center"
                         Foreground="{StaticResource TextPrimary}" />
 
@@ -96,7 +93,7 @@
                     Grid.Column="1"
                     Width="1"
                     HorizontalAlignment="Center"
-                    Background="#32000000" />
+                    Background="{StaticResource DashboardDividerBrush}" />
 
                 <Grid Grid.Column="2">
                     <Grid.RowDefinitions>
@@ -106,8 +103,7 @@
 
                     <TextBlock
                         Text="Top Going To Run Out"
-                        FontSize="18"
-                        FontWeight="SemiBold"
+                        Style="{StaticResource CardTitleStyle}"
                         HorizontalAlignment="Center"
                         Foreground="{StaticResource TextPrimary}" />
 

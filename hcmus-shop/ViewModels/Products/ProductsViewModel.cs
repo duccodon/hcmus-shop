@@ -1,12 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using hcmus_shop.Contracts.Services;
 using hcmus_shop.Models.DTOs;
-using hcmus_shop.Services.Brands;
-using hcmus_shop.Services.Categories;
-using hcmus_shop.Services.GraphQL;
-using hcmus_shop.Services.Products;
-using Microsoft.UI;
-using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -23,8 +18,8 @@ namespace hcmus_shop.ViewModels.Products
         private readonly IBrandService _brandService;
         private readonly ICategoryService _categoryService;
         private readonly IGraphQLClientService _graphQLClientService;
-        private CancellationTokenSource? _searchDebounceCts;
 
+        private CancellationTokenSource? _searchDebounceCts;
         private string _searchQuery = string.Empty;
         private int _selectedPageSize = 10;
         private bool _isAllOnPageSelected;
@@ -40,6 +35,7 @@ namespace hcmus_shop.ViewModels.Products
         private int _loadVersion;
         private bool _suppressFilterReload;
         private bool _suppressSortReload;
+        private bool _suppressSelectAllChange;
 
         public ProductsViewModel(
             IProductService productService,
@@ -138,10 +134,13 @@ namespace hcmus_shop.ViewModels.Products
                 {
                     InitializeCommand.NotifyCanExecuteChanged();
                     ClearFiltersCommand.NotifyCanExecuteChanged();
+                    OnPropertyChanged(nameof(IsBusy));
                     OnPropertyChanged(nameof(IsEmpty));
                 }
             }
         }
+
+        public bool IsBusy => IsLoading;
 
         public string ErrorMessage
         {
@@ -238,6 +237,11 @@ namespace hcmus_shop.ViewModels.Products
             {
                 if (SetProperty(ref _isAllOnPageSelected, value))
                 {
+                    if (_suppressSelectAllChange)
+                    {
+                        return;
+                    }
+
                     foreach (var row in PagedProducts)
                     {
                         row.IsSelected = value;
@@ -248,9 +252,8 @@ namespace hcmus_shop.ViewModels.Products
             }
         }
 
-        public bool HasSelection => PagedProducts.Any(p => p.IsSelected);
-
-        public string SelectionActionText => $"{PagedProducts.Count(p => p.IsSelected)} selected";
+        public bool HasSelection => PagedProducts.Any(product => product.IsSelected);
+        public string SelectionActionText => $"{PagedProducts.Count(product => product.IsSelected)} selected";
 
         public string ResultText
         {
@@ -341,36 +344,42 @@ namespace hcmus_shop.ViewModels.Products
 
         private async Task LoadFilterOptionsAsync()
         {
-            try
+            var brandsTask = _brandService.GetAllAsync();
+            var categoriesTask = _categoryService.GetAllAsync();
+            await Task.WhenAll(brandsTask, categoriesTask);
+
+            var brandsResult = brandsTask.Result;
+            if (!brandsResult.IsSuccess || brandsResult.Value is null)
             {
-                var brandsTask = _brandService.GetAllAsync();
-                var categoriesTask = _categoryService.GetAllAsync();
-
-                await Task.WhenAll(brandsTask, categoriesTask);
-
-                BrandOptions.Clear();
-                BrandOptions.Add(new FilterOptionViewModel(null, "All brands"));
-                foreach (var brand in brandsTask.Result.OrderBy(b => b.Name))
-                {
-                    BrandOptions.Add(new FilterOptionViewModel(brand.BrandId, brand.Name));
-                }
-
-                CategoryOptions.Clear();
-                CategoryOptions.Add(new FilterOptionViewModel(null, "All categories"));
-                foreach (var category in categoriesTask.Result.OrderBy(c => c.Name))
-                {
-                    CategoryOptions.Add(new FilterOptionViewModel(category.CategoryId, category.Name));
-                }
+                ErrorMessage = brandsResult.Error ?? "Failed to load brands.";
+                return;
             }
-            catch (Exception ex)
+
+            var categoriesResult = categoriesTask.Result;
+            if (!categoriesResult.IsSuccess || categoriesResult.Value is null)
             {
-                ErrorMessage = $"Failed to load filters: {ex.Message}";
+                ErrorMessage = categoriesResult.Error ?? "Failed to load categories.";
+                return;
+            }
+
+            BrandOptions.Clear();
+            BrandOptions.Add(new FilterOptionViewModel(null, "All brands"));
+            foreach (var brand in brandsResult.Value.OrderBy(brand => brand.Name))
+            {
+                BrandOptions.Add(new FilterOptionViewModel(brand.BrandId, brand.Name));
+            }
+
+            CategoryOptions.Clear();
+            CategoryOptions.Add(new FilterOptionViewModel(null, "All categories"));
+            foreach (var category in categoriesResult.Value.OrderBy(category => category.Name))
+            {
+                CategoryOptions.Add(new FilterOptionViewModel(category.CategoryId, category.Name));
             }
         }
 
         private async Task BulkToggleStatusAsync()
         {
-            var selectedRows = PagedProducts.Where(p => p.IsSelected).ToList();
+            var selectedRows = PagedProducts.Where(product => product.IsSelected).ToList();
             if (selectedRows.Count == 0)
             {
                 return;
@@ -383,10 +392,16 @@ namespace hcmus_shop.ViewModels.Products
             {
                 foreach (var row in selectedRows)
                 {
-                    await _productService.UpdateAsync(row.ProductId, new UpdateProductInput
+                    var result = await _productService.UpdateAsync(row.ProductId, new UpdateProductInput
                     {
                         IsActive = !row.IsActive
                     });
+
+                    if (!result.IsSuccess)
+                    {
+                        ErrorMessage = result.Error ?? "Failed to update product status.";
+                        return;
+                    }
                 }
 
                 await LoadProductsAsync();
@@ -404,16 +419,11 @@ namespace hcmus_shop.ViewModels.Products
         private async Task BulkDeleteAsync()
         {
             var selectedIds = PagedProducts
-                .Where(p => p.IsSelected)
-                .Select(p => p.ProductId)
+                .Where(product => product.IsSelected)
+                .Select(product => product.ProductId)
                 .ToList();
 
-            if (selectedIds.Count == 0)
-            {
-                return;
-            }
-
-            if (ConfirmBulkDeleteAsync is null)
+            if (selectedIds.Count == 0 || ConfirmBulkDeleteAsync is null)
             {
                 return;
             }
@@ -431,7 +441,12 @@ namespace hcmus_shop.ViewModels.Products
             {
                 foreach (var productId in selectedIds)
                 {
-                    await _productService.DeleteAsync(productId);
+                    var result = await _productService.DeleteAsync(productId);
+                    if (!result.IsSuccess)
+                    {
+                        ErrorMessage = result.Error ?? "Failed to delete product.";
+                        return;
+                    }
                 }
 
                 if ((_currentPage - 1) * SelectedPageSize >= Math.Max(_totalCount - selectedIds.Count, 0) && _currentPage > 1)
@@ -453,12 +468,7 @@ namespace hcmus_shop.ViewModels.Products
 
         private async Task DeleteSingleProductAsync(int productId)
         {
-            if (productId <= 0)
-            {
-                return;
-            }
-
-            if (ConfirmRowDeleteAsync is null)
+            if (productId <= 0 || ConfirmRowDeleteAsync is null)
             {
                 return;
             }
@@ -474,7 +484,12 @@ namespace hcmus_shop.ViewModels.Products
 
             try
             {
-                await _productService.DeleteAsync(productId);
+                var result = await _productService.DeleteAsync(productId);
+                if (!result.IsSuccess)
+                {
+                    ErrorMessage = result.Error ?? "Failed to delete product.";
+                    return;
+                }
 
                 if (PagedProducts.Count <= 1 && _currentPage > 1)
                 {
@@ -505,7 +520,7 @@ namespace hcmus_shop.ViewModels.Products
 
             try
             {
-                var page = await _productService.GetAllAsync(new ProductFilterDto
+                var result = await _productService.GetAllAsync(new ProductFilterDto
                 {
                     Search = string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery.Trim(),
                     CategoryId = SelectedCategoryId,
@@ -521,6 +536,20 @@ namespace hcmus_shop.ViewModels.Products
                     return;
                 }
 
+                if (!result.IsSuccess || result.Value is null)
+                {
+                    _totalCount = 0;
+                    PagedProducts.Clear();
+                    RebuildPageButtons();
+                    UpdateSelectAllState();
+                    NotifySelectionChanged();
+                    OnPropertyChanged(nameof(ResultText));
+                    OnPropertyChanged(nameof(IsEmpty));
+                    ErrorMessage = result.Error ?? "Failed to load products.";
+                    return;
+                }
+
+                var page = result.Value;
                 _totalCount = page.TotalCount;
                 if (_currentPage > TotalPages)
                 {
@@ -534,7 +563,7 @@ namespace hcmus_shop.ViewModels.Products
                         item.ProductId,
                         item.Sku,
                         item.Name,
-                        item.Categories.Count > 0 ? string.Join(", ", item.Categories.Select(c => c.Name)) : "Uncategorized",
+                        item.Categories.Count > 0 ? string.Join(", ", item.Categories.Select(category => category.Name)) : "Uncategorized",
                         item.StockQuantity,
                         Convert.ToDecimal(item.SellingPrice),
                         item.IsActive,
@@ -579,7 +608,6 @@ namespace hcmus_shop.ViewModels.Products
             _searchDebounceCts?.Dispose();
             _searchDebounceCts = new CancellationTokenSource();
             var token = _searchDebounceCts.Token;
-
             _ = DebounceSearchAsync(token);
         }
 
@@ -602,20 +630,12 @@ namespace hcmus_shop.ViewModels.Products
         {
             PageButtons.Clear();
 
-            var accentBackground = new SolidColorBrush(ColorHelper.FromArgb(255, 111, 126, 255));
-            var normalBackground = new SolidColorBrush(Colors.Transparent);
-            var activeForeground = new SolidColorBrush(Colors.White);
-            var normalForeground = App.Current.Resources["TextPrimary"] as Brush
-                ?? new SolidColorBrush(Colors.Black);
-
             PageButtons.Add(new PageButtonItem
             {
                 Label = "<- Previous",
                 PageNumber = _currentPage - 1,
                 IsEnabled = _currentPage > 1,
                 IsCurrent = false,
-                Background = normalBackground,
-                Foreground = normalForeground,
             });
 
             var pages = BuildPageNumbers(_currentPage, TotalPages);
@@ -631,8 +651,6 @@ namespace hcmus_shop.ViewModels.Products
                         PageNumber = -1,
                         IsEnabled = false,
                         IsCurrent = false,
-                        Background = normalBackground,
-                        Foreground = normalForeground,
                     });
                 }
 
@@ -642,8 +660,6 @@ namespace hcmus_shop.ViewModels.Products
                     PageNumber = page,
                     IsEnabled = page != _currentPage,
                     IsCurrent = page == _currentPage,
-                    Background = page == _currentPage ? accentBackground : normalBackground,
-                    Foreground = page == _currentPage ? activeForeground : normalForeground,
                 });
 
                 previousPage = page;
@@ -655,8 +671,6 @@ namespace hcmus_shop.ViewModels.Products
                 PageNumber = _currentPage + 1,
                 IsEnabled = _currentPage < TotalPages,
                 IsCurrent = false,
-                Background = normalBackground,
-                Foreground = normalForeground,
             });
         }
 
@@ -675,20 +689,22 @@ namespace hcmus_shop.ViewModels.Products
         {
             if (PagedProducts.Count == 0)
             {
-                if (_isAllOnPageSelected)
-                {
-                    _isAllOnPageSelected = false;
-                    OnPropertyChanged(nameof(IsAllOnPageSelected));
-                }
+                SetSelectAll(false);
                 return;
             }
 
-            var allSelected = PagedProducts.All(p => p.IsSelected);
+            var allSelected = PagedProducts.All(product => product.IsSelected);
             if (IsAllOnPageSelected != allSelected)
             {
-                _isAllOnPageSelected = allSelected;
-                OnPropertyChanged(nameof(IsAllOnPageSelected));
+                SetSelectAll(allSelected);
             }
+        }
+
+        private void SetSelectAll(bool value)
+        {
+            _suppressSelectAllChange = true;
+            IsAllOnPageSelected = value;
+            _suppressSelectAllChange = false;
         }
 
         private void NotifySelectionChanged()
@@ -719,16 +735,13 @@ namespace hcmus_shop.ViewModels.Products
                 return absoluteUri;
             }
 
-            var serverUrl = _graphQLClientService.ServerUrl;
-            if (!Uri.TryCreate(serverUrl, UriKind.Absolute, out var graphQlUri))
+            if (!Uri.TryCreate(_graphQLClientService.ServerUrl, UriKind.Absolute, out var graphQlUri))
             {
                 return null;
             }
 
             var baseOrigin = new Uri(graphQlUri.GetLeftPart(UriPartial.Authority));
-            var normalizedPath = imageUrl.StartsWith("/", StringComparison.Ordinal)
-                ? imageUrl
-                : $"/{imageUrl}";
+            var normalizedPath = imageUrl.StartsWith("/", StringComparison.Ordinal) ? imageUrl : $"/{imageUrl}";
 
             return Uri.TryCreate(baseOrigin, normalizedPath, out var resolvedUri)
                 ? resolvedUri

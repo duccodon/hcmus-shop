@@ -1,10 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using hcmus_shop.Contracts.Services;
 using hcmus_shop.Models.DTOs;
-using hcmus_shop.Services.Brands;
-using hcmus_shop.Services.Categories;
-using hcmus_shop.Services.Products;
-using hcmus_shop.Services.Series;
 using hcmus_shop.Services.Uploads;
 using System;
 using System.Collections.Generic;
@@ -17,11 +14,13 @@ namespace hcmus_shop.ViewModels.Products
     public class AddProductViewModel : ObservableObject
     {
         private const int MinimumImageCount = 1;
+
         private readonly IProductService _productService;
         private readonly IBrandService _brandService;
         private readonly ICategoryService _categoryService;
         private readonly ISeriesService _seriesService;
         private readonly IFileUploadService _fileUploadService;
+
         private ImagePreview _mainPreview = new();
         private int? _selectedBrandId;
         private int? _selectedSeriesId;
@@ -68,19 +67,13 @@ namespace hcmus_shop.ViewModels.Products
         public CreateProductInput DraftProduct { get; }
 
         public ObservableCollection<ImagePreview> PreviewImages { get; } = [];
-
         public ObservableCollection<LookupOptionViewModel> BrandOptions { get; } = [];
-
         public ObservableCollection<LookupOptionViewModel> SeriesOptions { get; } = [];
-
         public ObservableCollection<CategoryOptionViewModel> CategoryOptions { get; } = [];
 
         public IRelayCommand<ImagePreview?> SelectPreviewCommand { get; }
-
         public IAsyncRelayCommand AddCategoryCommand { get; }
-
         public IAsyncRelayCommand SaveProductCommand { get; }
-
         public IAsyncRelayCommand InitializeCommand { get; }
 
         public event EventHandler? ProductSaved;
@@ -106,6 +99,7 @@ namespace hcmus_shop.ViewModels.Products
                 if (SetProperty(ref _isSaving, value))
                 {
                     SaveProductCommand.NotifyCanExecuteChanged();
+                    OnPropertyChanged(nameof(IsBusy));
                 }
             }
         }
@@ -119,15 +113,26 @@ namespace hcmus_shop.ViewModels.Products
                 {
                     AddCategoryCommand.NotifyCanExecuteChanged();
                     OnPropertyChanged(nameof(AddCategoryButtonText));
+                    OnPropertyChanged(nameof(IsBusy));
                 }
             }
         }
 
+        public bool IsBusy => IsSaving || IsAddingCategory;
+
         public string SaveErrorMessage
         {
             get => _saveErrorMessage;
-            private set => SetProperty(ref _saveErrorMessage, value);
+            private set
+            {
+                if (SetProperty(ref _saveErrorMessage, value))
+                {
+                    OnPropertyChanged(nameof(HasSaveError));
+                }
+            }
         }
+
+        public bool HasSaveError => !string.IsNullOrWhiteSpace(SaveErrorMessage);
 
         public string SaveStatusMessage
         {
@@ -313,11 +318,17 @@ namespace hcmus_shop.ViewModels.Products
 
             try
             {
-                var created = await _categoryService.CreateAsync(
+                var createResult = await _categoryService.CreateAsync(
                     NewCategoryName,
                     string.IsNullOrWhiteSpace(NewCategoryDescription) ? null : NewCategoryDescription);
 
-                await ReloadCategoryOptionsAsync(created.CategoryId);
+                if (!createResult.IsSuccess || createResult.Value is null)
+                {
+                    CategoryErrorMessage = createResult.Error ?? "Failed to create category.";
+                    return;
+                }
+
+                await ReloadCategoryOptionsAsync(createResult.Value.CategoryId);
 
                 NewCategoryName = string.Empty;
                 NewCategoryDescription = string.Empty;
@@ -340,21 +351,32 @@ namespace hcmus_shop.ViewModels.Products
                 return;
             }
 
-            var brands = await _brandService.GetAllAsync();
+            SaveErrorMessage = string.Empty;
+
+            var brandsResult = await _brandService.GetAllAsync();
+            if (!brandsResult.IsSuccess || brandsResult.Value is null)
+            {
+                SaveErrorMessage = brandsResult.Error ?? "Failed to load brands.";
+                return;
+            }
 
             BrandOptions.Clear();
-            foreach (var brand in brands)
+            foreach (var brand in brandsResult.Value.OrderBy(brand => brand.Name))
             {
                 BrandOptions.Add(new LookupOptionViewModel(brand.BrandId, brand.Name));
             }
 
-            await ReloadCategoryOptionsAsync();
+            var categoriesLoaded = await ReloadCategoryOptionsAsync();
+            if (!categoriesLoaded)
+            {
+                return;
+            }
 
             SelectedBrandId = BrandOptions.FirstOrDefault()?.Id;
             IsInitialized = true;
         }
 
-        private async Task ReloadCategoryOptionsAsync(int? categoryToSelect = null)
+        private async Task<bool> ReloadCategoryOptionsAsync(int? categoryToSelect = null)
         {
             var selectedIds = new HashSet<int>(
                 CategoryOptions.Where(option => option.IsSelected).Select(option => option.CategoryId));
@@ -364,16 +386,23 @@ namespace hcmus_shop.ViewModels.Products
                 selectedIds.Add(categoryToSelect.Value);
             }
 
-            var categories = await _categoryService.GetAllAsync();
+            var categoriesResult = await _categoryService.GetAllAsync();
+            if (!categoriesResult.IsSuccess || categoriesResult.Value is null)
+            {
+                CategoryErrorMessage = categoriesResult.Error ?? "Failed to load categories.";
+                return false;
+            }
 
             CategoryOptions.Clear();
-            foreach (var category in categories.OrderBy(category => category.Name))
+            foreach (var category in categoriesResult.Value.OrderBy(category => category.Name))
             {
                 CategoryOptions.Add(new CategoryOptionViewModel(category.CategoryId, category.Name)
                 {
                     IsSelected = selectedIds.Contains(category.CategoryId)
                 });
             }
+
+            return true;
         }
 
         private async Task LoadSeriesOptionsAsync()
@@ -384,8 +413,14 @@ namespace hcmus_shop.ViewModels.Products
                 return;
             }
 
-            var seriesItems = await _seriesService.GetByBrandAsync(SelectedBrandId.Value);
-            foreach (var series in seriesItems)
+            var seriesResult = await _seriesService.GetByBrandAsync(SelectedBrandId.Value);
+            if (!seriesResult.IsSuccess || seriesResult.Value is null)
+            {
+                SaveErrorMessage = seriesResult.Error ?? "Failed to load series.";
+                return;
+            }
+
+            foreach (var series in seriesResult.Value.OrderBy(series => series.Name))
             {
                 SeriesOptions.Add(new LookupOptionViewModel(series.SeriesId, series.Name));
             }
@@ -400,6 +435,7 @@ namespace hcmus_shop.ViewModels.Products
 
             SaveErrorMessage = string.Empty;
             SaveStatusMessage = string.Empty;
+
             if (string.IsNullOrWhiteSpace(DraftProduct.Sku) || string.IsNullOrWhiteSpace(DraftProduct.Name))
             {
                 SaveErrorMessage = "SKU and product name are required.";
@@ -438,7 +474,14 @@ namespace hcmus_shop.ViewModels.Products
 
                 DraftProduct.ImageUrls = uploadedImageUrls;
                 SaveStatusMessage = "Saving product...";
-                await _productService.CreateAsync(DraftProduct);
+
+                var createResult = await _productService.CreateAsync(DraftProduct);
+                if (!createResult.IsSuccess)
+                {
+                    SaveErrorMessage = createResult.Error ?? "Failed to save product.";
+                    return;
+                }
+
                 SaveStatusMessage = string.Empty;
                 ProductSaved?.Invoke(this, EventArgs.Empty);
             }
@@ -452,7 +495,6 @@ namespace hcmus_shop.ViewModels.Products
                 IsSaving = false;
             }
         }
-
     }
 
     public class NewCategoryInput

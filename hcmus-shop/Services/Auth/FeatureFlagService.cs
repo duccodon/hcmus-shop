@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace hcmus_shop.Services.Auth
 {
-    public class FeatureFlagService : IFeatureFlagService
+    public class FeatureFlagService : Contracts.Services.IFeatureFlagService
     {
         private const string SectionName = "FeatureFlags";
         private readonly IConfiguration _configuration;

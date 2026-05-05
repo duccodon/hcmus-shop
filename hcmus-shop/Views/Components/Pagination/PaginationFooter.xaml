@@ -40,16 +40,13 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Button
-                        MinWidth="36"
-                        Height="32"
-                        Padding="10,0"
+                        Style="{StaticResource PaginationButtonStyle}"
                         Content="{Binding Label}"
                         Command="{Binding PageButtonClickCommand, ElementName=Root}"
                         CommandParameter="{Binding PageNumber}"
                         IsEnabled="{Binding IsEnabled}"
-                        Background="{Binding Background}"
-                        Foreground="{Binding Foreground}"
-                        CornerRadius="8" />
+                        Background="{Binding IsCurrent, Converter={StaticResource PageButtonBackgroundConverter}}"
+                        Foreground="{Binding IsCurrent, Converter={StaticResource PageButtonForegroundConverter}}" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

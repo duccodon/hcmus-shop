@@ -2,12 +2,8 @@
 using LiveChartsCore;
 using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.SkiaSharpView;
-using Microsoft.UI;
-using Microsoft.UI.Xaml.Media;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using Windows.UI.Text;
 
 namespace hcmus_shop.ViewModels
 {
@@ -71,28 +67,24 @@ namespace hcmus_shop.ViewModels
             {
                 Label = "Paid",
                 Value = 1135,
-                MarkerBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 6, 182, 212))
             });
 
             InvoiceLegends.Add(new InvoiceLegendItem
             {
                 Label = "Overdue",
                 Value = 234,
-                MarkerBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 124, 58, 237))
             });
 
             InvoiceLegends.Add(new InvoiceLegendItem
             {
                 Label = "Unpaid",
                 Value = 514,
-                MarkerBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 245, 158, 11))
             });
 
             InvoiceLegends.Add(new InvoiceLegendItem
             {
                 Label = "Draft",
                 Value = 345,
-                MarkerBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 148, 163, 184))
             });
 
             // Recent Invoices
@@ -103,8 +95,7 @@ namespace hcmus_shop.ViewModels
                 Product = "Air Black Backpack",
                 Date = "21/07/2021 08:21",
                 Status = "Paid",
-                Price = "$190",
-                StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 22, 163, 74))
+                Price = "$190"
             });
 
             RecentInvoices.Add(new RecentInvoiceItem
@@ -114,8 +105,7 @@ namespace hcmus_shop.ViewModels
                 Product = "Air Trend Backpack",
                 Date = "21/07/2021 08:21",
                 Status = "Pending",
-                Price = "$244",
-                StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 217, 119, 6))
+                Price = "$244"
             });
 
             RecentInvoices.Add(new RecentInvoiceItem
@@ -125,8 +115,7 @@ namespace hcmus_shop.ViewModels
                 Product = "Air Blue Backpack",
                 Date = "21/07/2021 08:21",
                 Status = "Paid",
-                Price = "$121",
-                StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 22, 163, 74))
+                Price = "$121"
             });
 
             RecentInvoices.Add(new RecentInvoiceItem
@@ -136,8 +125,7 @@ namespace hcmus_shop.ViewModels
                 Product = "Air Black Backpack",
                 Date = "21/07/2022 09:21",
                 Status = "Cancelled",
-                Price = "$300",
-                StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 236, 72, 153))
+                Price = "$300"
             });
 
             RecentInvoices.Add(new RecentInvoiceItem
@@ -147,8 +135,7 @@ namespace hcmus_shop.ViewModels
                 Product = "Urban Laptop Sleeve",
                 Date = "22/07/2022 11:05",
                 Status = "Paid",
-                Price = "$88",
-                StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 22, 163, 74))
+                Price = "$88"
             });
 
             RecentInvoices.Add(new RecentInvoiceItem
@@ -158,8 +145,7 @@ namespace hcmus_shop.ViewModels
                 Product = "Travel Cable Pouch",
                 Date = "23/07/2022 17:42",
                 Status = "Pending",
-                Price = "$56",
-                StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 217, 119, 6))
+                Price = "$56"
             });
 
             RecentInvoices.Add(new RecentInvoiceItem
@@ -169,8 +155,7 @@ namespace hcmus_shop.ViewModels
                 Product = "Classic Tote",
                 Date = "24/07/2022 09:08",
                 Status = "Paid",
-                Price = "$132",
-                StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 22, 163, 74))
+                Price = "$132"
             });
 
             // Top sold products
@@ -252,83 +237,16 @@ namespace hcmus_shop.ViewModels
     {
         public string Label { get; set; } = string.Empty;
         public int Value { get; set; }
-        public Brush MarkerBrush { get; set; } = new SolidColorBrush(Microsoft.UI.Colors.Gray);
     }
 
-    public class RecentInvoiceItem : INotifyPropertyChanged
+    public class RecentInvoiceItem
     {
-        private string _status = string.Empty;
-        private SolidColorBrush? _statusBackground;
-        private SolidColorBrush? _statusForeground;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
         public string No { get; set; } = string.Empty;
         public string Customer { get; set; } = string.Empty;
         public string Product { get; set; } = string.Empty;
         public string Date { get; set; } = string.Empty;
         public string Price { get; set; } = string.Empty;
-        public Brush StatusBrush { get; set; } = new SolidColorBrush(Microsoft.UI.Colors.Gray);
-
-        public string Status
-        {
-            get => _status;
-            set
-            {
-                if (_status == value)
-                {
-                    return;
-                }
-
-                _status = value;
-                OnPropertyChanged(nameof(Status));
-            }
-        }
-
-        public SolidColorBrush? StatusBackground
-        {
-            get => _statusBackground;
-            set
-            {
-                if (Equals(_statusBackground, value))
-                {
-                    return;
-                }
-
-                _statusBackground = value;
-                OnPropertyChanged(nameof(StatusBackground));
-            }
-        }
-
-        public SolidColorBrush? StatusForeground
-        {
-            get => _statusForeground;
-            set
-            {
-                if (Equals(_statusForeground, value))
-                {
-                    return;
-                }
-
-                _statusForeground = value;
-                OnPropertyChanged(nameof(StatusForeground));
-            }
-        }
-
-        private void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-    }
-
-    public class PageButtonItem
-    {
-        public string Label { get; set; } = string.Empty;
-        public int PageNumber { get; set; }
-        public bool IsEnabled { get; set; } = true;
-        public SolidColorBrush? Background { get; set; }
-        public SolidColorBrush? Foreground { get; set; }
-        public FontWeight FontWeight { get; set; } = new FontWeight { Weight = 400 };
+        public string Status { get; set; } = string.Empty;
     }
 
     public class ProductMetricItem

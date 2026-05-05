@@ -16,6 +16,7 @@ namespace hcmus_shop.Views
             InitializeComponent();
             ViewModel = Ioc.Default.GetRequiredService<ProductsViewModel>();
             DataContext = ViewModel;
+
             ViewModel.NavigateToAddProductRequested += ViewModel_NavigateToAddProductRequested;
             ViewModel.NavigateToEditProductRequested += ViewModel_NavigateToEditProductRequested;
             ViewModel.ConfirmBulkDeleteAsync = ShowBulkDeleteConfirmAsync;
@@ -66,13 +67,11 @@ namespace hcmus_shop.Views
         {
             var from = DateFromPicker.Date?.Date;
             var to = DateToPicker.Date?.Date;
-
             if (from is null && to is null)
             {
                 DateRangeLabel.Text = "Date Range";
                 return;
             }
-
             var fromText = from?.ToString("dd MMM") ?? "...";
             var toText = to?.ToString("dd MMM yyyy") ?? "...";
             DateRangeLabel.Text = $"{fromText} - {toText}";

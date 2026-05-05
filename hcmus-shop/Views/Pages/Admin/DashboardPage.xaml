@@ -1,4 +1,4 @@
-<Page x:Class="hcmus_shop.Views.DashboardPage"
+<Page x:Class="hcmus_shop.Views.Admin.DashboardPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:vm="using:hcmus_shop.ViewModels">
@@ -8,7 +8,8 @@
     </Page.DataContext>
 
     <Grid>
-        <TextBlock Text="{Binding WelcomeMessage}" 
-                   FontSize="24" Margin="20"/>
+        <TextBlock Text="{Binding WelcomeMessage}"
+                   Style="{StaticResource CardTitleStyle}"
+                   Margin="20" />
     </Grid>
 </Page>

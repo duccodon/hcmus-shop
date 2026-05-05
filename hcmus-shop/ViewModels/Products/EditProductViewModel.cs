@@ -1,10 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using hcmus_shop.Contracts.Services;
 using hcmus_shop.Models.DTOs;
-using hcmus_shop.Services.Brands;
-using hcmus_shop.Services.Categories;
-using hcmus_shop.Services.Products;
-using hcmus_shop.Services.Series;
 using hcmus_shop.Services.Uploads;
 using System;
 using System.Collections.Generic;
@@ -251,17 +248,26 @@ namespace hcmus_shop.ViewModels.Products
         {
             var brandsTask = _brandService.GetAllAsync();
             var categoriesTask = _categoryService.GetAllAsync();
-
             await Task.WhenAll(brandsTask, categoriesTask);
 
+            if (!brandsTask.Result.IsSuccess || brandsTask.Result.Value is null)
+            {
+                throw new InvalidOperationException(brandsTask.Result.Error ?? "Failed to load brands.");
+            }
+
+            if (!categoriesTask.Result.IsSuccess || categoriesTask.Result.Value is null)
+            {
+                throw new InvalidOperationException(categoriesTask.Result.Error ?? "Failed to load categories.");
+            }
+
             BrandOptions.Clear();
-            foreach (var brand in brandsTask.Result.OrderBy(b => b.Name))
+            foreach (var brand in brandsTask.Result.Value.OrderBy(b => b.Name))
             {
                 BrandOptions.Add(new LookupOptionViewModel(brand.BrandId, brand.Name));
             }
 
             CategoryOptions.Clear();
-            foreach (var category in categoriesTask.Result.OrderBy(c => c.Name))
+            foreach (var category in categoriesTask.Result.Value.OrderBy(c => c.Name))
             {
                 CategoryOptions.Add(new CategoryOptionViewModel(category.CategoryId, category.Name));
             }
@@ -269,7 +275,13 @@ namespace hcmus_shop.ViewModels.Products
 
         private async Task LoadProductAsync(int productId)
         {
-            var product = await _productService.GetByIdAsync(productId);
+            var result = await _productService.GetByIdAsync(productId);
+            if (!result.IsSuccess)
+            {
+                throw new InvalidOperationException(result.Error ?? "Failed to load product.");
+            }
+
+            var product = result.Value;
             if (product is null)
             {
                 throw new InvalidOperationException("Product not found.");
@@ -315,8 +327,13 @@ namespace hcmus_shop.ViewModels.Products
                 return;
             }
 
-            var seriesItems = await _seriesService.GetByBrandAsync(SelectedBrandId.Value);
-            foreach (var series in seriesItems.OrderBy(s => s.Name))
+            var result = await _seriesService.GetByBrandAsync(SelectedBrandId.Value);
+            if (!result.IsSuccess || result.Value is null)
+            {
+                throw new InvalidOperationException(result.Error ?? "Failed to load series.");
+            }
+
+            foreach (var series in result.Value.OrderBy(s => s.Name))
             {
                 SeriesOptions.Add(new LookupOptionViewModel(series.SeriesId, series.Name));
             }
@@ -367,7 +384,7 @@ namespace hcmus_shop.ViewModels.Products
                 }
 
                 SaveStatusMessage = "Saving product...";
-                await _productService.UpdateAsync(_productId, new UpdateProductInput
+                var result = await _productService.UpdateAsync(_productId, new UpdateProductInput
                 {
                     Sku = Sku.Trim(),
                     Name = Name.Trim(),
@@ -390,6 +407,12 @@ namespace hcmus_shop.ViewModels.Products
                         .. mergedImageUrls
                     ]
                 });
+
+                if (!result.IsSuccess)
+                {
+                    SaveErrorMessage = result.Error ?? "Failed to save product.";
+                    return;
+                }
 
                 PendingImageFiles.Clear();
                 SaveStatusMessage = string.Empty;
@@ -424,7 +447,13 @@ namespace hcmus_shop.ViewModels.Products
             IsDeleting = true;
             try
             {
-                await _productService.DeleteAsync(_productId);
+                var result = await _productService.DeleteAsync(_productId);
+                if (!result.IsSuccess)
+                {
+                    SaveErrorMessage = result.Error ?? "Failed to delete product.";
+                    return;
+                }
+
                 ProductDeleted?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)

@@ -1,4 +1,4 @@
-using hcmus_shop.Services.GraphQL;
+using hcmus_shop.Contracts.Services;
 using System;
 using System.Diagnostics;
 using System.IO;

@@ -1,5 +1,5 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
-using hcmus_shop.Services.Auth;
+using hcmus_shop.Contracts.Services;
 using hcmus_shop.Views;
 using DashboardPageView = hcmus_shop.Views.Dashboard.DashboardPage;
 using Microsoft.UI.Xaml;
@@ -16,14 +16,14 @@ namespace hcmus_shop
     /// </summary>
     public sealed partial class MainWindow : Window
     {
-        private readonly IAuthService _authService;
-        private readonly IFeatureFlagService _featureFlagService;
+        private readonly Contracts.Services.IAuthService _authService;
+        private readonly Contracts.Services.IFeatureFlagService _featureFlagService;
 
         public MainWindow()
         {
             InitializeComponent();
-            _authService = Ioc.Default.GetRequiredService<IAuthService>();
-            _featureFlagService = Ioc.Default.GetRequiredService<IFeatureFlagService>();
+            _authService = Ioc.Default.GetRequiredService<Contracts.Services.IAuthService>();
+            _featureFlagService = Ioc.Default.GetRequiredService<Contracts.Services.IFeatureFlagService>();
             ConfigureNavigationByFeatureFlag();
             //NavigateTo("Sales");  //test forbidden page
             NavigateToDefault();

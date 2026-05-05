@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style x:Key="StatusBadgePublished" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource SuccessBackgroundSubtle}" />
+        <Setter Property="CornerRadius" Value="99" />
+        <Setter Property="Padding" Value="10,5" />
+    </Style>
+
+    <Style x:Key="StatusBadgeInactive" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource DangerBackgroundSubtle}" />
+        <Setter Property="CornerRadius" Value="99" />
+        <Setter Property="Padding" Value="10,5" />
+    </Style>
+
+    <Style x:Key="StatusBadgeStockOut" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource WarningBackgroundSubtle}" />
+        <Setter Property="CornerRadius" Value="99" />
+        <Setter Property="Padding" Value="10,5" />
+    </Style>
+
+</ResourceDictionary>

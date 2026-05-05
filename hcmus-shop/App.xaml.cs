@@ -2,9 +2,11 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Microsoft.Windows.ApplicationModel.WindowsAppRuntime;
 using System;
 using System.IO;
 using System.Reflection;
+using hcmus_shop.Contracts.Services;
 using hcmus_shop.Services.GraphQL;
 using hcmus_shop.Services.Auth;
 using hcmus_shop.Services.Brands;
@@ -58,12 +60,11 @@ namespace hcmus_shop
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IFeatureFlagService, FeatureFlagService>();
 
-            // Feature Services (replace old Repositories)
-            services.AddTransient<IBrandService, BrandService>();
-            services.AddTransient<ICategoryService, CategoryService>();
-            services.AddTransient<ISeriesService, SeriesService>();
-            services.AddTransient<IProductService, ProductService>();
-            services.AddTransient<IFileUploadService, FileUploadService>();
+            services.AddSingleton<IBrandService, BrandService>();
+            services.AddSingleton<ICategoryService, CategoryService>();
+            services.AddSingleton<ISeriesService, SeriesService>();
+            services.AddSingleton<IProductService, ProductService>();
+            services.AddSingleton<IFileUploadService, FileUploadService>();
 
             // ViewModels
             services.AddTransient<LoginViewModel>();
