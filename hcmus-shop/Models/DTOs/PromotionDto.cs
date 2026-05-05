@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace hcmus_shop.Models.DTOs
@@ -9,11 +8,11 @@ namespace hcmus_shop.Models.DTOs
         public string Code { get; set; } = string.Empty;
         public double? DiscountPercent { get; set; }
         public double? DiscountAmount { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public string StartDate { get; set; } = string.Empty;
+        public string EndDate { get; set; } = string.Empty;
         public bool IsActive { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        public string CreatedAt { get; set; } = string.Empty;
+        public string? UpdatedAt { get; set; }
     }
 
     public class PromotionPageDto

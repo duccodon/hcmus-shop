@@ -5,6 +5,7 @@ using hcmus_shop.Models.DTOs;
 using hcmus_shop.Services.Promotions.Dto;
 using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -224,13 +225,15 @@ namespace hcmus_shop.ViewModels.Promotions
             }
 
             var promotion = current.Value;
+            var startDate = ParsePromotionDate(promotion.StartDate);
+            var endDate = ParsePromotionDate(promotion.EndDate);
             var draft = await RequestPromotionEditorAsync(PromotionEditorState.Edit(
                 promotion.PromotionId,
                 promotion.Code,
                 promotion.DiscountPercent,
                 promotion.DiscountAmount,
-                promotion.StartDate,
-                promotion.EndDate,
+                startDate,
+                endDate,
                 promotion.IsActive));
 
             if (draft is null)
@@ -359,13 +362,16 @@ namespace hcmus_shop.ViewModels.Promotions
                 Promotions.Clear();
                 foreach (var promotion in page.Items)
                 {
+                    var startDate = ParsePromotionDate(promotion.StartDate);
+                    var endDate = ParsePromotionDate(promotion.EndDate);
+
                     Promotions.Add(new PromotionListItemViewModel(
                         promotion.PromotionId,
                         promotion.Code,
                         promotion.DiscountPercent,
                         promotion.DiscountAmount,
-                        promotion.StartDate,
-                        promotion.EndDate,
+                        startDate,
+                        endDate,
                         promotion.IsActive));
                 }
 
@@ -440,6 +446,30 @@ namespace hcmus_shop.ViewModels.Promotions
 
             message = string.Empty;
             return true;
+        }
+
+        private static DateTime ParsePromotionDate(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return DateTime.Today;
+            }
+
+            if (DateTime.TryParse(
+                    value,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind | DateTimeStyles.AllowWhiteSpaces,
+                    out var parsed))
+            {
+                return parsed;
+            }
+
+            if (DateTime.TryParse(value, out parsed))
+            {
+                return parsed;
+            }
+
+            return DateTime.Today;
         }
     }
 

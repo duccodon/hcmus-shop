@@ -56,8 +56,10 @@ export class PromotionRepository {
   }
 
   async ensureUniqueCode(code: string, excludePromotionId?: number) {
-    const existing = await prisma.promotion.findUnique({
-      where: { code },
+    const existing = await prisma.promotion.findFirst({
+      where: {
+        code: { equals: code, mode: "insensitive" },
+      },
     });
 
     if (!existing) {

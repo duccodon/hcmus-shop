@@ -40,6 +40,9 @@ namespace hcmus_shop.Views
 
         private async Task<PromotionEditorResult?> ShowPromotionEditorAsync(PromotionEditorState state)
         {
+            var startDate = ClampDateForPicker(state.StartDate);
+            var endDate = ClampDateForPicker(state.EndDate);
+
             var codeBox = new TextBox
             {
                 PlaceholderText = "Promotion code",
@@ -62,12 +65,12 @@ namespace hcmus_shop.Views
 
             var startPicker = new DatePicker
             {
-                Date = state.StartDate
+                Date = startDate
             };
 
             var endPicker = new DatePicker
             {
-                Date = state.EndDate
+                Date = endDate
             };
 
             var activeSwitch = new ToggleSwitch
@@ -136,6 +139,24 @@ namespace hcmus_shop.Views
 
             var result = await dialog.ShowAsync();
             return result == ContentDialogResult.Primary;
+        }
+
+        private static DateTimeOffset ClampDateForPicker(DateTimeOffset value)
+        {
+            var min = new DateTimeOffset(new DateTime(1900, 1, 1));
+            var max = new DateTimeOffset(new DateTime(2100, 12, 31));
+
+            if (value < min)
+            {
+                return DateTimeOffset.Now;
+            }
+
+            if (value > max)
+            {
+                return max;
+            }
+
+            return value;
         }
     }
 }

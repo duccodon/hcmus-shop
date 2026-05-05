@@ -196,12 +196,18 @@ export class PromotionService {
       throw new Error("Promotion code is required.");
     }
 
-    const isUniqueCode = await promotionRepository.ensureUniqueCode(
-      code,
-      existing?.promotionId
-    );
-    if (!isUniqueCode) {
-      throw new Error("Promotion code already exists.");
+    const isSameCodeAsExisting =
+      existing != null &&
+      code.localeCompare(existing.code, undefined, { sensitivity: "accent" }) === 0;
+
+    if (!isSameCodeAsExisting) {
+      const isUniqueCode = await promotionRepository.ensureUniqueCode(
+        code,
+        existing?.promotionId
+      );
+      if (!isUniqueCode) {
+        throw new Error("Promotion code already exists.");
+      }
     }
 
     const startDate = dto.startDate
