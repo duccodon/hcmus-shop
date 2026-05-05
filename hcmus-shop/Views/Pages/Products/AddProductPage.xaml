@@ -224,6 +224,8 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -243,6 +245,18 @@
                                         Grid.Row="1"
                                         Grid.Column="1"
                                         Value="{x:Bind ViewModel.SellingPriceValue, Mode=TwoWay}"
+                                        SpinButtonPlacementMode="Inline"
+                                        Minimum="0" />
+
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        Text="Stock Quantity"
+                                        FontWeight="SemiBold"
+                                        Foreground="{StaticResource TextPrimary}" />
+
+                                    <NumberBox
+                                        Grid.Row="3"
+                                        Value="{x:Bind ViewModel.StockQuantityValue, Mode=TwoWay}"
                                         SpinButtonPlacementMode="Inline"
                                         Minimum="0" />
                                 </Grid>

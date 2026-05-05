@@ -16,12 +16,12 @@ export class ProductService {
   }
 
   async create(dto: CreateProductDto) {
-    const { categoryIds, imageUrls, ...data } = dto;
+    const { categoryIds, imageUrls, brandId, seriesId, ...data } = dto;
     console.log("[ProductService] createProduct input", {
       sku: dto.sku,
       name: dto.name,
-      brandId: dto.brandId,
-      seriesId: dto.seriesId ?? null,
+      brandId,
+      seriesId: seriesId ?? null,
       categoryCount: categoryIds?.length ?? 0,
       imageCount: imageUrls?.length ?? 0,
     });
@@ -30,9 +30,9 @@ export class ProductService {
       const product = await productRepository.create({
         ...data,
         specifications: data.specifications as Prisma.InputJsonValue,
-        brand: { connect: { brandId: data.brandId } },
-        series: data.seriesId
-          ? { connect: { seriesId: data.seriesId } }
+        brand: { connect: { brandId } },
+        series: seriesId
+          ? { connect: { seriesId } }
           : undefined,
         categories: categoryIds?.length
           ? { create: categoryIds.map((categoryId) => ({ categoryId })) }
@@ -59,13 +59,13 @@ export class ProductService {
   }
 
   async update(productId: number, dto: UpdateProductDto) {
-    const { categoryIds, imageUrls, ...data } = dto;
+    const { categoryIds, imageUrls, brandId, seriesId, ...data } = dto;
     console.log("[ProductService] updateProduct input", {
       productId,
       sku: dto.sku,
       name: dto.name,
-      brandId: dto.brandId,
-      seriesId: dto.seriesId ?? null,
+      brandId,
+      seriesId: seriesId ?? null,
       categoryCount: categoryIds?.length,
       imageCount: imageUrls?.length,
     });
@@ -82,6 +82,16 @@ export class ProductService {
       const product = await productRepository.update(productId, {
         ...data,
         specifications: data.specifications as Prisma.InputJsonValue,
+        brand:
+          brandId !== undefined
+            ? { connect: { brandId } }
+            : undefined,
+        series:
+          seriesId !== undefined
+            ? seriesId === null
+              ? { disconnect: true }
+              : { connect: { seriesId } }
+            : undefined,
       });
 
       console.log("[ProductService] updateProduct success", {

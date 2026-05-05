@@ -16,6 +16,7 @@ namespace hcmus_shop.ViewModels.Products
 {
     public class AddProductViewModel : ObservableObject
     {
+        private const int MinimumImageCount = 1;
         private readonly IProductService _productService;
         private readonly IBrandService _brandService;
         private readonly ICategoryService _categoryService;
@@ -59,6 +60,7 @@ namespace hcmus_shop.ViewModels.Products
                 WarrantyMonths = 12,
                 ImportPrice = 0,
                 SellingPrice = 0,
+                StockQuantity = 0,
                 BrandId = 0,
             };
         }
@@ -239,6 +241,16 @@ namespace hcmus_shop.ViewModels.Products
             }
         }
 
+        public double StockQuantityValue
+        {
+            get => DraftProduct.StockQuantity;
+            set
+            {
+                DraftProduct.StockQuantity = Math.Max(0, Convert.ToInt32(value));
+                OnPropertyChanged(nameof(StockQuantityValue));
+            }
+        }
+
         public void AddImagePreview(ImagePreview preview)
         {
             preview.DisplayOrder = PreviewImages.Count;
@@ -397,6 +409,12 @@ namespace hcmus_shop.ViewModels.Products
             if (DraftProduct.BrandId <= 0)
             {
                 SaveErrorMessage = "Please select a brand.";
+                return;
+            }
+
+            if (PreviewImages.Count < MinimumImageCount)
+            {
+                SaveErrorMessage = $"Please add at least {MinimumImageCount} product image.";
                 return;
             }
 

@@ -17,6 +17,7 @@ namespace hcmus_shop.ViewModels.Products
 {
     public class EditProductViewModel : ObservableObject
     {
+        private const int MinimumImageCount = 1;
         private readonly IProductService _productService;
         private readonly IBrandService _brandService;
         private readonly ICategoryService _categoryService;
@@ -37,6 +38,7 @@ namespace hcmus_shop.ViewModels.Products
         private int? _selectedSeriesId;
         private double _importPrice;
         private double _sellingPrice;
+        private double _stockQuantity;
         private double _warrantyMonths = 12;
         private bool _isActive = true;
         private string _newImageUrl = string.Empty;
@@ -192,6 +194,12 @@ namespace hcmus_shop.ViewModels.Products
             set => SetProperty(ref _sellingPrice, value);
         }
 
+        public double StockQuantityValue
+        {
+            get => _stockQuantity;
+            set => SetProperty(ref _stockQuantity, Math.Max(0, value));
+        }
+
         public double WarrantyMonthsValue
         {
             get => _warrantyMonths;
@@ -272,6 +280,7 @@ namespace hcmus_shop.ViewModels.Products
             Description = product.Description ?? string.Empty;
             ImportPriceValue = product.ImportPrice;
             SellingPriceValue = product.SellingPrice;
+            StockQuantityValue = product.StockQuantity;
             WarrantyMonthsValue = product.WarrantyMonths;
             IsActive = product.IsActive;
 
@@ -335,6 +344,13 @@ namespace hcmus_shop.ViewModels.Products
                 return;
             }
 
+            var totalImageCount = ImageUrls.Count + PendingImageFiles.Count;
+            if (totalImageCount < MinimumImageCount)
+            {
+                SaveErrorMessage = $"Please keep at least {MinimumImageCount} product image.";
+                return;
+            }
+
             IsSaving = true;
             try
             {
@@ -359,6 +375,7 @@ namespace hcmus_shop.ViewModels.Products
                     SeriesId = SelectedSeriesId,
                     ImportPrice = ImportPriceValue,
                     SellingPrice = SellingPriceValue,
+                    StockQuantity = Math.Max(0, (int)Math.Round(StockQuantityValue)),
                     Description = string.IsNullOrWhiteSpace(Description) ? null : Description.Trim(),
                     WarrantyMonths = Math.Max(0, (int)Math.Round(WarrantyMonthsValue)),
                     IsActive = IsActive,
