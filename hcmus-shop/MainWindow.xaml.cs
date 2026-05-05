@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 
@@ -92,7 +93,15 @@ namespace hcmus_shop
 
         private bool CanAccessFeature(string featureName)
         {
-            return _featureFlagService.IsFeatureEnabledForRole(_authService.CurrentUser?.Role, featureName);
+            var username = _authService.CurrentUser?.Username ?? "<null>";
+            var role = _authService.CurrentUser?.Role ?? "<null>";
+            var isEnabled = _featureFlagService.IsFeatureEnabledForRole(role, featureName);
+            var message = $"[FeatureFlag] user={username}, role={role}, feature={featureName}, enabled={isEnabled}";
+
+            Debug.WriteLine(message);
+            Console.WriteLine(message);
+
+            return isEnabled;
         }
 
         private void NavigateToDefault()
