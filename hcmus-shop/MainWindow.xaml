@@ -19,6 +19,7 @@
             <NavigationViewItem x:Name="DashboardItem" Content="Dashboard" Icon="Home" Tag="Dashboard" />
             <NavigationViewItem x:Name="SalesItem" Content="Sales" Icon="Shop" Tag="Sales" />
             <NavigationViewItem x:Name="ProductsItem" Content="Products" Icon="AllApps" Tag="Products" />
+            <NavigationViewItem x:Name="PromotionsItem" Content="Promotions" Icon="Tag" Tag="Promotions" />
             <NavigationViewItem x:Name="StoreItem" Content="Store" Icon="Shop" Tag="Store" />
             <NavigationViewItem x:Name="MessagesItem" Content="Messages" Icon="Mail" Tag="Messages" />
             <NavigationViewItem x:Name="InventoryItem" Content="Inventory" Icon="AllApps" Tag="Inventory" />

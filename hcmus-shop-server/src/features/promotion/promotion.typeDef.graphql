@@ -1,0 +1,54 @@
+type Promotion {
+  promotionId: Int!
+  code: String!
+  discountPercent: Float
+  discountAmount: Float
+  startDate: String!
+  endDate: String!
+  isActive: Boolean!
+  createdAt: String!
+  updatedAt: String
+}
+
+type PromotionPage {
+  items: [Promotion!]!
+  totalCount: Int!
+  page: Int!
+  pageSize: Int!
+}
+
+type PromotionValidationResult {
+  isValid: Boolean!
+  message: String!
+  promotion: Promotion
+}
+
+input CreatePromotionInput {
+  code: String!
+  discountPercent: Float
+  discountAmount: Float
+  startDate: String!
+  endDate: String!
+  isActive: Boolean
+}
+
+input UpdatePromotionInput {
+  code: String
+  discountPercent: Float
+  discountAmount: Float
+  startDate: String
+  endDate: String
+  isActive: Boolean
+}
+
+extend type Query {
+  promotions(search: String, page: Int, pageSize: Int): PromotionPage!
+  promotion(promotionId: Int!): Promotion
+  validatePromotion(code: String!): PromotionValidationResult!
+}
+
+extend type Mutation {
+  createPromotion(input: CreatePromotionInput!): Promotion!
+  updatePromotion(promotionId: Int!, input: UpdatePromotionInput!): Promotion!
+  deletePromotion(promotionId: Int!): Promotion!
+}

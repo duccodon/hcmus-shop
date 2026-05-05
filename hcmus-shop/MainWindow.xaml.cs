@@ -64,6 +64,9 @@ namespace hcmus_shop
                 case "Products":
                     NavigateOrForbid(typeof(ProductsPage), target);
                     break;
+                case "Promotions":
+                    NavigateOrForbid(typeof(PromotionsPage), target);
+                    break;
                 case "Store":
                     NavigateOrForbid(typeof(StorePage), target);
                     break;
