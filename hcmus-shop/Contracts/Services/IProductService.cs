@@ -1,5 +1,6 @@
 using hcmus_shop.Models.Common;
 using hcmus_shop.Models.DTOs;
+using hcmus_shop.Services.Products.Dto;
 using System.Threading.Tasks;
 
 namespace hcmus_shop.Contracts.Services

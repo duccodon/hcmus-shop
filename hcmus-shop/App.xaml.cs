@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.Windows.ApplicationModel.WindowsAppRuntime;   
+using Microsoft.Windows.ApplicationModel.WindowsAppRuntime;
 using System;
 using System.IO;
 using System.Reflection;
@@ -13,6 +13,7 @@ using hcmus_shop.Services.Brands;
 using hcmus_shop.Services.Categories;
 using hcmus_shop.Services.Series;
 using hcmus_shop.Services.Products;
+using hcmus_shop.Services.Uploads;
 using hcmus_shop.ViewModels;
 using hcmus_shop.ViewModels.Products;
 using hcmus_shop.Views;
@@ -59,16 +60,17 @@ namespace hcmus_shop
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IFeatureFlagService, FeatureFlagService>();
 
-            // Feature Services (replace old Repositories)
             services.AddSingleton<IBrandService, BrandService>();
             services.AddSingleton<ICategoryService, CategoryService>();
             services.AddSingleton<ISeriesService, SeriesService>();
             services.AddSingleton<IProductService, ProductService>();
+            services.AddSingleton<IFileUploadService, FileUploadService>();
 
             // ViewModels
             services.AddTransient<LoginViewModel>();
             services.AddTransient<ProductsViewModel>();
             services.AddTransient<AddProductViewModel>();
+            services.AddTransient<EditProductViewModel>();
 
             Ioc.Default.ConfigureServices(services.BuildServiceProvider());
         }

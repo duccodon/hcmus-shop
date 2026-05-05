@@ -21,13 +21,15 @@
   "dependencies": {
     "@apollo/server": "^4.13.0",
     "@prisma/client": "^6.19.3",
+    "@types/multer": "^2.1.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.1",
     "express": "^4.22.1",
     "graphql": "^16.13.2",
     "graphql-tag": "^2.12.6",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

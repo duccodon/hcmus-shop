@@ -94,7 +94,115 @@
                             </components:SearchFilterBar.FiltersContent>
                         </components:SearchFilterBar>
 
+<<<<<<< HEAD
                         <components:BulkActionBar
+=======
+                            <!-- Search -->
+                            <Grid VerticalAlignment="Center">
+                                <TextBox
+                                    x:Name="SearchBox"
+                                    PlaceholderText="Search"
+                                    Style="{StaticResource SearchTextBoxStyle}"
+                                    Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <FontIcon
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,12,0"
+                                    FontFamily="Segoe Fluent Icons"
+                                    Glyph="&#xE721;"
+                                    FontSize="14"
+                                    Foreground="{StaticResource TextSecondary}" />
+                            </Grid>
+
+                            <!-- Filter buttons -->
+                            <StackPanel
+                                Grid.Column="1"
+                                Orientation="Horizontal"
+                                Spacing="8"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                                <Button Style="{StaticResource PrimaryButtonStyle}">
+                                    <Button.Flyout>
+                                        <Flyout Placement="Bottom">
+                                            <StackPanel Spacing="10" Padding="4">
+                                                <TextBlock Text="From" Style="{StaticResource BodySecondaryTextStyle}" />
+                                                <CalendarDatePicker
+                                                    x:Name="DateFromPicker"
+                                                    PlaceholderText="Start date"
+                                                    DateChanged="DateFromPicker_DateChanged" />
+                                                <TextBlock Text="To" Style="{StaticResource BodySecondaryTextStyle}" />
+                                                <CalendarDatePicker
+                                                    x:Name="DateToPicker"
+                                                    PlaceholderText="End date"
+                                                    DateChanged="DateToPicker_DateChanged" />
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon
+                                            FontFamily="Segoe Fluent Icons"
+                                            Glyph="&#xE787;"
+                                            FontSize="12"
+                                            VerticalAlignment="Center" />
+                                        <TextBlock
+                                            x:Name="DateRangeLabel"
+                                            Text="Date Range"
+                                            Style="{StaticResource BodySecondaryTextStyle}"
+                                            VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <ComboBox
+                                    Width="160"
+                                    PlaceholderText="Brand"
+                                    Style="{StaticResource FormComboBoxStyle}"
+                                    ItemsSource="{x:Bind ViewModel.BrandOptions, Mode=OneWay}"
+                                    DisplayMemberPath="Name"
+                                    SelectedValuePath="Id"
+                                    SelectedValue="{x:Bind ViewModel.SelectedBrandId, Mode=TwoWay}" />
+                                <ComboBox
+                                    Width="180"
+                                    PlaceholderText="Category"
+                                    Style="{StaticResource FormComboBoxStyle}"
+                                    ItemsSource="{x:Bind ViewModel.CategoryOptions, Mode=OneWay}"
+                                    DisplayMemberPath="Name"
+                                    SelectedValuePath="Id"
+                                    SelectedValue="{x:Bind ViewModel.SelectedCategoryId, Mode=TwoWay}" />
+
+                                <ComboBox
+                                    Width="120"
+                                    Style="{StaticResource FormComboBoxStyle}"
+                                    PlaceholderText="Sort By"
+                                    ItemsSource="{x:Bind ViewModel.SortFieldOptions, Mode=OneWay}"
+                                    DisplayMemberPath="Name"
+                                    SelectedValuePath="Value"
+                                    SelectedValue="{x:Bind ViewModel.SelectedSortField, Mode=TwoWay}" />
+
+                                <ComboBox
+                                    Width="95"
+                                    Style="{StaticResource FormComboBoxStyle}"
+                                    PlaceholderText="Order"
+                                    ItemsSource="{x:Bind ViewModel.SortOrderOptions, Mode=OneWay}"
+                                    DisplayMemberPath="Name"
+                                    SelectedValuePath="Value"
+                                    SelectedValue="{x:Bind ViewModel.SelectedSortOrder, Mode=TwoWay}" />
+                                <Button
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Command="{x:Bind ViewModel.ClearFiltersCommand}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon
+                                            FontFamily="Segoe Fluent Icons"
+                                            Glyph="&#xE894;"
+                                            FontSize="12"
+                                            VerticalAlignment="Center" />
+                                        <TextBlock Text="Clear" Style="{StaticResource BodySecondaryTextStyle}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Row 3: Bulk-action bar -->
+                        <Grid
+>>>>>>> 4c48129343327c8f901fe42e41939be9ebbfd7e1
                             Grid.Row="3"
                             DeleteCommand="{x:Bind ViewModel.BulkDeleteCommand}"
                             IsVisible="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
@@ -170,11 +278,117 @@
                                 </Border>
                             </Grid>
 
+<<<<<<< HEAD
                             <ScrollViewer
                                 Grid.Row="1"
                                 HorizontalScrollBarVisibility="Disabled"
                                 VerticalScrollBarVisibility="Auto">
                                 <ItemsControl ItemTemplate="{StaticResource ProductRowTemplate}" ItemsSource="{x:Bind ViewModel.PagedProducts, Mode=OneWay}" />
+=======
+                            <!-- Table rows -->
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.PagedProducts, Mode=OneWay}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ProductRowViewModel">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="56" />
+                                                    <ColumnDefinition Width="2.6*" />
+                                                    <ColumnDefinition Width="1.4*" />
+                                                    <ColumnDefinition Width="1.4*" />
+                                                    <ColumnDefinition Width="1*" />
+                                                    <ColumnDefinition Width="1.4*" />
+                                                    <ColumnDefinition Width="80" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Border Grid.Column="0" Style="{StaticResource TableRowBorderStyle}">
+                                                    <CheckBox Width="22" Height="22" IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
+                                                </Border>
+
+                                                <Border Grid.Column="1" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                                        <Border
+                                                            Width="32" Height="32"
+                                                            CornerRadius="8"
+                                                            Background="{StaticResource CardBackground}"
+                                                            VerticalAlignment="Center">
+                                                            <Grid>
+                                                                <Image
+                                                                    Stretch="UniformToFill"
+                                                                    Visibility="{x:Bind HasThumbnail, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                    <Image.Source>
+                                                                        <BitmapImage UriSource="{x:Bind ThumbnailUri, Mode=OneWay}" />
+                                                                    </Image.Source>
+                                                                </Image>
+                                                                <FontIcon
+                                                                    HorizontalAlignment="Center"
+                                                                    VerticalAlignment="Center"
+                                                                    FontFamily="Segoe Fluent Icons"
+                                                                    Glyph="{x:Bind FallbackGlyph, Mode=OneWay}"
+                                                                    FontSize="14"
+                                                                    Foreground="{StaticResource TextSecondary}"
+                                                                    Visibility="{x:Bind HasThumbnail, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                                            </Grid>
+                                                        </Border>
+                                                        <StackPanel VerticalAlignment="Center">
+                                                            <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+                                                            <TextBlock Text="{x:Bind Sku, Mode=OneWay}" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+
+                                                <Border Grid.Column="2" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind CategoryDisplay, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+                                                </Border>
+
+                                                <Border Grid.Column="3" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                        <TextBlock Text="{x:Bind StockQuantity, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+                                                        <TextBlock Text="{x:Bind StockLabel, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" Foreground="{x:Bind StockTone, Mode=OneWay, Converter={StaticResource StockToneForegroundConverter}}" />
+                                                    </StackPanel>
+                                                </Border>
+
+                                                <Border Grid.Column="4" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind PriceDisplay, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+                                                </Border>
+
+                                                <Border Grid.Column="5" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <Border Padding="10,5" CornerRadius="99" Background="{x:Bind StatusTone, Mode=OneWay, Converter={StaticResource StatusToneBackgroundConverter}}" HorizontalAlignment="Left">
+                                                        <TextBlock VerticalAlignment="Center" Text="{x:Bind StatusText, Mode=OneWay}" Style="{StaticResource StatusBadgeTextStyle}" Foreground="{x:Bind StatusTone, Mode=OneWay, Converter={StaticResource StatusToneForegroundConverter}}" />
+                                                    </Border>
+                                                </Border>
+
+                                                <Border Grid.Column="6" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <Button
+                                                            Style="{StaticResource GhostButtonStyle}"
+                                                            Command="{Binding DataContext.EditProductCommand, ElementName=Root}"
+                                                            CommandParameter="{x:Bind ProductId}"
+                                                            ToolTipService.ToolTip="Edit product">
+                                                            <FontIcon
+                                                                FontFamily="Segoe Fluent Icons"
+                                                                Glyph="&#xE70F;"
+                                                                FontSize="13"
+                                                                Foreground="{StaticResource TextSecondary}" />
+                                                        </Button>
+                                                        <Button
+                                                            Style="{StaticResource GhostButtonStyle}"
+                                                            Command="{Binding DataContext.DeleteProductCommand, ElementName=Root}"
+                                                            CommandParameter="{x:Bind ProductId}"
+                                                            ToolTipService.ToolTip="Delete product">
+                                                            <FontIcon
+                                                                FontFamily="Segoe Fluent Icons"
+                                                                Glyph="&#xE74D;"
+                                                                FontSize="13"
+                                                                Foreground="{StaticResource DangerForeground}" />
+                                                        </Button>
+                                                    </StackPanel>
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+>>>>>>> 4c48129343327c8f901fe42e41939be9ebbfd7e1
                             </ScrollViewer>
 
                             <Border
@@ -215,4 +429,7 @@
         </ScrollViewer>
     </Grid>
 </Page>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4c48129343327c8f901fe42e41939be9ebbfd7e1
