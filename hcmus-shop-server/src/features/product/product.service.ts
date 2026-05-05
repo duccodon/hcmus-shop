@@ -16,50 +16,109 @@ export class ProductService {
   }
 
   async create(dto: CreateProductDto) {
-    const { categoryIds, imageUrls, ...data } = dto;
-
-    const product = await productRepository.create({
-      ...data,
-      specifications: data.specifications as Prisma.InputJsonValue,
-      brand: { connect: { brandId: data.brandId } },
-      series: data.seriesId
-        ? { connect: { seriesId: data.seriesId } }
-        : undefined,
-      categories: categoryIds?.length
-        ? { create: categoryIds.map((categoryId) => ({ categoryId })) }
-        : undefined,
-      images: imageUrls?.length
-        ? {
-            create: imageUrls.map((imageUrl, i) => ({
-              imageUrl,
-              displayOrder: i,
-            })),
-          }
-        : undefined,
+    const { categoryIds, imageUrls, brandId, seriesId, ...data } = dto;
+    console.log("[ProductService] createProduct input", {
+      sku: dto.sku,
+      name: dto.name,
+      brandId,
+      seriesId: seriesId ?? null,
+      categoryCount: categoryIds?.length ?? 0,
+      imageCount: imageUrls?.length ?? 0,
     });
 
-    return product;
+    try {
+      const product = await productRepository.create({
+        ...data,
+        specifications: data.specifications as Prisma.InputJsonValue,
+        brand: { connect: { brandId } },
+        series: seriesId
+          ? { connect: { seriesId } }
+          : undefined,
+        categories: categoryIds?.length
+          ? { create: categoryIds.map((categoryId) => ({ categoryId })) }
+          : undefined,
+        images: imageUrls?.length
+          ? {
+              create: imageUrls.map((imageUrl, i) => ({
+                imageUrl,
+                displayOrder: i,
+              })),
+            }
+          : undefined,
+      });
+
+      console.log("[ProductService] createProduct success", {
+        productId: product.productId,
+        sku: product.sku,
+      });
+      return product;
+    } catch (error) {
+      console.error("[ProductService] createProduct failed", error);
+      throw error;
+    }
   }
 
   async update(productId: number, dto: UpdateProductDto) {
-    const { categoryIds, imageUrls, ...data } = dto;
-
-    if (categoryIds !== undefined) {
-      await productRepository.replaceCategories(productId, categoryIds);
-    }
-
-    if (imageUrls !== undefined) {
-      await productRepository.replaceImages(productId, imageUrls);
-    }
-
-    return productRepository.update(productId, {
-      ...data,
-      specifications: data.specifications as Prisma.InputJsonValue,
+    const { categoryIds, imageUrls, brandId, seriesId, ...data } = dto;
+    console.log("[ProductService] updateProduct input", {
+      productId,
+      sku: dto.sku,
+      name: dto.name,
+      brandId,
+      seriesId: seriesId ?? null,
+      categoryCount: categoryIds?.length,
+      imageCount: imageUrls?.length,
     });
+
+    try {
+      if (categoryIds !== undefined) {
+        await productRepository.replaceCategories(productId, categoryIds);
+      }
+
+      if (imageUrls !== undefined) {
+        await productRepository.replaceImages(productId, imageUrls);
+      }
+
+      const product = await productRepository.update(productId, {
+        ...data,
+        specifications: data.specifications as Prisma.InputJsonValue,
+        brand:
+          brandId !== undefined
+            ? { connect: { brandId } }
+            : undefined,
+        series:
+          seriesId !== undefined
+            ? seriesId === null
+              ? { disconnect: true }
+              : { connect: { seriesId } }
+            : undefined,
+      });
+
+      console.log("[ProductService] updateProduct success", {
+        productId: product.productId,
+        sku: product.sku,
+      });
+      return product;
+    } catch (error) {
+      console.error("[ProductService] updateProduct failed", { productId, error });
+      throw error;
+    }
   }
 
-  delete(productId: number) {
-    return productRepository.softDelete(productId);
+  async delete(productId: number) {
+    console.log("[ProductService] deleteProduct input", { productId });
+
+    try {
+      const product = await productRepository.softDelete(productId);
+      console.log("[ProductService] deleteProduct success", {
+        productId: product.productId,
+        sku: product.sku,
+      });
+      return product;
+    } catch (error) {
+      console.error("[ProductService] deleteProduct failed", { productId, error });
+      throw error;
+    }
   }
 
   // Field resolvers

@@ -1,5 +1,6 @@
 using hcmus_shop.Models.Common;
 using System;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -59,7 +60,7 @@ namespace hcmus_shop.Services.GraphQL
             return await SendAsync<T>(query, variables);
         }
 
-        // SAFE WRAPPER 
+        // SAFE WRAPPER
         public async Task<Result<T>> SafeExecuteAsync<T>(Func<Task<T>> action)
         {
             try
@@ -103,7 +104,8 @@ namespace hcmus_shop.Services.GraphQL
             }
             catch (HttpRequestException ex)
             {
-                throw new GraphQLException($"Cannot connect to server: {ex.Message}");
+                LogError("HTTP request failed", ex.Message);
+                throw new GraphQLException($"Cannot connect to server at {_serverUrl}: {ex.Message}");
             }
 
             var responseBody = await response.Content.ReadAsStringAsync();
@@ -111,15 +113,31 @@ namespace hcmus_shop.Services.GraphQL
             var result = JsonSerializer.Deserialize<GraphQLResponse<T>>(responseBody, _jsonOptions);
 
             if (result == null)
+            {
+                LogError("Empty or invalid GraphQL response", responseBody);
                 throw new GraphQLException("Empty response from server");
+            }
 
             if (result.Errors != null && result.Errors.Length > 0)
+            {
+                LogError("GraphQL error", responseBody);
                 throw new GraphQLException(result.Errors[0].Message);
+            }
 
             if (result.Data == null)
-                throw new GraphQLException("No data returned from server");
+            {
+                LogError("GraphQL response contains no data", responseBody);
+                throw new GraphQLException("No data in response");
+            }
 
             return result.Data;
+        }
+
+        private void LogError(string title, string details)
+        {
+            var message = $"[GraphQLClientService] {title}{Environment.NewLine}Endpoint: {_serverUrl}{Environment.NewLine}{details}";
+            Debug.WriteLine(message);
+            Console.Error.WriteLine(message);
         }
     }
 

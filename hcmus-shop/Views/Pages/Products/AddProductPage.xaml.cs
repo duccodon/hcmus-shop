@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
+using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
@@ -20,6 +21,7 @@ namespace hcmus_shop.Views
             InitializeComponent();
             ViewModel = Ioc.Default.GetRequiredService<AddProductViewModel>();
             DataContext = ViewModel;
+            ViewModel.RequestCategoryInputAsync = ShowAddCategoryDialogAsync;
             Loaded += AddProductPage_Loaded;
             Unloaded += AddProductPage_Unloaded;
             ViewModel.ProductSaved += ViewModel_ProductSaved;
@@ -36,6 +38,7 @@ namespace hcmus_shop.Views
         private void AddProductPage_Unloaded(object sender, RoutedEventArgs e)
         {
             ViewModel.ProductSaved -= ViewModel_ProductSaved;
+            ViewModel.RequestCategoryInputAsync = null;
             Loaded -= AddProductPage_Loaded;
             Unloaded -= AddProductPage_Unloaded;
         }
@@ -96,6 +99,54 @@ namespace hcmus_shop.Views
             }
 
             Frame?.Navigate(typeof(ProductsPage));
+        }
+
+        private async Task<NewCategoryInput?> ShowAddCategoryDialogAsync()
+        {
+            var nameBox = new TextBox
+            {
+                PlaceholderText = "Category name"
+            };
+
+            var descriptionBox = new TextBox
+            {
+                PlaceholderText = "Description (optional)",
+                AcceptsReturn = true,
+                TextWrapping = TextWrapping.Wrap,
+                MinHeight = 72
+            };
+
+            var panel = new StackPanel
+            {
+                Spacing = 10
+            };
+
+            panel.Children.Add(new TextBlock { Text = "Category Name" });
+            panel.Children.Add(nameBox);
+            panel.Children.Add(new TextBlock { Text = "Description" });
+            panel.Children.Add(descriptionBox);
+
+            var dialog = new ContentDialog
+            {
+                Title = "Add Category",
+                Content = panel,
+                PrimaryButtonText = "Create",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = XamlRoot
+            };
+
+            var result = await dialog.ShowAsync();
+            if (result != ContentDialogResult.Primary)
+            {
+                return null;
+            }
+
+            return new NewCategoryInput
+            {
+                Name = nameBox.Text,
+                Description = descriptionBox.Text
+            };
         }
     }
 }

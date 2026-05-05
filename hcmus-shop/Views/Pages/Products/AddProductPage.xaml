@@ -66,10 +66,17 @@
                         Grid.Column="0"
                         Grid.ColumnSpan="2"
                         Margin="0,0,0,10"
-                        IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
+                        IsOpen="{x:Bind ViewModel.HasSaveError, Mode=OneWay}"
                         IsClosable="False"
                         Severity="Error"
-                        Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+                        Message="{x:Bind ViewModel.SaveErrorMessage, Mode=OneWay}" />
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Margin="0,22,0,10"
+                        Text="{x:Bind ViewModel.SaveStatusMessage, Mode=OneWay}"
+                        Foreground="{StaticResource TextSecondary}"
+                        Visibility="{x:Bind ViewModel.HasSaveStatus, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <Grid RowSpacing="16">
                         <Grid.Margin>0,26,0,0</Grid.Margin>
                         <Grid.RowDefinitions>
@@ -197,6 +204,8 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -215,6 +224,18 @@
                                         Grid.Column="1"
                                         Style="{StaticResource FormNumberBoxStyle}"
                                         Value="{x:Bind ViewModel.SellingPriceValue, Mode=TwoWay}"
+                                        SpinButtonPlacementMode="Inline"
+                                        Minimum="0" />
+
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        Text="Stock Quantity"
+                                        FontWeight="SemiBold"
+                                        Foreground="{StaticResource TextPrimary}" />
+
+                                    <NumberBox
+                                        Grid.Row="3"
+                                        Value="{x:Bind ViewModel.StockQuantityValue, Mode=TwoWay}"
                                         SpinButtonPlacementMode="Inline"
                                         Minimum="0" />
                                 </Grid>
@@ -347,12 +368,27 @@
                                 <Button
                                     Grid.Row="3"
                                     Margin="0,6,0,0"
-                                    Content="Add Category"
+                                    Content="{x:Bind ViewModel.AddCategoryButtonText, Mode=OneWay}"
                                     Style="{StaticResource PrimaryPillButtonStyle}"
                                     HorizontalAlignment="Left"
                                     Command="{x:Bind ViewModel.AddCategoryCommand}"
                                     Background="{StaticResource LoginPrimaryBrush}"
                                     Foreground="White" />
+
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Margin="150,12,0,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{StaticResource TextSecondary}"
+                                    Text="Working..."
+                                    Visibility="{x:Bind ViewModel.IsAddingCategory, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Margin="0,44,0,0"
+                                    Foreground="{StaticResource DangerForeground}"
+                                    Text="{x:Bind ViewModel.CategoryErrorMessage, Mode=OneWay}"
+                                    Visibility="{x:Bind ViewModel.HasCategoryError, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
                             </Grid>
                         </Border>
                     </Grid>

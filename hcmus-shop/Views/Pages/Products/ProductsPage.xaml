@@ -123,6 +123,24 @@
                                     DisplayMemberPath="Name"
                                     SelectedValuePath="Id"
                                     SelectedValue="{x:Bind ViewModel.SelectedCategoryId, Mode=TwoWay}" />
+
+                                <ComboBox
+                                    Width="120"
+                                    Style="{StaticResource FormComboBoxStyle}"
+                                    PlaceholderText="Sort By"
+                                    ItemsSource="{x:Bind ViewModel.SortFieldOptions, Mode=OneWay}"
+                                    DisplayMemberPath="Name"
+                                    SelectedValuePath="Value"
+                                    SelectedValue="{x:Bind ViewModel.SelectedSortField, Mode=TwoWay}" />
+
+                                <ComboBox
+                                    Width="95"
+                                    Style="{StaticResource FormComboBoxStyle}"
+                                    PlaceholderText="Order"
+                                    ItemsSource="{x:Bind ViewModel.SortOrderOptions, Mode=OneWay}"
+                                    DisplayMemberPath="Name"
+                                    SelectedValuePath="Value"
+                                    SelectedValue="{x:Bind ViewModel.SelectedSortOrder, Mode=TwoWay}" />
                                 <Button
                                     Style="{StaticResource PrimaryButtonStyle}"
                                     Command="{x:Bind ViewModel.ClearFiltersCommand}">
@@ -261,8 +279,28 @@
 
                                                 <Border Grid.Column="1" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
                                                     <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                                        <Border Width="32" Height="32" CornerRadius="8" Background="{StaticResource CardBackground}" VerticalAlignment="Center">
-                                                            <FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe Fluent Icons" Glyph="&#xEC8A;" FontSize="14" Foreground="{StaticResource TextSecondary}" />
+                                                        <Border
+                                                            Width="32" Height="32"
+                                                            CornerRadius="8"
+                                                            Background="{StaticResource CardBackground}"
+                                                            VerticalAlignment="Center">
+                                                            <Grid>
+                                                                <Image
+                                                                    Stretch="UniformToFill"
+                                                                    Visibility="{x:Bind HasThumbnail, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                    <Image.Source>
+                                                                        <BitmapImage UriSource="{x:Bind ThumbnailUri, Mode=OneWay}" />
+                                                                    </Image.Source>
+                                                                </Image>
+                                                                <FontIcon
+                                                                    HorizontalAlignment="Center"
+                                                                    VerticalAlignment="Center"
+                                                                    FontFamily="Segoe Fluent Icons"
+                                                                    Glyph="{x:Bind FallbackGlyph, Mode=OneWay}"
+                                                                    FontSize="14"
+                                                                    Foreground="{StaticResource TextSecondary}"
+                                                                    Visibility="{x:Bind HasThumbnail, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                                            </Grid>
                                                         </Border>
                                                         <StackPanel VerticalAlignment="Center">
                                                             <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
@@ -294,11 +332,27 @@
 
                                                 <Border Grid.Column="6" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
                                                     <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                        <Button Style="{StaticResource GhostButtonStyle}" ToolTipService.ToolTip="Edit product">
-                                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE70F;" FontSize="13" Foreground="{StaticResource TextSecondary}" />
+                                                        <Button
+                                                            Style="{StaticResource GhostButtonStyle}"
+                                                            Command="{Binding DataContext.EditProductCommand, ElementName=Root}"
+                                                            CommandParameter="{x:Bind ProductId}"
+                                                            ToolTipService.ToolTip="Edit product">
+                                                            <FontIcon
+                                                                FontFamily="Segoe Fluent Icons"
+                                                                Glyph="&#xE70F;"
+                                                                FontSize="13"
+                                                                Foreground="{StaticResource TextSecondary}" />
                                                         </Button>
-                                                        <Button Style="{StaticResource GhostButtonStyle}" ToolTipService.ToolTip="Delete product">
-                                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74D;" FontSize="13" Foreground="{StaticResource DangerForeground}" />
+                                                        <Button
+                                                            Style="{StaticResource GhostButtonStyle}"
+                                                            Command="{Binding DataContext.DeleteProductCommand, ElementName=Root}"
+                                                            CommandParameter="{x:Bind ProductId}"
+                                                            ToolTipService.ToolTip="Delete product">
+                                                            <FontIcon
+                                                                FontFamily="Segoe Fluent Icons"
+                                                                Glyph="&#xE74D;"
+                                                                FontSize="13"
+                                                                Foreground="{StaticResource DangerForeground}" />
                                                         </Button>
                                                     </StackPanel>
                                                 </Border>
