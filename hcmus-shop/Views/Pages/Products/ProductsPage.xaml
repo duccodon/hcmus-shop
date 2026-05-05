@@ -7,6 +7,81 @@
     xmlns:vm="using:hcmus_shop.ViewModels.Products"
     x:Name="Root">
     <Grid Background="{StaticResource DashboardBackground}">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="ProductsLayoutStates">
+                <VisualState x:Name="NarrowState">
+                    <VisualState.Setters>
+                        <Setter Target="HeaderActions.(Grid.Row)" Value="1" />
+                        <Setter Target="HeaderActions.(Grid.Column)" Value="0" />
+                        <Setter Target="HeaderActions.(Grid.ColumnSpan)" Value="2" />
+                        <Setter Target="HeaderActions.HorizontalAlignment" Value="Stretch" />
+                        <Setter Target="HeaderActions.Margin" Value="0,12,0,0" />
+                        <Setter Target="HeaderActions.Orientation" Value="Vertical" />
+
+                        <Setter Target="FilterPanel.(Grid.Row)" Value="1" />
+                        <Setter Target="FilterPanel.(Grid.Column)" Value="0" />
+                        <Setter Target="FilterPanel.(Grid.ColumnSpan)" Value="2" />
+                        <Setter Target="FilterPanel.HorizontalAlignment" Value="Stretch" />
+                        <Setter Target="FilterPanel.Margin" Value="0,12,0,0" />
+                        <Setter Target="FilterPanel.Orientation" Value="Vertical" />
+
+                        <Setter Target="BrandFilter.Width" Value="Auto" />
+                        <Setter Target="CategoryFilter.Width" Value="Auto" />
+                        <Setter Target="SortFieldFilter.Width" Value="Auto" />
+                        <Setter Target="SortOrderFilter.Width" Value="Auto" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="MediumState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="900" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="HeaderActions.(Grid.Row)" Value="1" />
+                        <Setter Target="HeaderActions.(Grid.Column)" Value="0" />
+                        <Setter Target="HeaderActions.(Grid.ColumnSpan)" Value="2" />
+                        <Setter Target="HeaderActions.HorizontalAlignment" Value="Left" />
+                        <Setter Target="HeaderActions.Margin" Value="0,12,0,0" />
+
+                        <Setter Target="FilterPanel.(Grid.Row)" Value="1" />
+                        <Setter Target="FilterPanel.(Grid.Column)" Value="0" />
+                        <Setter Target="FilterPanel.(Grid.ColumnSpan)" Value="2" />
+                        <Setter Target="FilterPanel.HorizontalAlignment" Value="Stretch" />
+                        <Setter Target="FilterPanel.Margin" Value="0,12,0,0" />
+                        <Setter Target="HeaderActions.Orientation" Value="Horizontal" />
+                        <Setter Target="FilterPanel.Orientation" Value="Horizontal" />
+                        <Setter Target="BrandFilter.Width" Value="160" />
+                        <Setter Target="CategoryFilter.Width" Value="180" />
+                        <Setter Target="SortFieldFilter.Width" Value="120" />
+                        <Setter Target="SortOrderFilter.Width" Value="95" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="WideState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="1300" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="HeaderActions.(Grid.Row)" Value="0" />
+                        <Setter Target="HeaderActions.(Grid.Column)" Value="1" />
+                        <Setter Target="HeaderActions.(Grid.ColumnSpan)" Value="1" />
+                        <Setter Target="HeaderActions.HorizontalAlignment" Value="Right" />
+                        <Setter Target="HeaderActions.Margin" Value="0" />
+                        <Setter Target="HeaderActions.Orientation" Value="Horizontal" />
+
+                        <Setter Target="FilterPanel.(Grid.Row)" Value="0" />
+                        <Setter Target="FilterPanel.(Grid.Column)" Value="1" />
+                        <Setter Target="FilterPanel.(Grid.ColumnSpan)" Value="1" />
+                        <Setter Target="FilterPanel.HorizontalAlignment" Value="Right" />
+                        <Setter Target="FilterPanel.Margin" Value="0" />
+                        <Setter Target="FilterPanel.Orientation" Value="Horizontal" />
+
+                        <Setter Target="BrandFilter.Width" Value="160" />
+                        <Setter Target="CategoryFilter.Width" Value="180" />
+                        <Setter Target="SortFieldFilter.Width" Value="120" />
+                        <Setter Target="SortOrderFilter.Width" Value="95" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
         <ScrollViewer>
             <Grid Margin="24">
                 <Border
@@ -25,7 +100,11 @@
                         </Grid.RowDefinitions>
 
                         <!-- Row 0: Title + Action Buttons -->
-                        <Grid>
+                        <Grid x:Name="HeaderGrid">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
@@ -34,7 +113,7 @@
                                 VerticalAlignment="Center"
                                 Text="Products List"
                                 Style="{StaticResource PageTitleStyle}" />
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                            <StackPanel x:Name="HeaderActions" Grid.Column="1" Orientation="Horizontal" Spacing="8">
                                 <Button Content="Import" Style="{StaticResource PrimaryButtonStyle}" />
                                 <Button Content="Export" Style="{StaticResource PrimaryButtonStyle}" />
                                 <Button
@@ -48,14 +127,18 @@
                         <Border Grid.Row="1" Height="1" Background="{StaticResource DividerBrush}" />
 
                         <!-- Row 2: Search + Filters -->
-                        <Grid Grid.Row="2">
+                        <Grid Grid.Row="2" x:Name="FilterGrid">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" MaxWidth="320" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
                             <!-- Search -->
-                            <Grid VerticalAlignment="Center">
+                            <Grid VerticalAlignment="Top">
                                 <TextBox
                                     x:Name="SearchBox"
                                     PlaceholderText="Search"
@@ -73,12 +156,14 @@
 
                             <!-- Filter buttons -->
                             <StackPanel
+                                x:Name="FilterPanel"
                                 Grid.Column="1"
                                 Orientation="Horizontal"
                                 Spacing="8"
                                 HorizontalAlignment="Right"
-                                VerticalAlignment="Center">
+                                VerticalAlignment="Top">
                                 <ComboBox
+                                    x:Name="BrandFilter"
                                     Width="160"
                                     PlaceholderText="Brand"
                                     Style="{StaticResource FormComboBoxStyle}"
@@ -87,6 +172,7 @@
                                     SelectedValuePath="Id"
                                     SelectedValue="{x:Bind ViewModel.SelectedBrandId, Mode=TwoWay}" />
                                 <ComboBox
+                                    x:Name="CategoryFilter"
                                     Width="180"
                                     PlaceholderText="Category"
                                     Style="{StaticResource FormComboBoxStyle}"
@@ -96,6 +182,7 @@
                                     SelectedValue="{x:Bind ViewModel.SelectedCategoryId, Mode=TwoWay}" />
 
                                 <ComboBox
+                                    x:Name="SortFieldFilter"
                                     Width="120"
                                     Style="{StaticResource FormComboBoxStyle}"
                                     PlaceholderText="Sort By"
@@ -105,6 +192,7 @@
                                     SelectedValue="{x:Bind ViewModel.SelectedSortField, Mode=TwoWay}" />
 
                                 <ComboBox
+                                    x:Name="SortOrderFilter"
                                     Width="95"
                                     Style="{StaticResource FormComboBoxStyle}"
                                     PlaceholderText="Order"
@@ -114,6 +202,7 @@
                                     SelectedValue="{x:Bind ViewModel.SelectedSortOrder, Mode=TwoWay}" />
                                 <ToggleSwitch
                                     Header="Advanced"
+                                    VerticalAlignment="Top"
                                     IsOn="{x:Bind ViewModel.IsAdvancedSearchExpanded, Mode=TwoWay}" />
                                 <Button
                                     Style="{StaticResource PrimaryButtonStyle}"
