@@ -11,20 +11,60 @@ export class ProductRepository {
     const where: Prisma.ProductWhereInput = { isActive: true };
 
     if (filter.search) {
-      where.name = { contains: filter.search, mode: "insensitive" };
+      where.OR = [
+        { name: { contains: filter.search, mode: "insensitive" } },
+        { sku: { contains: filter.search, mode: "insensitive" } },
+      ];
     }
+
+    if (filter.name) {
+      where.name = { contains: filter.name, mode: "insensitive" };
+    }
+
+    if (filter.sku) {
+      where.sku = { contains: filter.sku, mode: "insensitive" };
+    }
+
     if (filter.brandId) {
       where.brandId = filter.brandId;
     }
+
+    const brandIds = [
+      ...(filter.brandId ? [filter.brandId] : []),
+      ...(filter.brandIds ?? []),
+    ].filter((value, index, values) => values.indexOf(value) === index);
+
+    if (brandIds.length > 0) {
+      where.brandId = { in: brandIds };
+    }
+
     if (filter.categoryId) {
       where.categories = { some: { categoryId: filter.categoryId } };
     }
+
+    const categoryIds = [
+      ...(filter.categoryId ? [filter.categoryId] : []),
+      ...(filter.categoryIds ?? []),
+    ].filter((value, index, values) => values.indexOf(value) === index);
+
+    if (categoryIds.length > 0) {
+      where.categories = {
+        some: {
+          categoryId: { in: categoryIds },
+        },
+      };
+    }
+
     if (filter.minPrice !== undefined || filter.maxPrice !== undefined) {
       where.sellingPrice = {};
       if (filter.minPrice !== undefined)
         where.sellingPrice.gte = filter.minPrice;
       if (filter.maxPrice !== undefined)
         where.sellingPrice.lte = filter.maxPrice;
+    }
+
+    if (filter.inStockOnly) {
+      where.stockQuantity = { gt: 0 };
     }
 
     const orderBy: Prisma.ProductOrderByWithRelationInput = {};

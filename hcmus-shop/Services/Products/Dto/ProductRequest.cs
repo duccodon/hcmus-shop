@@ -5,10 +5,15 @@ namespace hcmus_shop.Services.Products.Dto
     public class ProductFilterDto
     {
         public string? Search { get; set; }
+        public string? Name { get; set; }
+        public string? Sku { get; set; }
         public int? CategoryId { get; set; }
         public int? BrandId { get; set; }
+        public List<int>? CategoryIds { get; set; }
+        public List<int>? BrandIds { get; set; }
         public double? MinPrice { get; set; }
         public double? MaxPrice { get; set; }
+        public bool? InStockOnly { get; set; }
         public string? SortBy { get; set; }
         public string? SortOrder { get; set; }
         public int Page { get; set; } = 1;
@@ -50,10 +55,15 @@ namespace hcmus_shop.Services.Products.Dto
     public class GetProductsRequest
     {
         public string? Search { get; set; }
+        public string? Name { get; set; }
+        public string? Sku { get; set; }
         public int? CategoryId { get; set; }
         public int? BrandId { get; set; }
+        public List<int>? CategoryIds { get; set; }
+        public List<int>? BrandIds { get; set; }
         public double? MinPrice { get; set; }
         public double? MaxPrice { get; set; }
+        public bool? InStockOnly { get; set; }
         public string? SortBy { get; set; }
         public string? SortOrder { get; set; }
         public int Page { get; set; }

@@ -53,30 +53,6 @@ namespace hcmus_shop.Views
             Frame?.Navigate(typeof(EditProductPage), productId);
         }
 
-        private void DateFromPicker_DateChanged(CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs args)
-        {
-            UpdateDateRangeLabel();
-        }
-
-        private void DateToPicker_DateChanged(CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs args)
-        {
-            UpdateDateRangeLabel();
-        }
-
-        private void UpdateDateRangeLabel()
-        {
-            var from = DateFromPicker.Date?.Date;
-            var to = DateToPicker.Date?.Date;
-            if (from is null && to is null)
-            {
-                DateRangeLabel.Text = "Date Range";
-                return;
-            }
-            var fromText = from?.ToString("dd MMM") ?? "...";
-            var toText = to?.ToString("dd MMM yyyy") ?? "...";
-            DateRangeLabel.Text = $"{fromText} - {toText}";
-        }
-
         private async Task<bool> ShowBulkDeleteConfirmAsync(int selectedCount)
         {
             var dialog = new ContentDialog

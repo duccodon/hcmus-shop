@@ -67,10 +67,15 @@ scalar JSON
 extend type Query {
   products(
     search: String
+    name: String
+    sku: String
     categoryId: Int
     brandId: Int
+    categoryIds: [Int!]
+    brandIds: [Int!]
     minPrice: Float
     maxPrice: Float
+    inStockOnly: Boolean
     sortBy: String
     sortOrder: String
     page: Int

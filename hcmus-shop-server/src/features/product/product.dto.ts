@@ -1,9 +1,14 @@
 export interface ProductFilterDto {
   search?: string;
+  name?: string;
+  sku?: string;
   categoryId?: number;
   brandId?: number;
+  categoryIds?: number[];
+  brandIds?: number[];
   minPrice?: number;
   maxPrice?: number;
+  inStockOnly?: boolean;
   sortBy?: string;
   sortOrder?: string;
   page?: number;

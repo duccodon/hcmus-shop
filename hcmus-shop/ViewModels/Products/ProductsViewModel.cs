@@ -37,6 +37,12 @@ namespace hcmus_shop.ViewModels.Products
         private bool _suppressFilterReload;
         private bool _suppressSortReload;
         private bool _suppressSelectAllChange;
+        private bool _isAdvancedSearchExpanded;
+        private string _advancedSku = string.Empty;
+        private string _advancedName = string.Empty;
+        private string _minPrice = string.Empty;
+        private string _maxPrice = string.Empty;
+        private bool _inStockOnly;
 
         public ProductsViewModel(
             IProductService productService,
@@ -57,6 +63,7 @@ namespace hcmus_shop.ViewModels.Products
             BulkDeleteCommand = new AsyncRelayCommand(BulkDeleteAsync);
             ClearFiltersCommand = new AsyncRelayCommand(ClearFiltersAsync, () => !IsLoading);
             InitializeCommand = new AsyncRelayCommand(InitializeAsync, () => !IsInitialized && !IsLoading);
+            ApplyAdvancedFiltersCommand = new AsyncRelayCommand(ApplyAdvancedFiltersAsync, () => !IsLoading);
 
             SortFieldOptions.Add(new SortOptionViewModel("name", "Name"));
             SortFieldOptions.Add(new SortOptionViewModel("sellingPrice", "Price"));
@@ -71,6 +78,8 @@ namespace hcmus_shop.ViewModels.Products
         public ObservableCollection<PageButtonItem> PageButtons { get; } = [];
         public ObservableCollection<FilterOptionViewModel> CategoryOptions { get; } = [];
         public ObservableCollection<FilterOptionViewModel> BrandOptions { get; } = [];
+        public ObservableCollection<AdvancedFilterOptionViewModel> AdvancedCategoryOptions { get; } = [];
+        public ObservableCollection<AdvancedFilterOptionViewModel> AdvancedBrandOptions { get; } = [];
         public ObservableCollection<SortOptionViewModel> SortFieldOptions { get; } = [];
         public ObservableCollection<SortOptionViewModel> SortOrderOptions { get; } = [];
 
@@ -82,6 +91,7 @@ namespace hcmus_shop.ViewModels.Products
         public IAsyncRelayCommand BulkDeleteCommand { get; }
         public IAsyncRelayCommand ClearFiltersCommand { get; }
         public IAsyncRelayCommand InitializeCommand { get; }
+        public IAsyncRelayCommand ApplyAdvancedFiltersCommand { get; }
 
         public event EventHandler? NavigateToAddProductRequested;
         public event Action<int>? NavigateToEditProductRequested;
@@ -135,6 +145,7 @@ namespace hcmus_shop.ViewModels.Products
                 {
                     InitializeCommand.NotifyCanExecuteChanged();
                     ClearFiltersCommand.NotifyCanExecuteChanged();
+                    ApplyAdvancedFiltersCommand.NotifyCanExecuteChanged();
                     OnPropertyChanged(nameof(IsBusy));
                     OnPropertyChanged(nameof(IsEmpty));
                 }
@@ -229,6 +240,42 @@ namespace hcmus_shop.ViewModels.Products
                     _ = LoadProductsAsync();
                 }
             }
+        }
+
+        public bool IsAdvancedSearchExpanded
+        {
+            get => _isAdvancedSearchExpanded;
+            set => SetProperty(ref _isAdvancedSearchExpanded, value);
+        }
+
+        public string AdvancedSku
+        {
+            get => _advancedSku;
+            set => SetProperty(ref _advancedSku, value);
+        }
+
+        public string AdvancedName
+        {
+            get => _advancedName;
+            set => SetProperty(ref _advancedName, value);
+        }
+
+        public string MinPrice
+        {
+            get => _minPrice;
+            set => SetProperty(ref _minPrice, value);
+        }
+
+        public string MaxPrice
+        {
+            get => _maxPrice;
+            set => SetProperty(ref _maxPrice, value);
+        }
+
+        public bool InStockOnly
+        {
+            get => _inStockOnly;
+            set => SetProperty(ref _inStockOnly, value);
         }
 
         public bool IsAllOnPageSelected
@@ -338,7 +385,32 @@ namespace hcmus_shop.ViewModels.Products
             SelectedCategoryId = null;
             SelectedBrandId = null;
             _suppressFilterReload = false;
+            AdvancedSku = string.Empty;
+            AdvancedName = string.Empty;
+            MinPrice = string.Empty;
+            MaxPrice = string.Empty;
+            InStockOnly = false;
+            ClearAdvancedSelections();
 
+            _currentPage = 1;
+            await LoadProductsAsync();
+        }
+
+        public string AdvancedBrandSelectionText =>
+            BuildSelectionSummary(AdvancedBrandOptions, "All brands");
+
+        public string AdvancedCategorySelectionText =>
+            BuildSelectionSummary(AdvancedCategoryOptions, "All categories");
+
+        private async Task ApplyAdvancedFiltersAsync()
+        {
+            if (!TryGetPriceRange(out var minPrice, out var maxPrice, out var validationError))
+            {
+                ErrorMessage = validationError;
+                return;
+            }
+
+            ErrorMessage = string.Empty;
             _currentPage = 1;
             await LoadProductsAsync();
         }
@@ -365,16 +437,24 @@ namespace hcmus_shop.ViewModels.Products
 
             BrandOptions.Clear();
             BrandOptions.Add(new FilterOptionViewModel(null, "All brands"));
+            AdvancedBrandOptions.Clear();
             foreach (var brand in brandsResult.Value.OrderBy(brand => brand.Name))
             {
                 BrandOptions.Add(new FilterOptionViewModel(brand.BrandId, brand.Name));
+                var option = new AdvancedFilterOptionViewModel(brand.BrandId, brand.Name);
+                option.PropertyChanged += AdvancedBrandOption_PropertyChanged;
+                AdvancedBrandOptions.Add(option);
             }
 
             CategoryOptions.Clear();
             CategoryOptions.Add(new FilterOptionViewModel(null, "All categories"));
+            AdvancedCategoryOptions.Clear();
             foreach (var category in categoriesResult.Value.OrderBy(category => category.Name))
             {
                 CategoryOptions.Add(new FilterOptionViewModel(category.CategoryId, category.Name));
+                var option = new AdvancedFilterOptionViewModel(category.CategoryId, category.Name);
+                option.PropertyChanged += AdvancedCategoryOption_PropertyChanged;
+                AdvancedCategoryOptions.Add(option);
             }
         }
 
@@ -521,13 +601,33 @@ namespace hcmus_shop.ViewModels.Products
 
             try
             {
+                if (!TryGetPriceRange(out var minPrice, out var maxPrice, out var validationError))
+                {
+                    _totalCount = 0;
+                    PagedProducts.Clear();
+                    RebuildPageButtons();
+                    UpdateSelectAllState();
+                    NotifySelectionChanged();
+                    OnPropertyChanged(nameof(ResultText));
+                    OnPropertyChanged(nameof(IsEmpty));
+                    ErrorMessage = validationError;
+                    return;
+                }
+
                 var result = await _productService.GetAllAsync(new ProductFilterDto
                 {
                     Search = string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery.Trim(),
+                    Name = string.IsNullOrWhiteSpace(AdvancedName) ? null : AdvancedName.Trim(),
+                    Sku = string.IsNullOrWhiteSpace(AdvancedSku) ? null : AdvancedSku.Trim(),
                     CategoryId = SelectedCategoryId,
                     BrandId = SelectedBrandId,
+                    CategoryIds = GetSelectedAdvancedCategoryIds(),
+                    BrandIds = GetSelectedAdvancedBrandIds(),
                     SortBy = SelectedSortField,
                     SortOrder = SelectedSortOrder,
+                    MinPrice = minPrice,
+                    MaxPrice = maxPrice,
+                    InStockOnly = InStockOnly ? true : null,
                     Page = _currentPage,
                     PageSize = SelectedPageSize
                 });
@@ -686,6 +786,22 @@ namespace hcmus_shop.ViewModels.Products
             UpdateSelectAllState();
         }
 
+        private void AdvancedBrandOption_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(AdvancedFilterOptionViewModel.IsSelected))
+            {
+                OnPropertyChanged(nameof(AdvancedBrandSelectionText));
+            }
+        }
+
+        private void AdvancedCategoryOption_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(AdvancedFilterOptionViewModel.IsSelected))
+            {
+                OnPropertyChanged(nameof(AdvancedCategorySelectionText));
+            }
+        }
+
         private void UpdateSelectAllState()
         {
             if (PagedProducts.Count == 0)
@@ -762,6 +878,98 @@ namespace hcmus_shop.ViewModels.Products
             }
 
             return pages;
+        }
+
+        private List<int>? GetSelectedAdvancedBrandIds()
+        {
+            var selectedIds = AdvancedBrandOptions
+                .Where(option => option.IsSelected)
+                .Select(option => option.Id)
+                .ToList();
+
+            return selectedIds.Count > 0 ? selectedIds : null;
+        }
+
+        private List<int>? GetSelectedAdvancedCategoryIds()
+        {
+            var selectedIds = AdvancedCategoryOptions
+                .Where(option => option.IsSelected)
+                .Select(option => option.Id)
+                .ToList();
+
+            return selectedIds.Count > 0 ? selectedIds : null;
+        }
+
+        private void ClearAdvancedSelections()
+        {
+            foreach (var option in AdvancedBrandOptions)
+            {
+                option.IsSelected = false;
+            }
+
+            foreach (var option in AdvancedCategoryOptions)
+            {
+                option.IsSelected = false;
+            }
+
+            OnPropertyChanged(nameof(AdvancedBrandSelectionText));
+            OnPropertyChanged(nameof(AdvancedCategorySelectionText));
+        }
+
+        private bool TryGetPriceRange(out double? minPrice, out double? maxPrice, out string validationError)
+        {
+            minPrice = ParseNullablePrice(MinPrice);
+            maxPrice = ParseNullablePrice(MaxPrice);
+
+            if (!string.IsNullOrWhiteSpace(MinPrice) && minPrice is null)
+            {
+                validationError = "Minimum price is invalid.";
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(MaxPrice) && maxPrice is null)
+            {
+                validationError = "Maximum price is invalid.";
+                return false;
+            }
+
+            if (minPrice.HasValue && maxPrice.HasValue && minPrice.Value > maxPrice.Value)
+            {
+                validationError = "Minimum price cannot be greater than maximum price.";
+                return false;
+            }
+
+            validationError = string.Empty;
+            return true;
+        }
+
+        private static double? ParseNullablePrice(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            return double.TryParse(value, out var parsed)
+                ? parsed
+                : null;
+        }
+
+        private static string BuildSelectionSummary(
+            IEnumerable<AdvancedFilterOptionViewModel> options,
+            string emptyLabel)
+        {
+            var selectedNames = options
+                .Where(option => option.IsSelected)
+                .Select(option => option.Name)
+                .ToList();
+
+            return selectedNames.Count switch
+            {
+                0 => emptyLabel,
+                1 => selectedNames[0],
+                _ => $"{selectedNames.Count} selected",
+            };
         }
     }
 }

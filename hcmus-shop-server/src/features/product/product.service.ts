@@ -8,6 +8,14 @@ import {
 
 export class ProductService {
   findAll(filter: ProductFilterDto) {
+    if (
+      filter.minPrice !== undefined &&
+      filter.maxPrice !== undefined &&
+      filter.minPrice > filter.maxPrice
+    ) {
+      throw new Error("Minimum price cannot be greater than maximum price.");
+    }
+
     return productRepository.findAll(filter);
   }
 
