@@ -66,16 +66,16 @@
                         Grid.Column="0"
                         Grid.ColumnSpan="2"
                         Margin="0,0,0,10"
-                        IsOpen="{x:Bind ViewModel.HasSaveError, Mode=OneWay}"
                         IsClosable="False"
-                        Severity="Error"
-                        Message="{x:Bind ViewModel.SaveErrorMessage, Mode=OneWay}" />
+                        IsOpen="{x:Bind ViewModel.HasSaveError, Mode=OneWay}"
+                        Message="{x:Bind ViewModel.SaveErrorMessage, Mode=OneWay}"
+                        Severity="Error" />
                     <TextBlock
                         Grid.Column="0"
                         Grid.ColumnSpan="2"
                         Margin="0,22,0,10"
-                        Text="{x:Bind ViewModel.SaveStatusMessage, Mode=OneWay}"
                         Foreground="{StaticResource TextSecondary}"
+                        Text="{x:Bind ViewModel.SaveStatusMessage, Mode=OneWay}"
                         Visibility="{x:Bind ViewModel.HasSaveStatus, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <Grid RowSpacing="16">
                         <Grid.Margin>0,26,0,0</Grid.Margin>
@@ -234,21 +234,19 @@
                                         Minimum="0"
                                         SpinButtonPlacementMode="Inline"
                                         Style="{StaticResource FormNumberBoxStyle}"
-                                        Value="{x:Bind ViewModel.SellingPriceValue, Mode=TwoWay}"
-                                        SpinButtonPlacementMode="Inline"
-                                        Minimum="0" />
+                                        Value="{x:Bind ViewModel.SellingPriceValue, Mode=TwoWay}" />
 
                                     <TextBlock
                                         Grid.Row="2"
-                                        Text="Stock Quantity"
                                         FontWeight="SemiBold"
-                                        Foreground="{StaticResource TextPrimary}" />
+                                        Foreground="{StaticResource TextPrimary}"
+                                        Text="Stock Quantity" />
 
                                     <NumberBox
                                         Grid.Row="3"
-                                        Value="{x:Bind ViewModel.StockQuantityValue, Mode=TwoWay}"
+                                        Minimum="0"
                                         SpinButtonPlacementMode="Inline"
-                                        Minimum="0" />
+                                        Value="{x:Bind ViewModel.StockQuantityValue, Mode=TwoWay}" />
                                 </Grid>
                             </Grid>
                         </Border>
@@ -357,12 +355,12 @@
                                 <Button
                                     Grid.Row="3"
                                     Margin="0,6,0,0"
-                                    Content="{x:Bind ViewModel.AddCategoryButtonText, Mode=OneWay}"
-                                    Style="{StaticResource PrimaryPillButtonStyle}"
                                     HorizontalAlignment="Left"
-                                    Command="{x:Bind ViewModel.AddCategoryCommand}"
                                     Background="{StaticResource LoginPrimaryBrush}"
-                                    Foreground="White" />
+                                    Command="{x:Bind ViewModel.AddCategoryCommand}"
+                                    Content="{x:Bind ViewModel.AddCategoryButtonText, Mode=OneWay}"
+                                    Foreground="White"
+                                    Style="{StaticResource PrimaryPillButtonStyle}" />
 
                                 <TextBlock
                                     Grid.Row="3"
