@@ -80,14 +80,14 @@
                         Text="{x:Bind ViewModel.SaveStatusMessage, Mode=OneWay}"
                         Foreground="{StaticResource TextSecondary}"
                         Visibility="{x:Bind ViewModel.HasSaveStatus, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <InfoBar
+                    <TextBlock
                         Grid.Column="0"
                         Grid.ColumnSpan="2"
                         Margin="0,52,0,10"
-                        IsOpen="{x:Bind ViewModel.HasSavedDraft, Mode=OneWay}"
-                        IsClosable="False"
-                        Severity="Informational"
-                        Message="{x:Bind ViewModel.DraftStatusText, Mode=OneWay}" />
+                        Text="{x:Bind ViewModel.AutoSaveStatusText, Mode=OneWay}"
+                        Foreground="{StaticResource TextSecondary}"
+                        FontStyle="Italic"
+                        Visibility="{x:Bind ViewModel.HasAutoSaveStatusText, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <Grid RowSpacing="16">
                         <Grid.Margin>0,82,0,0</Grid.Margin>
                         <Grid.RowDefinitions>

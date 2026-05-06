@@ -43,6 +43,7 @@ namespace hcmus_shop.ViewModels.Products
         private bool _isDraftRestored;
         private bool _isAutoSaveActive;
         private bool _suppressSeriesReload;
+        private string _draftEventMessage = string.Empty;
 
         public AddProductViewModel(
             IProductService productService,
@@ -201,7 +202,8 @@ namespace hcmus_shop.ViewModels.Products
             {
                 if (SetProperty(ref _hasSavedDraft, value))
                 {
-                    OnPropertyChanged(nameof(DraftStatusText));
+                    OnPropertyChanged(nameof(AutoSaveStatusText));
+                    OnPropertyChanged(nameof(HasAutoSaveStatusText));
                 }
             }
         }
@@ -213,15 +215,48 @@ namespace hcmus_shop.ViewModels.Products
             {
                 if (SetProperty(ref _isDraftRestored, value))
                 {
-                    OnPropertyChanged(nameof(DraftStatusText));
+                    OnPropertyChanged(nameof(AutoSaveStatusText));
+                    OnPropertyChanged(nameof(HasAutoSaveStatusText));
                 }
             }
         }
 
-        public string DraftStatusText =>
-            IsDraftRestored ? "Draft restored automatically." :
-            HasSavedDraft ? "Draft auto-save is active." :
+        public bool IsAutoSaveActive
+        {
+            get => _isAutoSaveActive;
+            private set
+            {
+                if (SetProperty(ref _isAutoSaveActive, value))
+                {
+                    OnPropertyChanged(nameof(AutoSaveStatusText));
+                    OnPropertyChanged(nameof(HasAutoSaveStatusText));
+                }
+            }
+        }
+
+        public string AutoSaveStatusText =>
+            HasDraftEventMessage ? DraftEventMessage :
+            IsDraftRestored ? "Draft restored." :
+            IsAutoSaveActive ? "Auto-save on." :
             string.Empty;
+
+        public bool HasAutoSaveStatusText => !string.IsNullOrWhiteSpace(AutoSaveStatusText);
+
+        public string DraftEventMessage
+        {
+            get => _draftEventMessage;
+            private set
+            {
+                if (SetProperty(ref _draftEventMessage, value))
+                {
+                    OnPropertyChanged(nameof(HasDraftEventMessage));
+                    OnPropertyChanged(nameof(AutoSaveStatusText));
+                    OnPropertyChanged(nameof(HasAutoSaveStatusText));
+                }
+            }
+        }
+
+        public bool HasDraftEventMessage => !string.IsNullOrWhiteSpace(DraftEventMessage);
 
         public int? SelectedBrandId
         {
@@ -381,23 +416,23 @@ namespace hcmus_shop.ViewModels.Products
 
         public void StartAutoSave()
         {
-            if (_isAutoSaveActive)
+            if (IsAutoSaveActive)
             {
                 return;
             }
 
-            _isAutoSaveActive = true;
+            IsAutoSaveActive = true;
             _autoSaveTimer.Start();
         }
 
         public void StopAutoSave()
         {
-            if (!_isAutoSaveActive)
+            if (!IsAutoSaveActive)
             {
                 return;
             }
 
-            _isAutoSaveActive = false;
+            IsAutoSaveActive = false;
             _autoSaveTimer.Stop();
         }
 
@@ -550,6 +585,7 @@ namespace hcmus_shop.ViewModels.Products
 
                 HasSavedDraft = false;
                 IsDraftRestored = false;
+                DraftEventMessage = string.Empty;
             }
 
             IsInitialized = true;
@@ -716,6 +752,7 @@ namespace hcmus_shop.ViewModels.Products
             await RestoreDraftAsync(draft);
             HasSavedDraft = true;
             IsDraftRestored = true;
+            DraftEventMessage = "Draft restored automatically.";
             _isDraftDirty = false;
             return true;
         }
@@ -809,6 +846,10 @@ namespace hcmus_shop.ViewModels.Products
                 ApplicationData.Current.LocalSettings.Values[DraftStorageKey] = serializedDraft;
 
                 HasSavedDraft = true;
+                if (!IsDraftRestored)
+                {
+                    DraftEventMessage = string.Empty;
+                }
                 _isDraftDirty = false;
             }
             catch
@@ -851,6 +892,7 @@ namespace hcmus_shop.ViewModels.Products
         public async Task DiscardDraftAsync()
         {
             await ClearDraftAsync(resetRestoredState: true);
+            DraftEventMessage = "Draft discarded.";
         }
 
         private Task ClearDraftAsync(bool resetRestoredState)
