@@ -31,6 +31,11 @@ type ProductPage {
   pageSize: Int!
 }
 
+input ProductSortInput {
+  field: String!
+  direction: String!
+}
+
 input CreateProductInput {
   sku: String!
   name: String!
@@ -67,10 +72,16 @@ scalar JSON
 extend type Query {
   products(
     search: String
+    name: String
+    sku: String
     categoryId: Int
     brandId: Int
+    categoryIds: [Int!]
+    brandIds: [Int!]
     minPrice: Float
     maxPrice: Float
+    inStockOnly: Boolean
+    sorts: [ProductSortInput!]
     sortBy: String
     sortOrder: String
     page: Int

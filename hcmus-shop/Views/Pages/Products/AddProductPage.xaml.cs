@@ -33,10 +33,13 @@ namespace hcmus_shop.Views
             {
                 await ViewModel.InitializeCommand.ExecuteAsync(null);
             }
+
+            ViewModel.StartAutoSave();
         }
 
         private void AddProductPage_Unloaded(object sender, RoutedEventArgs e)
         {
+            ViewModel.StopAutoSave();
             ViewModel.ProductSaved -= ViewModel_ProductSaved;
             ViewModel.RequestCategoryInputAsync = null;
             Loaded -= AddProductPage_Loaded;

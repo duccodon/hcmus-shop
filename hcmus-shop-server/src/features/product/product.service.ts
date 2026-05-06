@@ -4,11 +4,44 @@ import {
   ProductFilterDto,
   CreateProductDto,
   UpdateProductDto,
+  ProductSortDto,
 } from "./product.dto";
 
 export class ProductService {
   findAll(filter: ProductFilterDto) {
+    if (
+      filter.minPrice !== undefined &&
+      filter.maxPrice !== undefined &&
+      filter.minPrice > filter.maxPrice
+    ) {
+      throw new Error("Minimum price cannot be greater than maximum price.");
+    }
+
+    if (filter.sorts?.length) {
+      for (const sort of filter.sorts) {
+        this.validateSort(sort);
+      }
+    } else if (filter.sortBy) {
+      this.validateSort({
+        field: filter.sortBy,
+        direction: filter.sortOrder ?? "desc",
+      });
+    }
+
     return productRepository.findAll(filter);
+  }
+
+  private validateSort(sort: ProductSortDto) {
+    const allowedFields = new Set(["name", "sellingPrice", "stockQuantity", "createdAt"]);
+    const allowedDirections = new Set(["asc", "desc"]);
+
+    if (!allowedFields.has(sort.field)) {
+      throw new Error(`Unsupported sort field '${sort.field}'.`);
+    }
+
+    if (!allowedDirections.has(sort.direction)) {
+      throw new Error(`Unsupported sort direction '${sort.direction}'.`);
+    }
   }
 
   findById(productId: number) {

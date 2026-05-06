@@ -13,9 +13,11 @@ using hcmus_shop.Services.Brands;
 using hcmus_shop.Services.Categories;
 using hcmus_shop.Services.Series;
 using hcmus_shop.Services.Products;
+using hcmus_shop.Services.Promotions;
 using hcmus_shop.Services.Uploads;
 using hcmus_shop.ViewModels;
 using hcmus_shop.ViewModels.Products;
+using hcmus_shop.ViewModels.Promotions;
 using hcmus_shop.Views;
 using Windows.Storage;
 
@@ -64,6 +66,7 @@ namespace hcmus_shop
             services.AddSingleton<ICategoryService, CategoryService>();
             services.AddSingleton<ISeriesService, SeriesService>();
             services.AddSingleton<IProductService, ProductService>();
+            services.AddSingleton<IPromotionService, PromotionService>();
             services.AddSingleton<IFileUploadService, FileUploadService>();
 
             // ViewModels
@@ -71,6 +74,7 @@ namespace hcmus_shop
             services.AddTransient<ProductsViewModel>();
             services.AddTransient<AddProductViewModel>();
             services.AddTransient<EditProductViewModel>();
+            services.AddTransient<PromotionsViewModel>();
 
             Ioc.Default.ConfigureServices(services.BuildServiceProvider());
         }

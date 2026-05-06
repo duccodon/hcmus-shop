@@ -145,7 +145,7 @@ model ProductInstance {
 model Promotion {
   promotionId     Int       @id @default(autoincrement())
   code            String    @unique
-  discountPercent Decimal
+  discountPercent Decimal?
   discountAmount  Decimal?
   startDate       DateTime
   endDate         DateTime

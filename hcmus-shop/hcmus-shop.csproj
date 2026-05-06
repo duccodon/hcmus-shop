@@ -63,6 +63,7 @@
        <Page Include="Views\Pages\Products\AddProductPage.xaml" />
        <Page Include="Views\Pages\Products\EditProductPage.xaml" />
 		<Page Include="Views\Pages\Products\ProductsPage.xaml" />
+		<Page Include="Views\Pages\Promotions\PromotionsPage.xaml" />
 		<Page Include="Views\Pages\Store\StorePage.xaml" />
 		<Page Include="Views\Pages\Messages\MessagesPage.xaml" />
 	</ItemGroup>
@@ -159,6 +160,9 @@
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
         <Page Update="Views\Pages\Products\EditProductPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="Views\Pages\Promotions\PromotionsPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
         <Page Update="Views\Components\**\*.xaml">

@@ -14,6 +14,7 @@ import { brandResolver } from "./features/brand/brand.resolver";
 import { categoryResolver } from "./features/category/category.resolver";
 import { seriesResolver } from "./features/series/series.resolver";
 import { productResolver } from "./features/product/product.resolver";
+import { promotionResolver } from "./features/promotion/promotion.resolver";
 
 // Load .graphql type definitions
 function loadTypeDef(featurePath: string): string {
@@ -26,6 +27,7 @@ const typeDefs = [
   loadTypeDef("category/category.typeDef.graphql"),
   loadTypeDef("series/series.typeDef.graphql"),
   loadTypeDef("product/product.typeDef.graphql"),
+  loadTypeDef("promotion/promotion.typeDef.graphql"),
 ].join("\n");
 
 // Merge resolvers by type (Query, Mutation, etc.)
@@ -46,7 +48,8 @@ const resolvers = mergeResolvers(
   brandResolver,
   categoryResolver,
   seriesResolver,
-  productResolver
+  productResolver,
+  promotionResolver
 );
 
 async function main() {

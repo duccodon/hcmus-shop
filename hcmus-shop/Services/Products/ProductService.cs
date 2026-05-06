@@ -22,10 +22,16 @@ namespace hcmus_shop.Services.Products
             var request = new GetProductsRequest
             {
                 Search = filter.Search,
+                Name = filter.Name,
+                Sku = filter.Sku,
                 CategoryId = filter.CategoryId,
                 BrandId = filter.BrandId,
+                CategoryIds = filter.CategoryIds,
+                BrandIds = filter.BrandIds,
                 MinPrice = filter.MinPrice,
                 MaxPrice = filter.MaxPrice,
+                InStockOnly = filter.InStockOnly,
+                Sorts = filter.Sorts,
                 SortBy = filter.SortBy,
                 SortOrder = filter.SortOrder,
                 Page = filter.Page,

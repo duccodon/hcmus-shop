@@ -10,8 +10,17 @@ function getUserFromToken(token?: string): JwtPayload | null {
 
   try {
     const cleaned = token.startsWith("Bearer ") ? token.slice(7) : token;
-    return verifyToken(cleaned);
+    const payload = verifyToken(cleaned);
+
+    console.log("[AuthContext] token verified", {
+      userId: payload.userId,
+      username: payload.username,
+      role: payload.role,
+    });
+
+    return payload;
   } catch {
+    console.log("[AuthContext] token verification failed");
     return null;
   }
 }

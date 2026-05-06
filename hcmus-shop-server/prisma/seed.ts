@@ -384,6 +384,56 @@ async function main() {
 
   console.log(`Products seeded: ${products.length}`);
 
+  const promotions = [
+    {
+      code: "WELCOME10",
+      discountPercent: 10,
+      discountAmount: null,
+      startDate: new Date("2026-01-01T00:00:00.000Z"),
+      endDate: new Date("2026-12-31T23:59:59.999Z"),
+      isActive: true,
+    },
+    {
+      code: "SPRING500K",
+      discountPercent: null,
+      discountAmount: 500000,
+      startDate: new Date("2026-03-01T00:00:00.000Z"),
+      endDate: new Date("2026-06-30T23:59:59.999Z"),
+      isActive: true,
+    },
+    {
+      code: "EXPIRED25",
+      discountPercent: 25,
+      discountAmount: null,
+      startDate: new Date("2025-01-01T00:00:00.000Z"),
+      endDate: new Date("2025-12-31T23:59:59.999Z"),
+      isActive: false,
+    },
+  ];
+
+  for (const seed of promotions) {
+    await prisma.promotion.upsert({
+      where: { code: seed.code },
+      update: {
+        discountPercent: seed.discountPercent,
+        discountAmount: seed.discountAmount,
+        startDate: seed.startDate,
+        endDate: seed.endDate,
+        isActive: seed.isActive,
+      },
+      create: {
+        code: seed.code,
+        discountPercent: seed.discountPercent,
+        discountAmount: seed.discountAmount,
+        startDate: seed.startDate,
+        endDate: seed.endDate,
+        isActive: seed.isActive,
+      },
+    });
+  }
+
+  console.log(`Promotions seeded: ${promotions.length}`);
+
   console.log("Seed completed!");
 }
 

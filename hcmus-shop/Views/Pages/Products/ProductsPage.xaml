@@ -1,20 +1,90 @@
-﻿<Page
+<Page
     x:Class="hcmus_shop.Views.ProductsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:components="using:hcmus_shop.Views.Components"
-    xmlns:pagination="using:hcmus_shop.Views.Components.Pagination"
+    xmlns:local="using:hcmus_shop.Views"
+    xmlns:components="using:hcmus_shop.Views.Components.Pagination"
     xmlns:vm="using:hcmus_shop.ViewModels.Products"
     x:Name="Root">
-
     <Grid Background="{StaticResource DashboardBackground}">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="ProductsLayoutStates">
+                <VisualState x:Name="NarrowState">
+                    <VisualState.Setters>
+                        <Setter Target="HeaderActions.(Grid.Row)" Value="1" />
+                        <Setter Target="HeaderActions.(Grid.Column)" Value="0" />
+                        <Setter Target="HeaderActions.(Grid.ColumnSpan)" Value="2" />
+                        <Setter Target="HeaderActions.HorizontalAlignment" Value="Stretch" />
+                        <Setter Target="HeaderActions.Margin" Value="0,12,0,0" />
+                        <Setter Target="HeaderActions.Orientation" Value="Vertical" />
+
+                        <Setter Target="FilterPanel.(Grid.Row)" Value="1" />
+                        <Setter Target="FilterPanel.(Grid.Column)" Value="0" />
+                        <Setter Target="FilterPanel.(Grid.ColumnSpan)" Value="2" />
+                        <Setter Target="FilterPanel.HorizontalAlignment" Value="Stretch" />
+                        <Setter Target="FilterPanel.Margin" Value="0,12,0,0" />
+                        <Setter Target="FilterPanel.Orientation" Value="Vertical" />
+
+                        <Setter Target="BrandFilter.Width" Value="Auto" />
+                        <Setter Target="CategoryFilter.Width" Value="Auto" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="MediumState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="900" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="HeaderActions.(Grid.Row)" Value="1" />
+                        <Setter Target="HeaderActions.(Grid.Column)" Value="0" />
+                        <Setter Target="HeaderActions.(Grid.ColumnSpan)" Value="2" />
+                        <Setter Target="HeaderActions.HorizontalAlignment" Value="Left" />
+                        <Setter Target="HeaderActions.Margin" Value="0,12,0,0" />
+
+                        <Setter Target="FilterPanel.(Grid.Row)" Value="1" />
+                        <Setter Target="FilterPanel.(Grid.Column)" Value="0" />
+                        <Setter Target="FilterPanel.(Grid.ColumnSpan)" Value="2" />
+                        <Setter Target="FilterPanel.HorizontalAlignment" Value="Stretch" />
+                        <Setter Target="FilterPanel.Margin" Value="0,12,0,0" />
+                        <Setter Target="HeaderActions.Orientation" Value="Horizontal" />
+                        <Setter Target="FilterPanel.Orientation" Value="Horizontal" />
+                        <Setter Target="BrandFilter.Width" Value="160" />
+                        <Setter Target="CategoryFilter.Width" Value="180" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="WideState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="1300" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="HeaderActions.(Grid.Row)" Value="0" />
+                        <Setter Target="HeaderActions.(Grid.Column)" Value="1" />
+                        <Setter Target="HeaderActions.(Grid.ColumnSpan)" Value="1" />
+                        <Setter Target="HeaderActions.HorizontalAlignment" Value="Right" />
+                        <Setter Target="HeaderActions.Margin" Value="0" />
+                        <Setter Target="HeaderActions.Orientation" Value="Horizontal" />
+
+                        <Setter Target="FilterPanel.(Grid.Row)" Value="0" />
+                        <Setter Target="FilterPanel.(Grid.Column)" Value="1" />
+                        <Setter Target="FilterPanel.(Grid.ColumnSpan)" Value="1" />
+                        <Setter Target="FilterPanel.HorizontalAlignment" Value="Right" />
+                        <Setter Target="FilterPanel.Margin" Value="0" />
+                        <Setter Target="FilterPanel.Orientation" Value="Horizontal" />
+
+                        <Setter Target="BrandFilter.Width" Value="160" />
+                        <Setter Target="CategoryFilter.Width" Value="180" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
         <ScrollViewer>
             <Grid Margin="24">
-                <Border Style="{StaticResource ContentCardBorderStyle}">
+                <Border
+                    Background="{StaticResource CardBackground}"
+                    CornerRadius="16"
+                    Padding="20">
                     <Grid RowSpacing="14">
-
-                        <!--  ROWS  -->
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
@@ -23,169 +93,559 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <!--  HEADER  -->
-                        <components:PageHeader
-                            Title="Products List"
-                            PrimaryActionCommand="{x:Bind ViewModel.AddProductCommand}"
-                            PrimaryActionLabel="+ Add Product" />
+                        <!-- Row 0: Title + Action Buttons -->
+                        <Grid x:Name="HeaderGrid">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Text="Products List"
+                                Style="{StaticResource PageTitleStyle}" />
+                            <StackPanel x:Name="HeaderActions" Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <Button Content="Import" Style="{StaticResource PrimaryButtonStyle}" />
+                                <Button Content="Export" Style="{StaticResource PrimaryButtonStyle}" />
+                                <Button
+                                    Content="+ Add Product"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Command="{x:Bind ViewModel.AddProductCommand}" />
+                            </StackPanel>
+                        </Grid>
 
-                        <!--  DIVIDER  -->
+                        <!-- Row 1: Divider -->
+                        <Border Grid.Row="1" Height="1" Background="{StaticResource DividerBrush}" />
+
+                        <!-- Row 2: Search + Filters -->
+                        <Grid Grid.Row="2" x:Name="FilterGrid">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" MaxWidth="320" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Search -->
+                            <Grid VerticalAlignment="Top">
+                                <TextBox
+                                    x:Name="SearchBox"
+                                    PlaceholderText="Search"
+                                    Style="{StaticResource SearchTextBoxStyle}"
+                                    Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <FontIcon
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,12,0"
+                                    FontFamily="Segoe Fluent Icons"
+                                    Glyph="&#xE721;"
+                                    FontSize="14"
+                                    Foreground="{StaticResource TextSecondary}" />
+                            </Grid>
+
+                            <!-- Filter buttons -->
+                            <StackPanel
+                                x:Name="FilterPanel"
+                                Grid.Column="1"
+                                Orientation="Horizontal"
+                                Spacing="8"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top">
+                                <ComboBox
+                                    x:Name="BrandFilter"
+                                    Width="160"
+                                    PlaceholderText="Brand"
+                                    Style="{StaticResource FormComboBoxStyle}"
+                                    ItemsSource="{x:Bind ViewModel.BrandOptions, Mode=OneWay}"
+                                    DisplayMemberPath="Name"
+                                    SelectedValuePath="Id"
+                                    SelectedValue="{x:Bind ViewModel.SelectedBrandId, Mode=TwoWay}" />
+                                <ComboBox
+                                    x:Name="CategoryFilter"
+                                    Width="180"
+                                    PlaceholderText="Category"
+                                    Style="{StaticResource FormComboBoxStyle}"
+                                    ItemsSource="{x:Bind ViewModel.CategoryOptions, Mode=OneWay}"
+                                    DisplayMemberPath="Name"
+                                    SelectedValuePath="Id"
+                                    SelectedValue="{x:Bind ViewModel.SelectedCategoryId, Mode=TwoWay}" />
+
+                                <ToggleSwitch
+                                    Header="Advanced"
+                                    VerticalAlignment="Top"
+                                    IsOn="{x:Bind ViewModel.IsAdvancedSearchExpanded, Mode=TwoWay}" />
+                                <Button
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Command="{x:Bind ViewModel.ClearFiltersCommand}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon
+                                            FontFamily="Segoe Fluent Icons"
+                                            Glyph="&#xE894;"
+                                            FontSize="12"
+                                            VerticalAlignment="Center" />
+                                        <TextBlock Text="Clear" Style="{StaticResource BodySecondaryTextStyle}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Row 3: Advanced Search -->
                         <Border
-                            Grid.Row="1"
-                            Height="1"
-                            Background="{StaticResource DividerBrush}" />
-
-                        <!--  SEARCH + FILTER  -->
-                        <components:SearchFilterBar Grid.Row="2" SearchText="{x:Bind ViewModel.SearchQuery, Mode=TwoWay}">
-
-                            <components:SearchFilterBar.FiltersContent>
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-
-                                    <!--  DATE  -->
-                                    <Button Style="{StaticResource PrimaryButtonStyle}">
-                                        <Button.Flyout>
-                                            <Flyout>
-                                                <StackPanel Spacing="10" Style="{StaticResource FilterFlyoutContentStyle}">
-                                                    <TextBlock Style="{StaticResource BodySecondaryTextStyle}" Text="From" />
-                                                    <CalendarDatePicker
-                                                        x:Name="DateFromPicker"
-                                                        DateChanged="DateFromPicker_DateChanged"
-                                                        PlaceholderText="Start date" />
-                                                    <TextBlock Style="{StaticResource BodySecondaryTextStyle}" Text="To" />
-                                                    <CalendarDatePicker
-                                                        x:Name="DateToPicker"
-                                                        DateChanged="DateToPicker_DateChanged"
-                                                        PlaceholderText="End date" />
-                                                </StackPanel>
-                                            </Flyout>
-                                        </Button.Flyout>
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE787;" />
-                                            <TextBlock
-                                                x:Name="DateRangeLabel"
-                                                Style="{StaticResource BodySecondaryTextStyle}"
-                                                Text="Date Range" />
-                                        </StackPanel>
-                                    </Button>
-
-                                    <!--  BRAND  -->
-                                    <ComboBox
-                                        Width="160"
-                                        DisplayMemberPath="Name"
-                                        ItemsSource="{x:Bind ViewModel.BrandOptions}"
-                                        PlaceholderText="Brand"
-                                        SelectedValue="{x:Bind ViewModel.SelectedBrandId, Mode=TwoWay}"
-                                        SelectedValuePath="Id"
-                                        Style="{StaticResource FormComboBoxStyle}" />
-
-                                    <!--  CATEGORY  -->
-                                    <ComboBox
-                                        Width="180"
-                                        DisplayMemberPath="Name"
-                                        ItemsSource="{x:Bind ViewModel.CategoryOptions}"
-                                        PlaceholderText="Category"
-                                        SelectedValue="{x:Bind ViewModel.SelectedCategoryId, Mode=TwoWay}"
-                                        SelectedValuePath="Id"
-                                        Style="{StaticResource FormComboBoxStyle}" />
-
-                                    <!--  CLEAR  -->
-                                    <Button Command="{x:Bind ViewModel.ClearFiltersCommand}" Style="{StaticResource PrimaryButtonStyle}">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE894;" />
-                                            <TextBlock Style="{StaticResource BodySecondaryTextStyle}" Text="Clear" />
-                                        </StackPanel>
-                                    </Button>
-
-                                </StackPanel>
-                            </components:SearchFilterBar.FiltersContent>
-                        </components:SearchFilterBar>
-
-                        <!--  BULK ACTION  -->
-                        <components:BulkActionBar
                             Grid.Row="3"
-                            DeleteCommand="{x:Bind ViewModel.BulkDeleteCommand}"
-                            SelectionText="{x:Bind ViewModel.SelectionActionText}"
-                            ToggleStatusCommand="{x:Bind ViewModel.BulkToggleStatusCommand}"
-                            Visibility="{x:Bind ViewModel.HasSelection, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            Background="{StaticResource SelectionHighlight}"
+                            CornerRadius="12"
+                            Padding="16"
+                            Visibility="{x:Bind ViewModel.IsAdvancedSearchExpanded, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid RowSpacing="14">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
 
-                        <!--  TABLE  -->
-                        <Grid Grid.Row="4" MinHeight="300">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="140" />
+                                    </Grid.ColumnDefinitions>
 
-                            <!--  ERROR  -->
+                                    <TextBox
+                                        PlaceholderText="SKU"
+                                        Style="{StaticResource SearchTextBoxStyle}"
+                                        Text="{x:Bind ViewModel.AdvancedSku, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                    <TextBox
+                                        Grid.Column="1"
+                                        Margin="12,0,0,0"
+                                        PlaceholderText="Product name"
+                                        Style="{StaticResource SearchTextBoxStyle}"
+                                        Text="{x:Bind ViewModel.AdvancedName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                    <TextBox
+                                        Grid.Column="2"
+                                        Margin="12,0,0,0"
+                                        PlaceholderText="Min price"
+                                        Style="{StaticResource SearchTextBoxStyle}"
+                                        Text="{x:Bind ViewModel.MinPrice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                    <TextBox
+                                        Grid.Column="3"
+                                        Margin="12,0,0,0"
+                                        PlaceholderText="Max price"
+                                        Style="{StaticResource SearchTextBoxStyle}"
+                                        Text="{x:Bind ViewModel.MaxPrice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                    <CheckBox
+                                        Grid.Column="4"
+                                        Margin="12,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Content="In stock only"
+                                        IsChecked="{x:Bind ViewModel.InStockOnly, Mode=TwoWay}" />
+                                </Grid>
+
+                                <Grid Grid.Row="1" ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border
+                                        Padding="12"
+                                        CornerRadius="10"
+                                        Background="{StaticResource CardBackground}">
+                                        <StackPanel Spacing="10">
+                                            <TextBlock Text="Brands" Style="{StaticResource FieldLabelStyle}" />
+                                            <TextBlock Text="{x:Bind ViewModel.AdvancedBrandSelectionText, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" />
+                                            <ScrollViewer MaxHeight="150">
+                                                <ItemsControl ItemsSource="{x:Bind ViewModel.AdvancedBrandOptions, Mode=OneWay}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:AdvancedFilterOptionViewModel">
+                                                            <CheckBox
+                                                                Margin="0,0,0,6"
+                                                                Content="{x:Bind Name}"
+                                                                IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </ScrollViewer>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border
+                                        Grid.Column="1"
+                                        Padding="12"
+                                        CornerRadius="10"
+                                        Background="{StaticResource CardBackground}">
+                                        <StackPanel Spacing="10">
+                                            <TextBlock Text="Categories" Style="{StaticResource FieldLabelStyle}" />
+                                            <TextBlock Text="{x:Bind ViewModel.AdvancedCategorySelectionText, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" />
+                                            <ScrollViewer MaxHeight="150">
+                                                <ItemsControl ItemsSource="{x:Bind ViewModel.AdvancedCategoryOptions, Mode=OneWay}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:AdvancedFilterOptionViewModel">
+                                                            <CheckBox
+                                                                Margin="0,0,0,6"
+                                                                Content="{x:Bind Name}"
+                                                                IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </ScrollViewer>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+
+                                <Border
+                                    Grid.Row="2"
+                                    Padding="12"
+                                    CornerRadius="10"
+                                    Background="{StaticResource CardBackground}">
+                                    <StackPanel Spacing="10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="Sort Criteria" Style="{StaticResource FieldLabelStyle}" />
+                                                <TextBlock Text="{x:Bind ViewModel.SortCriteriaSummary, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" />
+                                            </StackPanel>
+                                            <Button
+                                                Grid.Column="1"
+                                                Content="+ Add Sort"
+                                                Style="{StaticResource GhostButtonStyle}"
+                                                Command="{x:Bind ViewModel.AddSortCriterionCommand}" />
+                                        </Grid>
+
+                                        <ItemsControl ItemsSource="{x:Bind ViewModel.SortCriteria, Mode=OneWay}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:ProductSortCriterionViewModel">
+                                                    <Grid Margin="0,0,0,8">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="1.5*" />
+                                                            <ColumnDefinition Width="1.1*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <ComboBox
+                                                            Style="{StaticResource FormComboBoxStyle}"
+                                                            ItemsSource="{Binding DataContext.SortFieldOptions, ElementName=Root}"
+                                                            DisplayMemberPath="Name"
+                                                            SelectedValuePath="Value"
+                                                            SelectedValue="{x:Bind Field, Mode=TwoWay}" />
+
+                                                        <ComboBox
+                                                            Grid.Column="1"
+                                                            Margin="8,0,0,0"
+                                                            Style="{StaticResource FormComboBoxStyle}"
+                                                            ItemsSource="{Binding DataContext.SortOrderOptions, ElementName=Root}"
+                                                            DisplayMemberPath="Name"
+                                                            SelectedValuePath="Value"
+                                                            SelectedValue="{x:Bind Direction, Mode=TwoWay}" />
+
+                                                        <Button
+                                                            Grid.Column="2"
+                                                            Margin="8,0,0,0"
+                                                            Style="{StaticResource GhostButtonStyle}"
+                                                            Command="{Binding DataContext.MoveSortCriterionUpCommand, ElementName=Root}"
+                                                            CommandParameter="{Binding}">
+                                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74A;" />
+                                                        </Button>
+
+                                                        <Button
+                                                            Grid.Column="3"
+                                                            Margin="4,0,0,0"
+                                                            Style="{StaticResource GhostButtonStyle}"
+                                                            Command="{Binding DataContext.MoveSortCriterionDownCommand, ElementName=Root}"
+                                                            CommandParameter="{Binding}">
+                                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74B;" />
+                                                        </Button>
+
+                                                        <Button
+                                                            Grid.Column="4"
+                                                            Margin="4,0,0,0"
+                                                            Style="{StaticResource GhostButtonStyle}"
+                                                            Command="{Binding DataContext.RemoveSortCriterionCommand, ElementName=Root}"
+                                                            CommandParameter="{Binding}">
+                                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74D;" Foreground="{StaticResource DangerForeground}" />
+                                                        </Button>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+
+                                <StackPanel
+                                    Grid.Row="3"
+                                    Orientation="Horizontal"
+                                    Spacing="8"
+                                    HorizontalAlignment="Right">
+                                    <Button
+                                        Content="Apply Filters"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        Command="{x:Bind ViewModel.ApplyAdvancedFiltersCommand}" />
+                                    <Button
+                                        Content="Apply Sort"
+                                        Style="{StaticResource GhostButtonStyle}"
+                                        Command="{x:Bind ViewModel.ApplySortCommand}" />
+                                    <Button
+                                        Content="Reset Sort"
+                                        Style="{StaticResource GhostButtonStyle}"
+                                        Command="{x:Bind ViewModel.ResetSortCommand}" />
+                                    <Button
+                                        Content="Clear All Filters"
+                                        Style="{StaticResource GhostButtonStyle}"
+                                        Command="{x:Bind ViewModel.ClearFiltersCommand}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Row 4: Bulk-action bar -->
+                        <Grid
+                            Grid.Row="4"
+                            Visibility="{x:Bind ViewModel.HasSelection, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Border
+                                Background="{StaticResource SelectionHighlight}"
+                                CornerRadius="8"
+                                Padding="12,8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        Text="{x:Bind ViewModel.SelectionActionText, Mode=OneWay}"
+                                        Style="{StaticResource BodySecondaryTextStyle}" />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                        <Button
+                                            Command="{x:Bind ViewModel.BulkToggleStatusCommand}"
+                                            Style="{StaticResource PrimaryButtonStyle}"
+                                            ToolTipService.ToolTip="Toggle active / inactive">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon
+                                                    FontFamily="Segoe Fluent Icons"
+                                                    Glyph="&#xE70F;"
+                                                    FontSize="13" />
+                                                <TextBlock Text="Update Status" Style="{StaticResource BodySecondaryTextStyle}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button
+                                            Command="{x:Bind ViewModel.BulkDeleteCommand}"
+                                            Style="{StaticResource DangerButtonStyle}"
+                                            ToolTipService.ToolTip="Delete selected">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon
+                                                    FontFamily="Segoe Fluent Icons"
+                                                    Glyph="&#xE74D;"
+                                                    FontSize="13"
+                                                    Foreground="{StaticResource DangerForeground}" />
+                                                <TextBlock Text="Delete" Style="{StaticResource BodySecondaryTextStyle}" Foreground="{StaticResource DangerForeground}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+
+                        <!-- Row 5: Table -->
+                        <Grid Grid.Row="5" MinHeight="300">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
                             <InfoBar
+                                Grid.RowSpan="2"
+                                Margin="0,0,0,12"
+                                IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
                                 IsClosable="False"
-                                IsOpen="{x:Bind ViewModel.HasError}"
-                                Message="{x:Bind ViewModel.ErrorMessage}"
-                                Severity="Error" />
+                                Severity="Error"
+                                Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
 
-                            <!--  LIST  -->
-                            <ScrollViewer>
-                                <ItemsControl ItemsSource="{x:Bind ViewModel.PagedProducts}">
+                            <!-- Table header -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="56" />
+                                    <ColumnDefinition Width="2.6*" />
+                                    <ColumnDefinition Width="1.4*" />
+                                    <ColumnDefinition Width="1.4*" />
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="1.4*" />
+                                    <ColumnDefinition Width="80" />
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Style="{StaticResource TableHeaderBorderStyle}">
+                                    <CheckBox
+                                        x:Name="SelectAllCheckBox"
+                                        Width="22"
+                                        Height="22"
+                                        IsChecked="{x:Bind ViewModel.IsAllOnPageSelected, Mode=TwoWay}" />
+                                </Border>
+                                <Border Grid.Column="1" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Product Name" Style="{StaticResource TableHeaderTextStyle}" />
+                                </Border>
+                                <Border Grid.Column="2" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Category" Style="{StaticResource TableHeaderTextStyle}" />
+                                </Border>
+                                <Border Grid.Column="3" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Stock" Style="{StaticResource TableHeaderTextStyle}" />
+                                </Border>
+                                <Border Grid.Column="4" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Price" Style="{StaticResource TableHeaderTextStyle}" />
+                                </Border>
+                                <Border Grid.Column="5" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Status" Style="{StaticResource TableHeaderTextStyle}" />
+                                </Border>
+                                <Border Grid.Column="6" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Action" Style="{StaticResource TableHeaderTextStyle}" />
+                                </Border>
+                            </Grid>
+
+                            <!-- Table rows -->
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.PagedProducts, Mode=OneWay}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="vm:ProductRowViewModel">
-
-                                            <Grid Padding="10">
+                                            <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="2.5*" />
+                                                    <ColumnDefinition Width="56" />
+                                                    <ColumnDefinition Width="2.6*" />
+                                                    <ColumnDefinition Width="1.4*" />
+                                                    <ColumnDefinition Width="1.4*" />
                                                     <ColumnDefinition Width="1*" />
-                                                    <ColumnDefinition Width="1*" />
-                                                    <ColumnDefinition Width="1*" />
-                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="1.4*" />
+                                                    <ColumnDefinition Width="80" />
                                                 </Grid.ColumnDefinitions>
 
-                                                <!--  NAME  -->
-                                                <TextBlock Text="{x:Bind Name}" />
+                                                <Border Grid.Column="0" Style="{StaticResource TableRowBorderStyle}">
+                                                    <CheckBox Width="22" Height="22" IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
+                                                </Border>
 
-                                                <!--  STOCK  -->
-                                                <TextBlock Grid.Column="1" Text="{x:Bind StockQuantity}" />
+                                                <Border Grid.Column="1" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                                        <Border
+                                                            Width="32" Height="32"
+                                                            CornerRadius="8"
+                                                            Background="{StaticResource CardBackground}"
+                                                            VerticalAlignment="Center">
+                                                            <Grid>
+                                                                <Image
+                                                                    Stretch="UniformToFill"
+                                                                    Visibility="{x:Bind HasThumbnail, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                    <Image.Source>
+                                                                        <BitmapImage UriSource="{x:Bind ThumbnailUri, Mode=OneWay}" />
+                                                                    </Image.Source>
+                                                                </Image>
+                                                                <FontIcon
+                                                                    HorizontalAlignment="Center"
+                                                                    VerticalAlignment="Center"
+                                                                    FontFamily="Segoe Fluent Icons"
+                                                                    Glyph="{x:Bind FallbackGlyph, Mode=OneWay}"
+                                                                    FontSize="14"
+                                                                    Foreground="{StaticResource TextSecondary}"
+                                                                    Visibility="{x:Bind HasThumbnail, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                                            </Grid>
+                                                        </Border>
+                                                        <StackPanel VerticalAlignment="Center">
+                                                            <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+                                                            <TextBlock Text="{x:Bind Sku, Mode=OneWay}" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
 
-                                                <!--  PRICE  -->
-                                                <TextBlock Grid.Column="2" Text="{x:Bind PriceDisplay}" />
+                                                <Border Grid.Column="2" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind CategoryDisplay, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+                                                </Border>
 
-                                                <!--  STATUS  -->
-                                                <TextBlock Grid.Column="3" Text="{x:Bind StatusText}" />
+                                                <Border Grid.Column="3" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                        <TextBlock Text="{x:Bind StockQuantity, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+                                                        <TextBlock Text="{x:Bind StockLabel, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" Foreground="{x:Bind StockTone, Mode=OneWay, Converter={StaticResource StockToneForegroundConverter}}" />
+                                                    </StackPanel>
+                                                </Border>
 
-                                                <!--  ACTION  -->
-                                                <StackPanel Grid.Column="4" Orientation="Horizontal">
-                                                    <Button
-                                                        Command="{Binding DataContext.EditProductCommand, ElementName=Root}"
-                                                        CommandParameter="{x:Bind ProductId}"
-                                                        Style="{StaticResource GhostButtonStyle}">
-                                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE70F;" />
-                                                    </Button>
+                                                <Border Grid.Column="4" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind PriceDisplay, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+                                                </Border>
 
-                                                    <Button
-                                                        Command="{Binding DataContext.DeleteProductCommand, ElementName=Root}"
-                                                        CommandParameter="{x:Bind ProductId}"
-                                                        Style="{StaticResource GhostButtonStyle}">
-                                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74D;" />
-                                                    </Button>
-                                                </StackPanel>
+                                                <Border Grid.Column="5" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <Border Padding="10,5" CornerRadius="99" Background="{x:Bind StatusTone, Mode=OneWay, Converter={StaticResource StatusToneBackgroundConverter}}" HorizontalAlignment="Left">
+                                                        <TextBlock VerticalAlignment="Center" Text="{x:Bind StatusText, Mode=OneWay}" Style="{StaticResource StatusBadgeTextStyle}" Foreground="{x:Bind StatusTone, Mode=OneWay, Converter={StaticResource StatusToneForegroundConverter}}" />
+                                                    </Border>
+                                                </Border>
 
+                                                <Border Grid.Column="6" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <Button
+                                                            Style="{StaticResource GhostButtonStyle}"
+                                                            Command="{Binding DataContext.EditProductCommand, ElementName=Root}"
+                                                            CommandParameter="{x:Bind ProductId}"
+                                                            ToolTipService.ToolTip="Edit product">
+                                                            <FontIcon
+                                                                FontFamily="Segoe Fluent Icons"
+                                                                Glyph="&#xE70F;"
+                                                                FontSize="13"
+                                                                Foreground="{StaticResource TextSecondary}" />
+                                                        </Button>
+                                                        <Button
+                                                            Style="{StaticResource GhostButtonStyle}"
+                                                            Command="{Binding DataContext.DeleteProductCommand, ElementName=Root}"
+                                                            CommandParameter="{x:Bind ProductId}"
+                                                            ToolTipService.ToolTip="Delete product">
+                                                            <FontIcon
+                                                                FontFamily="Segoe Fluent Icons"
+                                                                Glyph="&#xE74D;"
+                                                                FontSize="13"
+                                                                Foreground="{StaticResource DangerForeground}" />
+                                                        </Button>
+                                                    </StackPanel>
+                                                </Border>
                                             </Grid>
-
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </ScrollViewer>
 
-                            <!--  LOADING  -->
-                            <ProgressRing
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                IsActive="{x:Bind ViewModel.IsBusy}" />
+                            <Border
+                                Grid.RowSpan="2"
+                                Background="{StaticResource CardBackground}"
+                                Opacity="0.85"
+                                Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <ProgressRing IsActive="True" Width="36" Height="36" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
 
+                            <Border
+                                Grid.Row="1"
+                                Background="Transparent"
+                                Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource EmptyStateTextStyle}"
+                                    Text="No products found." />
+                            </Border>
                         </Grid>
 
-                        <!--  PAGINATION  -->
-                        <pagination:PaginationFooter
-                            Grid.Row="5"
-                            PageButtonClickCommand="{x:Bind ViewModel.GoToPageCommand}"
-                            PageButtons="{x:Bind ViewModel.PageButtons}"
-                            PageSizeOptions="{x:Bind ViewModel.PageSizeOptions}"
-                            ResultText="{x:Bind ViewModel.ResultText}"
-                            SelectedPageSize="{x:Bind ViewModel.SelectedPageSize, Mode=TwoWay}" />
-
+                        <!-- Row 6: Footer -->
+                        <components:PaginationFooter
+                            Grid.Row="6"
+                            ResultText="{x:Bind ViewModel.ResultText, Mode=OneWay}"
+                            PageSizeOptions="{x:Bind ViewModel.PageSizeOptions, Mode=OneWay}"
+                            SelectedPageSize="{x:Bind ViewModel.SelectedPageSize, Mode=TwoWay}"
+                            PageButtons="{x:Bind ViewModel.PageButtons, Mode=OneWay}"
+                            PageButtonClickCommand="{x:Bind ViewModel.GoToPageCommand}" />
                     </Grid>
                 </Border>
             </Grid>
