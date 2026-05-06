@@ -199,9 +199,9 @@ responsive-pattern.md
 
 ## Known gotchas / things to be aware of
 
-1. **`MainWindow.xaml.cs` line ~100**: `CanAccessFeature("Settings")` returns true for any logged-in user. Settings doesn't go through the FeatureFlagService (which is config-driven for Admin/Sale). If you need admin-only settings, add it to FeatureFlags in `appsettings.json`.
+1. **`MainWindow.xaml.cs.CanAccessFeature`**: returns true for any logged-in user when checking "Settings". Settings doesn't go through the FeatureFlagService (which is config-driven for Admin/Sale). If you need admin-only settings, add it to FeatureFlags in `appsettings.json`.
 
-2. **`DashboardViewModel.ApplyStats` line ~134**: invoice legend is currently derived from recent orders (only 3 entries). When real reports come in, replace with a proper status breakdown query.
+2. **`DashboardViewModel.ApplyStats`**: invoice legend is currently derived from recent orders (only 3 entries). When real reports come in, replace with a proper status breakdown query.
 
 3. **Trial mode (`TrialService`)** uses `LocalSettings`. If a user clears LocalSettings, the trial resets. For demo this is fine; production would need machine binding.
 

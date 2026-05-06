@@ -10,16 +10,16 @@ Exact sequence of what happens at each user action. Use this when debugging or e
 Double-click .exe / .msix
     ↓
 WinUI calls App() constructor
-    │ App.xaml.cs:39
+    │ App.xaml.cs (App ctor)
     ▼
 ConfigurationBuilder loads appsettings.json
-    │ App.xaml.cs:50
+    │ App.xaml.cs (ConfigurationBuilder block)
     ▼
 DI container built and registered with Ioc.Default
-    │ App.xaml.cs:92
+    │ App.xaml.cs (Ioc.Default.ConfigureServices)
     ▼
 WinUI calls App.OnLaunched
-    │ App.xaml.cs:95
+    │ App.xaml.cs.OnLaunched
     ▼
 Trial check: GetStatus()
     │ → Status: Active (first launch saves trial_start_date)
@@ -28,7 +28,7 @@ Auto-login check: TryAutoLoginAsync()
     │ → No saved token → returns false
     ▼
 LoginWindow created and Activate()'d
-    │ App.xaml.cs:106
+    │ App.xaml.cs.OnLaunched (LoginWindow branch)
     ▼
 LoginWindow constructor calls ShowLoginPage()
     │ Frame.Navigate(typeof(LoginPage))
