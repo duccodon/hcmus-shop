@@ -1,13 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <Application
     x:Class="hcmus_shop.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:hcmus_shop"
-    xmlns:converters="using:hcmus_shop.Converters">
+    xmlns:converters="using:hcmus_shop.Converters"
+    xmlns:local="using:hcmus_shop">
     <Application.Resources>
         <ResourceDictionary>
-            <!-- Declare your converter here -->
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
@@ -28,8 +27,8 @@
                 <ResourceDictionary Source="ms-appx:///Resources/Styles/FormStyles.xaml" />
                 <ResourceDictionary Source="ms-appx:///Resources/Styles/BadgeStyles.xaml" />
                 <ResourceDictionary Source="ms-appx:///Resources/Styles/TableStyles.xaml" />
+                <ResourceDictionary Source="ms-appx:///Resources/Styles/ProductTemplates.xaml" />
                 <ResourceDictionary Source="ms-appx:///Resources/Auth/LoginStyles.xaml" />
-                <!-- Add other merged dictionaries if you have more -->
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

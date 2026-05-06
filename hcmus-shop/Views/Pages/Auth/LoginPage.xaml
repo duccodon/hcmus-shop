@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="hcmus_shop.Views.LoginPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -13,7 +13,7 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!-- Left Panel — Branding -->
+        <!--  Left Panel â€” Branding  -->
         <Grid Grid.Column="0" Background="{StaticResource LoginPrimaryBrush}">
             <StackPanel
                 HorizontalAlignment="Center"
@@ -22,55 +22,51 @@
                 <FontIcon
                     HorizontalAlignment="Center"
                     FontFamily="{StaticResource SymbolThemeFontFamily}"
-                    FontSize="64"
                     Foreground="{StaticResource LoginCardBackgroundBrush}"
-                    Glyph="&#xE719;" />
+                    Glyph="&#xE719;"
+                    Style="{StaticResource BrandBigIconStyle}" />
                 <TextBlock
                     HorizontalAlignment="Center"
-                    Style="{StaticResource CardTitleStyle}"
                     Foreground="{StaticResource LoginCardBackgroundBrush}"
+                    Style="{StaticResource CardTitleStyle}"
                     Text="MyShop" />
                 <TextBlock
                     HorizontalAlignment="Center"
-                    Style="{StaticResource BodySecondaryTextStyle}"
                     Foreground="{StaticResource LoginCardBackgroundBrush}"
+                    Style="{StaticResource BodySecondaryTextStyle}"
                     Text="Laptop Store Management System" />
             </StackPanel>
 
-            <!-- Version at bottom-left -->
+            <!--  Version at bottom-left  -->
             <TextBlock
                 Margin="20,0,0,16"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
-                Style="{StaticResource BodySecondaryTextStyle}"
                 Foreground="{StaticResource LoginCardBackgroundBrush}"
+                Style="{StaticResource BodySecondaryTextStyle}"
                 Text="{x:Bind VersionText}" />
         </Grid>
 
-        <!-- Right Panel — Login Form -->
+        <!--  Right Panel â€” Login Form  -->
         <Grid Grid.Column="1" Background="{StaticResource LoginRightPanelBrush}">
 
-            <!-- Config button top-right -->
+            <!--  Config button top-right  -->
             <Button
                 Margin="0,16,16,0"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
-                Style="{StaticResource GhostButtonStyle}"
                 Command="{Binding OpenConfigCommand}"
+                Style="{StaticResource GhostButtonStyle}"
                 ToolTipService.ToolTip="Server Configuration">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon
                         FontFamily="{StaticResource SymbolThemeFontFamily}"
-                        FontSize="14"
-                        Foreground="{StaticResource TextSecondary}"
-                        Glyph="&#xE713;" />
-                    <TextBlock
-                        Style="{StaticResource BodySecondaryTextStyle}"
-                        Text="Config" />
+                        Glyph="&#xE713;"
+                        Style="{StaticResource SortGlyphIconStyle}" />
                 </StackPanel>
             </Button>
 
-            <!-- Login Card -->
+            <!--  Login Card  -->
             <Border
                 Width="380"
                 HorizontalAlignment="Center"
@@ -78,16 +74,14 @@
                 Style="{StaticResource LoginCardBorderStyle}">
                 <StackPanel Spacing="4">
 
-                    <!-- Header -->
-                    <TextBlock
-                        Style="{StaticResource CardTitleStyle}"
-                        Text="Welcome back" />
+                    <!--  Header  -->
+                    <TextBlock Style="{StaticResource CardTitleStyle}" Text="Welcome back" />
                     <TextBlock
                         Margin="0,2,0,20"
                         Style="{StaticResource BodySecondaryTextStyle}"
                         Text="Sign in to continue to your dashboard" />
 
-                    <!-- Username -->
+                    <!--  Username  -->
                     <TextBlock
                         Margin="0,0,0,4"
                         Style="{StaticResource FieldLabelStyle}"
@@ -97,33 +91,33 @@
                         Style="{StaticResource LoginTextBoxStyle}"
                         Text="{Binding Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <!-- Password -->
+                    <!--  Password  -->
                     <TextBlock
                         Margin="0,14,0,4"
                         Style="{StaticResource FieldLabelStyle}"
                         Text="Password" />
                     <PasswordBox
                         x:Name="PasswordInput"
-                        PlaceholderText="Enter your password"
                         PasswordChanged="PasswordInput_PasswordChanged"
+                        PlaceholderText="Enter your password"
                         Style="{StaticResource LoginPasswordBoxStyle}" />
 
-                    <!-- Remember me -->
+                    <!--  Remember me  -->
                     <CheckBox
                         Margin="-2,8,0,0"
                         Content="Remember me"
                         Foreground="{StaticResource TextPrimary}"
                         IsChecked="{Binding RememberMe, Mode=TwoWay}" />
 
-                    <!-- Error message -->
+                    <!--  Error message  -->
                     <InfoBar
                         Margin="0,4,0,0"
-                        IsOpen="{Binding HasError}"
                         IsClosable="False"
-                        Severity="Error"
-                        Message="{Binding ErrorMessage}" />
+                        IsOpen="{Binding HasError}"
+                        Message="{Binding ErrorMessage}"
+                        Severity="Error" />
 
-                    <!-- Login button -->
+                    <!--  Login button  -->
                     <Button
                         Margin="0,16,0,0"
                         HorizontalAlignment="Stretch"
@@ -132,7 +126,7 @@
                         Content="Sign In"
                         Style="{StaticResource AccentButtonStyle}" />
 
-                    <!-- Server status -->
+                    <!--  Server status  -->
                     <TextBlock
                         Margin="0,16,0,0"
                         HorizontalAlignment="Center"
@@ -144,3 +138,6 @@
         </Grid>
     </Grid>
 </Page>
+
+
+

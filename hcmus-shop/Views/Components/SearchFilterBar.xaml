@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="hcmus_shop.Views.Components.SearchFilterBar"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Name="Root">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MaxWidth="320" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid VerticalAlignment="Center">
+            <TextBox
+                PlaceholderText="Search"
+                Style="{StaticResource SearchTextBoxStyle}"
+                Text="{x:Bind SearchText, Mode=TwoWay}" />
+            <FontIcon
+                Margin="0,0,12,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                Foreground="{StaticResource TextSecondary}"
+                Glyph="&#xE721;" />
+        </Grid>
+
+        <ContentPresenter
+            Grid.Column="1"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Content="{x:Bind FiltersContent, Mode=OneWay}" />
+    </Grid>
+</UserControl>

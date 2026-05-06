@@ -1,30 +1,26 @@
-<UserControl
+﻿<UserControl
     x:Class="hcmus_shop.Views.Dashboard.Components.Charts.InvoiceStatsCard"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
-    xmlns:vm="using:hcmus_shop.ViewModels"
-    xmlns:local="using:hcmus_shop.Views.Dashboard.Components.Controls">
-
-    <Border
-        Background="{StaticResource CardBackground}"
-        CornerRadius="16"
-        Padding="16">
+    xmlns:vm="using:hcmus_shop.ViewModels">
+    <Border Style="{StaticResource DashboardCardBorderStyle}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="220" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-
             <StackPanel>
-                <TextBlock Text="Invoice Statistics" Style="{StaticResource SectionTitleStyle}" />
+                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Invoice Statistics" />
                 <lvc:PieChart
                     Height="200"
-                    Series="{x:Bind Series, Mode=OneWay}"
-                    LegendPosition="Hidden" />
+                    LegendPosition="Hidden"
+                    Series="{x:Bind Series, Mode=OneWay}" />
             </StackPanel>
-
-            <StackPanel Grid.Column="1" Margin="14,28,0,0" Spacing="10">
+            <StackPanel
+                Grid.Column="1"
+                Margin="14,28,0,0"
+                Spacing="10">
                 <ItemsControl ItemsSource="{x:Bind Legends, Mode=OneWay}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:InvoiceLegendItem">
@@ -34,14 +30,20 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-
                                 <Ellipse
                                     Width="10"
                                     Height="10"
-                                    Fill="{x:Bind Label, Converter={StaticResource InvoiceLegendMarkerConverter}}"
-                                    VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Margin="8,0,0,0" Foreground="{StaticResource TextSecondary}" Text="{x:Bind Label}" />
-                                <TextBlock Grid.Column="2" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" Text="{x:Bind Value}" />
+                                    VerticalAlignment="Center"
+                                    Fill="{x:Bind Label, Converter={StaticResource InvoiceLegendMarkerConverter}}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Margin="8,0,0,0"
+                                    Foreground="{StaticResource TextSecondary}"
+                                    Text="{x:Bind Label}" />
+                                <TextBlock
+                                    Grid.Column="2"
+                                    Style="{StaticResource FieldLabelStyle}"
+                                    Text="{x:Bind Value}" />
                             </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

@@ -1,4 +1,4 @@
-<UserControl
+﻿<UserControl
     x:Class="hcmus_shop.Views.Dashboard.Components.Tables.RecentInvoicesTable"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,9 +7,9 @@
     x:Name="Root">
 
     <Border
+        Padding="16"
         Background="{StaticResource CardBackground}"
-        CornerRadius="16"
-        Padding="16">
+        CornerRadius="16">
         <Grid RowSpacing="14">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -18,31 +18,31 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!-- Search Bar Row -->
+            <!--  Search Bar Row  -->
             <Grid>
                 <StackPanel
-                    Orientation="Horizontal"
-                    Spacing="8"
                     HorizontalAlignment="Right"
-                    VerticalAlignment="Center">
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="8">
 
                     <ComboBox
                         x:Name="SearchFieldCombo"
-                        Style="{StaticResource FormComboBoxStyle}"
                         Width="170"
                         SelectedIndex="0"
-                        SelectionChanged="SearchFieldCombo_SelectionChanged">
+                        SelectionChanged="SearchFieldCombo_SelectionChanged"
+                        Style="{StaticResource FormComboBoxStyle}">
                         <ComboBoxItem Content="Customer" Tag="Customer" />
-                        <ComboBoxItem Content="Product"  Tag="Product" />
-                        <ComboBoxItem Content="Date"     Tag="Date" />
+                        <ComboBoxItem Content="Product" Tag="Product" />
+                        <ComboBoxItem Content="Date" Tag="Date" />
                         <ComboBoxItem Content="Invoice No" Tag="No" />
                     </ComboBox>
 
                     <TextBox
                         x:Name="SearchTextBox"
-                        Style="{StaticResource FormTextBoxStyle}"
                         MinWidth="220"
                         PlaceholderText="Type to search"
+                        Style="{StaticResource FormTextBoxStyle}"
                         TextChanged="SearchTextBox_TextChanged" />
 
                     <StackPanel
@@ -52,18 +52,18 @@
                         Visibility="Collapsed">
                         <CalendarDatePicker
                             x:Name="SearchFromDatePicker"
-                            PlaceholderText="From"
-                            DateChanged="SearchDatePicker_DateChanged" />
+                            DateChanged="SearchDatePicker_DateChanged"
+                            PlaceholderText="From" />
                         <CalendarDatePicker
                             x:Name="SearchToDatePicker"
-                            PlaceholderText="To"
-                            DateChanged="SearchDatePicker_DateChanged" />
+                            DateChanged="SearchDatePicker_DateChanged"
+                            PlaceholderText="To" />
                     </StackPanel>
 
                 </StackPanel>
             </Grid>
 
-            <!-- Column Headers Row -->
+            <!--  Column Headers Row  -->
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.1*" />
@@ -74,87 +74,160 @@
                     <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Padding="10,8" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="0,0,0,1">
-                    <Button Click="SortHeader_Click" Tag="No" HorizontalAlignment="Center" Style="{StaticResource GhostButtonStyle}" BorderThickness="0">
-                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="No" Style="{StaticResource TableHeaderTextStyle}" />
-                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind NoSortGlyph, Mode=OneWay}" Foreground="{StaticResource TextSecondary}" FontSize="14" />
+                <Border
+                    Grid.Column="0"
+                    BorderThickness="0,0,0,1"
+                    Style="{StaticResource RecentInvoicesHeaderCellStyle}">
+                    <Button
+                        HorizontalAlignment="Center"
+                        BorderThickness="0"
+                        Click="SortHeader_Click"
+                        Style="{StaticResource GhostButtonStyle}"
+                        Tag="No">
+                        <StackPanel
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="4">
+                            <TextBlock Style="{StaticResource TableHeaderTextStyle}" Text="No" />
+                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind NoSortGlyph, Mode=OneWay}" />
                         </StackPanel>
                     </Button>
                 </Border>
 
-                <Border Grid.Column="1" Padding="10,8" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
-                    <Button Click="SortHeader_Click" Tag="Customer" HorizontalAlignment="Center" Style="{StaticResource GhostButtonStyle}" BorderThickness="0">
-                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="Customer" Style="{StaticResource TableHeaderTextStyle}" />
-                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind CustomerSortGlyph, Mode=OneWay}" Foreground="{StaticResource TextSecondary}" FontSize="14" />
+                <Border
+                    Grid.Column="1"
+                    BorderThickness="1,0,0,1"
+                    Style="{StaticResource RecentInvoicesHeaderCellStyle}">
+                    <Button
+                        HorizontalAlignment="Center"
+                        BorderThickness="0"
+                        Click="SortHeader_Click"
+                        Style="{StaticResource GhostButtonStyle}"
+                        Tag="Customer">
+                        <StackPanel
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="4">
+                            <TextBlock Style="{StaticResource TableHeaderTextStyle}" Text="Customer" />
+                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind CustomerSortGlyph, Mode=OneWay}" />
                         </StackPanel>
                     </Button>
                 </Border>
 
-                <Border Grid.Column="2" Padding="10,8" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
-                    <Button Click="SortHeader_Click" Tag="Product" HorizontalAlignment="Center" Style="{StaticResource GhostButtonStyle}" BorderThickness="0">
-                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="Product" Style="{StaticResource TableHeaderTextStyle}" />
-                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind ProductSortGlyph, Mode=OneWay}" Foreground="{StaticResource TextSecondary}" FontSize="14" />
+                <Border
+                    Grid.Column="2"
+                    BorderThickness="1,0,0,1"
+                    Style="{StaticResource RecentInvoicesHeaderCellStyle}">
+                    <Button
+                        HorizontalAlignment="Center"
+                        BorderThickness="0"
+                        Click="SortHeader_Click"
+                        Style="{StaticResource GhostButtonStyle}"
+                        Tag="Product">
+                        <StackPanel
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="4">
+                            <TextBlock Style="{StaticResource TableHeaderTextStyle}" Text="Product" />
+                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind ProductSortGlyph, Mode=OneWay}" />
                         </StackPanel>
                     </Button>
                 </Border>
 
-                <Border Grid.Column="3" Padding="10,8" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
-                    <Button Click="SortHeader_Click" Tag="Date" HorizontalAlignment="Center" Style="{StaticResource GhostButtonStyle}" BorderThickness="0">
-                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="Date" Style="{StaticResource TableHeaderTextStyle}" />
-                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind DateSortGlyph, Mode=OneWay}" Foreground="{StaticResource TextSecondary}" FontSize="14" />
+                <Border
+                    Grid.Column="3"
+                    BorderThickness="1,0,0,1"
+                    Style="{StaticResource RecentInvoicesHeaderCellStyle}">
+                    <Button
+                        HorizontalAlignment="Center"
+                        BorderThickness="0"
+                        Click="SortHeader_Click"
+                        Style="{StaticResource GhostButtonStyle}"
+                        Tag="Date">
+                        <StackPanel
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="4">
+                            <TextBlock Style="{StaticResource TableHeaderTextStyle}" Text="Date" />
+                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind DateSortGlyph, Mode=OneWay}" />
                         </StackPanel>
                     </Button>
                 </Border>
 
-                <!-- Status header with filter dropdown -->
-                <Border Grid.Column="4" Padding="6,4" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
+                <!--  Status header with filter dropdown  -->
+                <Border
+                    Grid.Column="4"
+                    Padding="6,4"
+                    BorderBrush="{StaticResource TableHeaderBorder}"
+                    BorderThickness="1,0,0,1">
                     <Button
                         x:Name="StatusHeaderButton"
-                        Click="StatusHeader_Click"
                         HorizontalAlignment="Center"
-                        Style="{StaticResource GhostButtonStyle}"
-                        BorderThickness="0">    
-                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                        BorderThickness="0"
+                        Click="StatusHeader_Click"
+                        Style="{StaticResource GhostButtonStyle}">
+                        <StackPanel
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="4">
                             <TextBlock
                                 x:Name="StatusHeaderLabel"
-                                Text="Status: All"
-                                Style="{StaticResource TableHeaderTextStyle}" />
-                                        <FontIcon
+                                Style="{StaticResource TableHeaderTextStyle}"
+                                Text="Status: All" />
+                            <FontIcon
                                 FontFamily="Segoe Fluent Icons"
-                                Glyph="&#xE70D;"
                                 Foreground="{StaticResource TextSecondary}"
-                                FontSize="14" />            
+                                Glyph="&#xE70D;" />
                         </StackPanel>
                         <Button.Flyout>
                             <MenuFlyout x:Name="StatusMenuFlyout" Placement="Bottom">
-                                <MenuFlyoutItem Text="All"       Click="StatusFilter_Click" Tag="" />
-                                <MenuFlyoutItem Text="Paid"      Click="StatusFilter_Click" Tag="Paid" />
-                                <MenuFlyoutItem Text="Pending"   Click="StatusFilter_Click" Tag="Pending" />
-                                <MenuFlyoutItem Text="Cancelled" Click="StatusFilter_Click" Tag="Cancelled" />
+                                <MenuFlyoutItem
+                                    Click="StatusFilter_Click"
+                                    Tag=""
+                                    Text="All" />
+                                <MenuFlyoutItem
+                                    Click="StatusFilter_Click"
+                                    Tag="Paid"
+                                    Text="Paid" />
+                                <MenuFlyoutItem
+                                    Click="StatusFilter_Click"
+                                    Tag="Pending"
+                                    Text="Pending" />
+                                <MenuFlyoutItem
+                                    Click="StatusFilter_Click"
+                                    Tag="Cancelled"
+                                    Text="Cancelled" />
                             </MenuFlyout>
                         </Button.Flyout>
                     </Button>
                 </Border>
 
-                <Border Grid.Column="5" Padding="10,8" BorderBrush="{StaticResource TableHeaderBorder}" BorderThickness="1,0,0,1">
-                    <Button Click="SortHeader_Click" Tag="Price" HorizontalAlignment="Center" Style="{StaticResource GhostButtonStyle}" BorderThickness="0">
-                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="Price" Style="{StaticResource TableHeaderTextStyle}" />
-                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind PriceSortGlyph, Mode=OneWay}" Foreground="{StaticResource TextSecondary}" FontSize="14" />
+                <Border
+                    Grid.Column="5"
+                    BorderThickness="1,0,0,1"
+                    Style="{StaticResource RecentInvoicesHeaderCellStyle}">
+                    <Button
+                        HorizontalAlignment="Center"
+                        BorderThickness="0"
+                        Click="SortHeader_Click"
+                        Style="{StaticResource GhostButtonStyle}"
+                        Tag="Price">
+                        <StackPanel
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="4">
+                            <TextBlock Style="{StaticResource TableHeaderTextStyle}" Text="Price" />
+                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind PriceSortGlyph, Mode=OneWay}" />
                         </StackPanel>
                     </Button>
                 </Border>
             </Grid>
 
-            <!-- Scrollable Table Body -->
+            <!--  Scrollable Table Body  -->
             <ScrollViewer
                 Grid.Row="2"
-                VerticalScrollBarVisibility="Auto"
-                HorizontalScrollBarVisibility="Disabled">
+                HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{x:Bind PagedItems, Mode=OneWay}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:RecentInvoiceItem">
@@ -168,62 +241,80 @@
                                     <ColumnDefinition Width="1*" />
                                 </Grid.ColumnDefinitions>
 
-                                <Border Grid.Column="0" Padding="10,10" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="0,0,0,1">
+                                <Border
+                                    Grid.Column="0"
+                                    BorderThickness="0,0,0,1"
+                                    Style="{StaticResource RecentInvoicesRowCellStyle}">
                                     <TextBlock
-                                        Text="{Binding No}"
-                                        VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
-                                        Style="{StaticResource BodyTextStyle}" />
+                                        VerticalAlignment="Center"
+                                        Style="{StaticResource BodyTextStyle}"
+                                        Text="{Binding No}" />
                                 </Border>
 
-                                <Border Grid.Column="1" Padding="10,10" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
+                                <Border
+                                    Grid.Column="1"
+                                    BorderThickness="1,0,0,1"
+                                    Style="{StaticResource RecentInvoicesRowCellStyle}">
                                     <TextBlock
-                                        Text="{Binding Customer}"
-                                        VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
-                                        Style="{StaticResource BodyTextStyle}" />
+                                        VerticalAlignment="Center"
+                                        Style="{StaticResource BodyTextStyle}"
+                                        Text="{Binding Customer}" />
                                 </Border>
 
-                                <Border Grid.Column="2" Padding="10,10" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
+                                <Border
+                                    Grid.Column="2"
+                                    BorderThickness="1,0,0,1"
+                                    Style="{StaticResource RecentInvoicesRowCellStyle}">
                                     <TextBlock
-                                        Text="{Binding Product}"
-                                        VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
-                                        Style="{StaticResource BodyTextStyle}" />
+                                        VerticalAlignment="Center"
+                                        Style="{StaticResource BodyTextStyle}"
+                                        Text="{Binding Product}" />
                                 </Border>
 
-                                <Border Grid.Column="3" Padding="10,10" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
+                                <Border
+                                    Grid.Column="3"
+                                    BorderThickness="1,0,0,1"
+                                    Style="{StaticResource RecentInvoicesRowCellStyle}">
                                     <TextBlock
-                                        Text="{Binding Date}"
-                                        VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
-                                        Style="{StaticResource BodyTextStyle}" />
+                                        VerticalAlignment="Center"
+                                        Style="{StaticResource BodyTextStyle}"
+                                        Text="{Binding Date}" />
                                 </Border>
 
-                                <!-- Status Badge -->
-                                <Border Grid.Column="4" Padding="10,6" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
+                                <!--  Status Badge  -->
+                                <Border
+                                    Grid.Column="4"
+                                    BorderThickness="1,0,0,1"
+                                    Style="{StaticResource RecentInvoicesStatusOuterCellStyle}">
                                     <Border
-                                        Background="{Binding Status, Converter={StaticResource InvoiceStatusBackgroundConverter}}"
-                                        CornerRadius="12"
                                         Padding="10,4"
-                                        HorizontalAlignment="Center">
+                                        HorizontalAlignment="Center"
+                                        Background="{Binding Status, Converter={StaticResource InvoiceStatusBackgroundConverter}}"
+                                        CornerRadius="12">
                                         <TextBlock
-                                            Text="{Binding Status}"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
                                             Foreground="{Binding Status, Converter={StaticResource InvoiceStatusForegroundConverter}}"
                                             Style="{StaticResource StatusBadgeTextStyle}"
-                                            VerticalAlignment="Center"
-                                            HorizontalAlignment="Center" />
+                                            Text="{Binding Status}" />
                                     </Border>
                                 </Border>
 
-                                <!-- Price with accent styling -->
-                                <Border Grid.Column="5" Padding="10,10" BorderBrush="{StaticResource TableRowBorder}" BorderThickness="1,0,0,1">
+                                <!--  Price with accent styling  -->
+                                <Border
+                                    Grid.Column="5"
+                                    BorderThickness="1,0,0,1"
+                                    Style="{StaticResource RecentInvoicesRowCellStyle}">
                                     <TextBlock
-                                        Text="{Binding Price}"
-                                        VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Foreground="{StaticResource AccentPurple}"
                                         Style="{StaticResource FieldLabelStyle}"
-                                        Foreground="{StaticResource AccentPurple}" />
+                                        Text="{Binding Price}" />
                                 </Border>
                             </Grid>
                         </DataTemplate>
@@ -233,11 +324,12 @@
 
             <components:PaginationFooter
                 Grid.Row="3"
-                ResultText="{x:Bind FooterResultText, Mode=OneWay}"
-                PageSizeOptions="{x:Bind PageSizeOptions, Mode=OneWay}"
-                SelectedPageSize="{x:Bind SelectedPageSize, Mode=TwoWay}"
+                PageButtonClickCommand="{x:Bind PageButtonClickCommand}"
                 PageButtons="{x:Bind PageButtons, Mode=OneWay}"
-                PageButtonClickCommand="{x:Bind PageButtonClickCommand}" />
+                PageSizeOptions="{x:Bind PageSizeOptions, Mode=OneWay}"
+                ResultText="{x:Bind FooterResultText, Mode=OneWay}"
+                SelectedPageSize="{x:Bind SelectedPageSize, Mode=TwoWay}" />
         </Grid>
     </Border>
 </UserControl>
+
