@@ -16,7 +16,7 @@ using hcmus_shop.Services.Products;
 using hcmus_shop.Services.Config;
 using hcmus_shop.Services.Dashboard;
 using hcmus_shop.Services.Settings;
-using hcmus_shop.Services.Trial;
+using hcmus_shop.Services.License;
 using hcmus_shop.Services.Onboarding;
 using hcmus_shop.Services.Backup;
 using hcmus_shop.Services.Health;
@@ -79,7 +79,7 @@ namespace hcmus_shop
             services.AddSingleton<IProductService, ProductService>();
             services.AddSingleton<IDashboardService, DashboardService>();
             services.AddSingleton<ISettingsService, SettingsService>();
-            services.AddSingleton<ITrialService, TrialService>();
+            services.AddSingleton<ILicenseService, LicenseService>();
             services.AddSingleton<IOnboardingService, OnboardingService>();
             services.AddSingleton<IBackupService, BackupService>();
             services.AddSingleton<IHealthService, HealthService>();
@@ -98,9 +98,9 @@ namespace hcmus_shop
 
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {           
-            // 1. Trial check — if expired and not activated, block everything.
-            var trial = Ioc.Default.GetRequiredService<ITrialService>();
-            if (trial.GetStatus() == TrialStatus.Expired)
+            // 1. License/trial check — if expired (trial OR license), block everything.
+            var license = Ioc.Default.GetRequiredService<ILicenseService>();
+            if (license.GetStatus() == LicenseStatus.Expired)
             {
                 ShowTrialExpiredWindow();
                 return;
