@@ -90,4 +90,35 @@
         <Setter Property="HorizontalAlignment" Value="Center" />
     </Style>
 
+    <!--
+        Secondary "outline" button used next to AccentButtonStyle (e.g. Cancel
+        next to Save). Matches AccentButtonStyle dimensions/font but uses an
+        outlined (white background, brown border, dark text) appearance.
+        Includes explicit hover/pressed brushes so the button stays visible
+        on the cream-colored card background.
+    -->
+    <Style x:Key="LoginSecondaryButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="White" />
+        <Setter Property="BorderBrush" Value="{StaticResource LoginInputBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="11,5,11,6" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Resources">
+            <Setter.Value>
+                <ResourceDictionary>
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#F4EFE9" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#E8E0D6" />
+                    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#1F1F1F" />
+                    <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#1F1F1F" />
+                    <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#9B6F4E" />
+                    <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#5B3F1E" />
+                </ResourceDictionary>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>

@@ -1,7 +1,7 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using hcmus_shop.Contracts.Services;
 using hcmus_shop.Views;
-using DashboardPageView = hcmus_shop.Views.Dashboard.DashboardPage;
+using hcmus_shop.Views.Dashboard;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -102,7 +102,7 @@ namespace hcmus_shop
             switch (target)
             {
                 case "Dashboard":
-                    NavigateOrForbid(typeof(DashboardPageView), "Dashboard");
+                    NavigateOrForbid(typeof(DashboardPage), "Dashboard");
                     break;
                 case "Sales":
                     NavigateOrForbid(typeof(SalesPage), target);

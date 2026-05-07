@@ -77,7 +77,8 @@
                     <Button
                         Grid.Column="1"
                         Command="{Binding ResetToDefaultCommand}"
-                        Content="Reset" />
+                        Content="Reset"
+                        Style="{StaticResource LoginSecondaryButtonStyle}" />
                 </Grid>
 
                 <!-- Status message -->
@@ -96,10 +97,9 @@
                     </Grid.ColumnDefinitions>
                     <Button
                         Grid.Column="0"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center"
                         Command="{Binding CancelCommand}"
-                        Content="Cancel" />
+                        Content="Cancel"
+                        Style="{StaticResource LoginSecondaryButtonStyle}" />
                     <Button
                         Grid.Column="1"
                         HorizontalAlignment="Stretch"

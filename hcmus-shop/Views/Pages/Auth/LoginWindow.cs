@@ -41,7 +41,7 @@ namespace hcmus_shop
             }
         }
 
-        private void OnConfigDoneAndReturn(object? sender, EventArgs e)
+        private void OnConfigDoneAndReturn(object? sender, EventArgs e) 
         {
             ShowLoginPage();
         }
