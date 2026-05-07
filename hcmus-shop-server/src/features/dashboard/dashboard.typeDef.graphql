@@ -1,0 +1,41 @@
+type DashboardStats {
+  totalProducts: Int!
+  totalOrdersToday: Int!
+  totalRevenueToday: Float!
+  lowStockProducts: [LowStockProduct!]!
+  topSellingProducts: [TopSellingProduct!]!
+  recentOrders: [RecentOrder!]!
+  dailyRevenue: [DailyRevenuePoint!]!
+}
+
+type LowStockProduct {
+  productId: Int!
+  name: String!
+  sku: String!
+  stockQuantity: Int!
+}
+
+type TopSellingProduct {
+  productId: Int!
+  name: String!
+  sku: String!
+  totalSold: Int!
+  totalRevenue: Float!
+}
+
+type RecentOrder {
+  orderId: ID!
+  customerName: String
+  finalAmount: Float!
+  status: String!
+  createdAt: String!
+}
+
+type DailyRevenuePoint {
+  date: String!
+  revenue: Float!
+}
+
+extend type Query {
+  dashboardStats: DashboardStats!
+}

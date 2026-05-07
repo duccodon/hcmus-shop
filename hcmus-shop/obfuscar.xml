@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!--
+  Obfuscar configuration for the HCMUS Shop WinUI 3 app.
+  Run after Release build:
+    dotnet tool install -g Obfuscar.Console
+    obfuscar.console obfuscar.xml
+
+  This renames private classes/methods/fields to opaque names while
+  keeping the public surface (Application, Pages, ViewModels) untouched
+  so XAML bindings and DI keep working.
+-->
+<Obfuscator>
+  <Var name="InPath" value="bin\Release\net10.0-windows10.0.19041.0\win-x64" />
+  <Var name="OutPath" value="bin\Release\net10.0-windows10.0.19041.0\win-x64\Obfuscated" />
+  <Var name="KeepPublicApi" value="true" />
+  <Var name="HidePrivateApi" value="true" />
+  <Var name="RenameProperties" value="false" />
+
+  <Module file="$(InPath)\hcmus-shop.dll">
+    <!-- WinUI / Application entry point — must keep names -->
+    <SkipType name="hcmus_shop.App" />
+    <SkipType name="hcmus_shop.MainWindow" />
+    <SkipType name="hcmus_shop.LoginWindow" />
+    <SkipType name="hcmus_shop.TrialExpiredWindow" />
+
+    <!-- Pages — XAML loader needs original names -->
+    <SkipNamespace name="hcmus_shop.Views" />
+    <SkipNamespace name="hcmus_shop.Views.Admin" />
+    <SkipNamespace name="hcmus_shop.Views.Auth" />
+    <SkipNamespace name="hcmus_shop.Views.Dashboard" />
+    <SkipNamespace name="hcmus_shop.Views.Customers" />
+
+    <!-- ViewModels — XAML bindings reference property names -->
+    <SkipNamespace name="hcmus_shop.ViewModels" />
+    <SkipNamespace name="hcmus_shop.ViewModels.Auth" />
+    <SkipNamespace name="hcmus_shop.ViewModels.Products" />
+    <SkipNamespace name="hcmus_shop.ViewModels.Settings" />
+    <SkipNamespace name="hcmus_shop.ViewModels.Dashboard" />
+
+    <!-- DTOs — JSON deserialization needs property names -->
+    <SkipNamespace name="hcmus_shop.Models.DTOs" />
+
+    <!-- Converters — referenced from XAML by class name -->
+    <SkipNamespace name="hcmus_shop.Converters" />
+  </Module>
+</Obfuscator>

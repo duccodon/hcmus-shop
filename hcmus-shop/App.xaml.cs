@@ -13,12 +13,22 @@ using hcmus_shop.Services.Brands;
 using hcmus_shop.Services.Categories;
 using hcmus_shop.Services.Series;
 using hcmus_shop.Services.Products;
+using hcmus_shop.Services.Config;
+using hcmus_shop.Services.Dashboard;
+using hcmus_shop.Services.Settings;
+using hcmus_shop.Services.License;
+using hcmus_shop.Services.Onboarding;
+using hcmus_shop.Services.Backup;
+using hcmus_shop.Services.Health;
 using hcmus_shop.Services.Promotions;
 using hcmus_shop.Services.Uploads;
 using hcmus_shop.ViewModels;
+using hcmus_shop.ViewModels.Auth;
 using hcmus_shop.ViewModels.Products;
+using hcmus_shop.ViewModels.Settings;
 using hcmus_shop.ViewModels.Promotions;
 using hcmus_shop.Views;
+using System.Threading.Tasks;
 using Windows.Storage;
 
 namespace hcmus_shop
@@ -58,6 +68,9 @@ namespace hcmus_shop
             var serverUrl = GetConfiguredServerUrl();
             services.AddSingleton<IGraphQLClientService>(new GraphQLClientService(serverUrl));
 
+            // Config (pre-login server URL)
+            services.AddSingleton<IConfigService, ConfigService>();
+
             // Auth
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IFeatureFlagService, FeatureFlagService>();
@@ -66,11 +79,21 @@ namespace hcmus_shop
             services.AddSingleton<ICategoryService, CategoryService>();
             services.AddSingleton<ISeriesService, SeriesService>();
             services.AddSingleton<IProductService, ProductService>();
+            services.AddSingleton<IDashboardService, DashboardService>();
+            services.AddSingleton<ISettingsService, SettingsService>();
+            services.AddSingleton<ILicenseService, LicenseService>();
+            services.AddSingleton<IOnboardingService, OnboardingService>();
+            services.AddSingleton<IBackupService, BackupService>();
+            services.AddSingleton<IHealthService, HealthService>();
             services.AddSingleton<IPromotionService, PromotionService>();
             services.AddSingleton<IFileUploadService, FileUploadService>();
 
             // ViewModels
             services.AddTransient<LoginViewModel>();
+            services.AddTransient<ConfigViewModel>();
+            services.AddTransient<DashboardViewModel>();
+            services.AddTransient<SettingsViewModel>();
+            services.AddTransient<TrialExpiredViewModel>();
             services.AddTransient<ProductsViewModel>();
             services.AddTransient<AddProductViewModel>();
             services.AddTransient<EditProductViewModel>();
@@ -79,11 +102,71 @@ namespace hcmus_shop
             Ioc.Default.ConfigureServices(services.BuildServiceProvider());
         }
 
-        protected override void OnLaunched(LaunchActivatedEventArgs args)
-        {
+        protected override async void OnLaunched(LaunchActivatedEventArgs args)
+        {           
+            // 1. License/trial check — if expired (trial OR license), block everything.
+            var license = Ioc.Default.GetRequiredService<ILicenseService>();
+            if (license.GetStatus() == LicenseStatus.Expired)
+            {
+                ShowTrialExpiredWindow();
+                return;
+            }
+
+            // 2. Try silent auto-login with the saved JWT token.
+            var auth = Ioc.Default.GetRequiredService<IAuthService>();
+            var loggedIn = await auth.TryAutoLoginAsync();
+
+            if (loggedIn)
+            {
+                _mainWindow = new MainWindow();
+                CurrentWindow = _mainWindow;
+                _mainWindow.Activate();
+                return;
+            }
+
+            // 3. Otherwise show LoginWindow.
             _loginWindow = new LoginWindow();
             CurrentWindow = _loginWindow;
             _loginWindow.Activate();
+        }
+
+        private Window? _trialWindow;
+
+        private void ShowTrialExpiredWindow()
+        {
+            _trialWindow = new TrialExpiredWindow();
+            CurrentWindow = _trialWindow;
+            _trialWindow.Activate();
+        }
+
+        /// <summary>
+        /// Called from TrialExpiredPage after the user enters a valid code.
+        /// Important: open the next window FIRST, then close the trial window.
+        /// If we close the trial window before awaiting, the await continuation
+        /// runs on a destroyed dispatcher context and crashes.
+        /// </summary>
+        public async void RelaunchAfterTrialActivation()
+        {
+            var auth = Ioc.Default.GetRequiredService<IAuthService>();
+            var loggedIn = await auth.TryAutoLoginAsync();
+
+            if (loggedIn)
+            {
+                _mainWindow = new MainWindow();
+                CurrentWindow = _mainWindow;
+                _mainWindow.Activate();
+            }
+            else
+            {
+                _loginWindow = new LoginWindow();
+                CurrentWindow = _loginWindow;
+                _loginWindow.Activate();
+            }
+
+            // Now safe to close the trial window — there's another active window.
+            var trial = _trialWindow;
+            _trialWindow = null;
+            trial?.Close();
         }
 
         public void OpenMainWindow()

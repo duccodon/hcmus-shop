@@ -1,3 +1,4 @@
+using hcmus_shop.Models.Common;
 using hcmus_shop.Models.DTOs;
 using System.Threading.Tasks;
 
@@ -7,7 +8,16 @@ namespace hcmus_shop.Contracts.Services
     {
         UserDto? CurrentUser { get; }
         string? Token { get; }
-        Task<bool> LoginAsync(string username, string password);
+
+        /// <summary>
+        /// Returns Result.Success(true) on successful login.
+        /// Returns Result.Failure with a specific reason:
+        ///   - "Cannot connect to server: ..." for network errors
+        ///   - "Invalid username or password." for auth failures
+        ///   - other GraphQL errors as raw messages
+        /// </summary>
+        Task<Result<bool>> LoginAsync(string username, string password, bool rememberMe = false);
+
         Task<bool> TryAutoLoginAsync();
         bool HasRole(string role);
         void Logout();

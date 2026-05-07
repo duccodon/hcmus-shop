@@ -37,14 +37,23 @@
                     Text="Laptop Store Management System" />
             </StackPanel>
 
-            <!--  Version at bottom-left  -->
-            <TextBlock
+            <!-- Version + License at bottom-left -->
+            <StackPanel
                 Margin="20,0,0,16"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
-                Foreground="{StaticResource LoginCardBackgroundBrush}"
-                Style="{StaticResource BodySecondaryTextStyle}"
-                Text="{x:Bind VersionText}" />
+                Spacing="2">
+                <TextBlock
+                    Style="{StaticResource BodySecondaryTextStyle}"
+                    Foreground="{StaticResource LoginCardBackgroundBrush}"
+                    Text="{x:Bind VersionText}" />
+                <TextBlock
+                    Style="{StaticResource BodySecondaryTextStyle}"
+                    Foreground="{StaticResource LoginCardBackgroundBrush}"
+                    Opacity="0.85"
+                    FontSize="11"
+                    Text="{x:Bind LicenseText}" />
+            </StackPanel>
         </Grid>
 
         <!--  Right Panel â€” Login Form  -->
@@ -126,12 +135,48 @@
                         Content="Sign In"
                         Style="{StaticResource AccentButtonStyle}" />
 
-                    <!--  Server status  -->
-                    <TextBlock
+                    <!-- Server status indicator + URL -->
+                    <StackPanel
                         Margin="0,16,0,0"
                         HorizontalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="6">
+
+                        <!-- Online dot -->
+                        <Ellipse
+                            Width="8" Height="8"
+                            VerticalAlignment="Center"
+                            Fill="#15803D"
+                            Visibility="{Binding IsServerOnline, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                        <!-- Offline dot -->
+                        <Ellipse
+                            Width="8" Height="8"
+                            VerticalAlignment="Center"
+                            Fill="#DC2626"
+                            Visibility="{Binding IsServerOffline, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                        <!-- Checking spinner -->
+                        <ProgressRing
+                            Width="10" Height="10"
+                            VerticalAlignment="Center"
+                            IsActive="{Binding IsServerChecking}"
+                            Visibility="{Binding IsServerChecking, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Style="{StaticResource CaptionSecondaryTextStyle}"
+                            Text="{x:Bind ServerUrlText}" />
+                    </StackPanel>
+
+                    <!-- Offline message -->
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        HorizontalAlignment="Center"
+                        Foreground="#DC2626"
                         Style="{StaticResource CaptionSecondaryTextStyle}"
-                        Text="{x:Bind ServerUrlText}" />
+                        Text="{Binding ServerErrorReason}"
+                        Visibility="{Binding IsServerOffline, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 </StackPanel>
             </Border>

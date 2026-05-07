@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { Context } from "../../common/context";
 import { productService } from "./product.service";
 import {
   ProductFilterDto,
@@ -16,8 +17,18 @@ export const productResolver = {
       productService.findCategories(parent.productId),
     images: (parent: { productId: number }) =>
       productService.findImages(parent.productId),
-    importPrice: (parent: { importPrice: Prisma.Decimal }) =>
-      Number(parent.importPrice),
+    /**
+     * Role-based access: only Admin can see import price.
+     * Sale users get null. Other roles also get null.
+     */
+    importPrice: (
+      parent: { importPrice: Prisma.Decimal },
+      _: unknown,
+      context: Context
+    ) => {
+      if (context.user?.role !== "Admin") return null;
+      return Number(parent.importPrice);
+    },
     sellingPrice: (parent: { sellingPrice: Prisma.Decimal }) =>
       Number(parent.sellingPrice),
   },

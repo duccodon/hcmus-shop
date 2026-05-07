@@ -1,3 +1,4 @@
+
 ## 1. Solution Architecture
 
 ```
@@ -123,4 +124,76 @@ hcmus-shop/
 |   ├── Admin/
 |   │   ├── AdminPage.xaml/.cs
 |   │   └── DashboardPage.xaml/.cs  ← admin shell
-|
+|   ├── Auth/
+|   ├── Dashboard/
+|   │   ├── Components/
+|   │   │   ├── Charts/
+|   │   │   │   ├── InvoiceStatsCard.xaml/.cs
+|   │   │   │   └── SalesAnalyticsCard.xaml/.cs
+|   │   │   ├── Controls/
+│   |   │   │   ├── DashboardCard.xaml/.cs
+|   │   │   │   ├── HeaderBar.xaml/.cs
+|   │   │   │   ├── KpiCard.xaml/.cs
+|   │   │   │   └── SidebarNavigation.xaml/.cs
+|   │   │   └── Tables/
+|   │   └── DashboardPage.xaml.cs
+|   ├── Inventory/
+|   ├── Messages/
+|   ├── Products/
+|   │   ├── AddProductPage.xaml/.cs ← treated as a feature-scoped page; navigated to from ProductsPage
+|   │   └── ProductsPage.xaml/.cs
+|   ├── Sale/
+|   └── Store/
+```
+
+---
+
+## 3. GraphQL Communication
+
+### IGraphQLClientService
+
+`Services/GraphQL/GraphQLClientService.cs` implements `IGraphQLClientService` — the single GraphQL entry point for the entire app. It:
+
+- Owns a single `HttpClient` and `JsonSerializerOptions` (camelCase, null-ignore).
+- Injects `Authorization: Bearer <token>` via `SetAuthToken(token)` — called by `AuthService` after login and on auto-login.
+- Exposes `QueryAsync<T>` and `MutateAsync<T>` — both POST `{ query, variables }` to the server and deserialise `GraphQLResponse<T>`.
+- Throws `GraphQLException` if the response contains an `errors` array or `data` is null.
+- Exposes `SafeExecuteAsync<T>(Func<Task<T>>)` — wraps any call in try/catch and returns `Result<T>`. **All service calls must go through `SafeExecuteAsync`.**
+
+```csharp
+// Services always use SafeExecuteAsync — never call QueryAsync/MutateAsync raw
+public async Task<Result<ProductPageDto>> GetAllAsync(ProductFilterDto filter)
+{
+    var request = new GetProductsRequest { /* map from filter */ };
+
+    var result = await (_graphQL as GraphQLClientService)!
+        .SafeExecuteAsync(() =>
+            _graphQL.QueryAsync<ProductsResponse>(ProductQueries.GetProducts, request)
+        );
+
+    if (!result.IsSuccess)
+        return Result<ProductPageDto>.Failure(result.Error!);
+
+    return Result<ProductPageDto>.Success(result.Value!.Products);
+}
+```
+
+### Token Storage
+
+- JWT stored in `Windows.Storage.ApplicationData.Current.LocalSettings`.
+- `AuthService` is the only class that reads/writes the token — no other class accesses `LocalSettings` for auth.
+- Never store tokens in memory-only fields that do not survive app restarts.
+
+### GraphQL Response Contract
+
+`GraphQLClientService` deserialises all responses into `GraphQLResponse<T>`:
+
+```csharp
+public class GraphQLResponse<T>
+{
+    public T? Data { get; set; }
+    public GraphQLError[]? Errors { get; set; }
+}
+```
+
+`T` is the feature-specific response envelope defined in `Services/{Feature}/Dto/{Feature}Response.cs`:

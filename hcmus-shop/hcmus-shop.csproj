@@ -66,6 +66,7 @@
 		<Page Include="Views\Pages\Promotions\PromotionsPage.xaml" />
 		<Page Include="Views\Pages\Store\StorePage.xaml" />
 		<Page Include="Views\Pages\Messages\MessagesPage.xaml" />
+		<Page Include="Views\Pages\Settings\**\*.xaml" />
 	</ItemGroup>
 
 	<!-- Resources -->

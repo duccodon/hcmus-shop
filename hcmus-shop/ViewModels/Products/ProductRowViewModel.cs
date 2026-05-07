@@ -59,13 +59,17 @@ namespace hcmus_shop.ViewModels.Products
 
         public string PriceDisplay => $"${SellingPrice:0}";
 
+        // Low-stock threshold is 5 per instructor spec (feature-specs.md B2):
+        // "Top 5 products nearly out of stock (quantity < 5)".
+        // Same threshold lives on the server in dashboard.repository.ts
+        // (LOW_STOCK_THRESHOLD = 5). Keep these two in sync.
         public string StockLabel => StockQuantity <= 0
             ? "Out of Stock"
-            : StockQuantity < 10 ? "Low Stock" : string.Empty;
+            : StockQuantity < 5 ? "Low Stock" : string.Empty;
 
         public string StockTone => StockQuantity <= 0
             ? "Danger"
-            : StockQuantity < 10 ? "Warning" : "None";
+            : StockQuantity < 5 ? "Warning" : "None";
 
         public string StatusText => IsActive
             ? "Published"

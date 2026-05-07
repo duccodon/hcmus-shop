@@ -259,6 +259,9 @@ Generated_Code/
 # because we have git ;-)
 _UpgradeReport_Files/
 Backup*/
+# Allow our app's backup feature folders (gitignore rule above is for VS upgrade artifacts)
+!hcmus-shop/Services/Backup/
+!hcmus-shop-server/src/features/backup/
 UpgradeLog*.XML
 UpgradeLog*.htm
 ServiceFabricBackup/

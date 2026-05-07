@@ -4,7 +4,7 @@ type Product {
   name: String!
   brandId: Int!
   seriesId: Int
-  importPrice: Float!
+  importPrice: Float
   sellingPrice: Float!
   stockQuantity: Int!
   specifications: JSON

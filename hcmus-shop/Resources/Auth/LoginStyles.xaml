@@ -88,4 +88,23 @@
         <Setter Property="HorizontalAlignment" Value="Center" />
     </Style>
 
+    <!--
+        Secondary "outline" button used next to AccentButtonStyle (e.g. Cancel
+        next to Save). Matches AccentButtonStyle dimensions/font but uses an
+        outlined (white background, brown border, dark text) appearance.
+        Hover/pressed brushes are overridden at the page level (Page.Resources)
+        because WinUI 3 doesn't allow setting `Resources` via a Style Setter.
+    -->
+    <Style x:Key="LoginSecondaryButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="White" />
+        <Setter Property="BorderBrush" Value="{StaticResource LoginInputBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="11,5,11,6" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
 </ResourceDictionary>
