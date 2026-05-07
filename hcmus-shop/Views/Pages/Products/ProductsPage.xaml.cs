@@ -3,6 +3,7 @@ using hcmus_shop.ViewModels.Products;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using System.Threading.Tasks;
 
 namespace hcmus_shop.Views
 {
@@ -17,6 +18,9 @@ namespace hcmus_shop.Views
             DataContext = ViewModel;
 
             ViewModel.NavigateToAddProductRequested += ViewModel_NavigateToAddProductRequested;
+            ViewModel.NavigateToEditProductRequested += ViewModel_NavigateToEditProductRequested;
+            ViewModel.ConfirmBulkDeleteAsync = ShowBulkDeleteConfirmAsync;
+            ViewModel.ConfirmRowDeleteAsync = ShowRowDeleteConfirmAsync;
             Loaded += ProductsPage_Loaded;
             Unloaded += ProductsPage_Unloaded;
         }
@@ -34,6 +38,9 @@ namespace hcmus_shop.Views
             Loaded -= ProductsPage_Loaded;
             Unloaded -= ProductsPage_Unloaded;
             ViewModel.NavigateToAddProductRequested -= ViewModel_NavigateToAddProductRequested;
+            ViewModel.NavigateToEditProductRequested -= ViewModel_NavigateToEditProductRequested;
+            ViewModel.ConfirmBulkDeleteAsync = null;
+            ViewModel.ConfirmRowDeleteAsync = null;
         }
 
         private void ViewModel_NavigateToAddProductRequested(object? sender, EventArgs e)
@@ -41,28 +48,41 @@ namespace hcmus_shop.Views
             Frame?.Navigate(typeof(AddProductPage));
         }
 
-        private void DateFromPicker_DateChanged(CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs args)
+        private void ViewModel_NavigateToEditProductRequested(int productId)
         {
-            UpdateDateRangeLabel();
+            Frame?.Navigate(typeof(EditProductPage), productId);
         }
 
-        private void DateToPicker_DateChanged(CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs args)
+        private async Task<bool> ShowBulkDeleteConfirmAsync(int selectedCount)
         {
-            UpdateDateRangeLabel();
-        }
-
-        private void UpdateDateRangeLabel()
-        {
-            var from = DateFromPicker.Date?.Date;
-            var to = DateToPicker.Date?.Date;
-            if (from is null && to is null)
+            var dialog = new ContentDialog
             {
-                DateRangeLabel.Text = "Date Range";
-                return;
-            }
-            var fromText = from?.ToString("dd MMM") ?? "...";
-            var toText = to?.ToString("dd MMM yyyy") ?? "...";
-            DateRangeLabel.Text = $"{fromText} - {toText}";
+                Title = "Delete Products",
+                Content = $"Delete {selectedCount} selected products? This will deactivate them.",
+                PrimaryButtonText = "Delete",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = XamlRoot
+            };
+
+            var result = await dialog.ShowAsync();
+            return result == ContentDialogResult.Primary;
+        }
+
+        private async Task<bool> ShowRowDeleteConfirmAsync(int productId)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = "Delete Product",
+                Content = $"Delete product ID {productId}? This will deactivate it.",
+                PrimaryButtonText = "Delete",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = XamlRoot
+            };
+
+            var result = await dialog.ShowAsync();
+            return result == ContentDialogResult.Primary;
         }
     }
 }

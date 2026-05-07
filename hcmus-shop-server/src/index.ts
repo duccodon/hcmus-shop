@@ -14,6 +14,7 @@ import { categoryResolver } from "./features/category/category.resolver";
 import { seriesResolver } from "./features/series/series.resolver";
 import { productResolver } from "./features/product/product.resolver";
 import { dashboardResolver } from "./features/dashboard/dashboard.resolver";
+import { promotionResolver } from "./features/promotion/promotion.resolver";
 import { uploadRouter } from "./features/upload/upload.routes";
 import { backupRouter } from "./features/backup/backup.routes";
 import { healthRouter } from "./features/health/health.routes";
@@ -30,6 +31,7 @@ const typeDefs = [
   loadTypeDef("series/series.typeDef.graphql"),
   loadTypeDef("product/product.typeDef.graphql"),
   loadTypeDef("dashboard/dashboard.typeDef.graphql"),
+  loadTypeDef("promotion/promotion.typeDef.graphql"),
 ].join("\n");
 
 // Merge resolvers by type (Query, Mutation, etc.)
@@ -51,7 +53,8 @@ const resolvers = mergeResolvers(
   categoryResolver,
   seriesResolver,
   productResolver,
-  dashboardResolver
+  dashboardResolver,
+  promotionResolver
 );
 
 async function main() {
@@ -72,7 +75,7 @@ async function main() {
   // REST: health check (pre-flight liveness probe used by the client)
   app.use(healthRouter);
 
-  // REST: file upload endpoint
+  // REST: file upload endpoint (admin-only, see uploadRouter)
   app.use(uploadRouter);
 
   // REST: backup / restore (admin tooling)

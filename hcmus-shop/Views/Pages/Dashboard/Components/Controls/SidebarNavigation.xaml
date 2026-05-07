@@ -1,44 +1,37 @@
-<UserControl
+﻿<UserControl
     x:Class="hcmus_shop.Views.Dashboard.Components.Controls.SidebarNavigation"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-
-    <Border
-        Background="{StaticResource SidebarBackground}"
-        CornerRadius="0,18,18,0"
-        Padding="16">
+    <Border Style="{StaticResource DashboardSidebarBorderStyle}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-
             <StackPanel Spacing="3">
-                <TextBlock Text="DESKBOARD" Foreground="{StaticResource TextPrimary}" FontWeight="Bold" FontSize="18" />
-                <TextBlock Text="Sales Management Platform" Foreground="{StaticResource TextSecondary}" FontSize="11" />
+                <TextBlock
+                    FontWeight="Bold"
+                    Style="{StaticResource SectionHeaderTextStyle}"
+                    Text="DESKBOARD" />
+                <TextBlock Style="{StaticResource BodySecondarySmallTextStyle}" Text="Sales Management Platform" />
             </StackPanel>
-
-            <StackPanel Grid.Row="1" Margin="0,18,0,0" Spacing="6">
+            <StackPanel
+                Grid.Row="1"
+                Margin="0,18,0,0"
+                Spacing="6">
                 <NavigationViewItem Content="Dashboard" Icon="Home" />
                 <NavigationViewItem Content="Products" Icon="AllApps" />
                 <NavigationViewItem Content="Store" Icon="Shop" />
                 <NavigationViewItem Content="Messages" Icon="Mail" />
-                <!--<NavigationViewItem Content="Statistics" Icon="BarChart4" />
-                <NavigationViewItem Content="Invoices" Icon="Document" />
-                <NavigationViewItem Content="To Deliver" Icon="DeliveryTruck" />
-                <NavigationViewItem Content="Finances" Icon="Money" />
-                <TextBlock Margin="8,16,0,4" Text="HELP & SUPPORT" Foreground="{StaticResource TextSecondary}" FontSize="11" />
-                <NavigationViewItem Content="Help & Center" Icon="Help" />-->
                 <NavigationViewItem Content="Settings" Icon="Setting" />
             </StackPanel>
-
             <Button
                 Grid.Row="2"
                 HorizontalAlignment="Stretch"
+                Background="{StaticResource SidebarLogoutBackground}"
                 Content="Log Out"
                 CornerRadius="10"
-                Background="#1F2937"
                 Foreground="{StaticResource TextPrimary}" />
         </Grid>
     </Border>

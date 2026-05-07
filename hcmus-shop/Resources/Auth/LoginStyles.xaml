@@ -1,11 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- ============ Input State Overrides ============ -->
+    <!--  ============ Input State Overrides ============  -->
 
-    <!-- TextBox / PasswordBox — no visual change on hover/focus -->
+    <!--  TextBox / PasswordBox — no visual change on hover/focus  -->
     <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#D1C9C2" />
     <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#D1C9C2" />
     <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="White" />
@@ -13,7 +11,7 @@
     <SolidColorBrush x:Key="TextControlForegroundPointerOver" Color="#1F1F1F" />
     <SolidColorBrush x:Key="TextControlForegroundFocused" Color="#1F1F1F" />
 
-    <!-- Checkbox — brown accent, dark text in all states -->
+    <!--  Checkbox — brown accent, dark text in all states  -->
     <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="#7B4F2E" />
     <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="#9B6F4E" />
     <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPressed" Color="#5B3F1E" />
@@ -24,14 +22,14 @@
     <SolidColorBrush x:Key="CheckBoxForegroundCheckedPointerOver" Color="#1F1F1F" />
     <SolidColorBrush x:Key="CheckBoxForegroundCheckedPressed" Color="#1F1F1F" />
 
-    <!-- AccentButton — brown theme -->
+    <!--  AccentButton — brown theme  -->
     <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#9B6F4E" />
     <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#5B3F1E" />
     <SolidColorBrush x:Key="AccentButtonForeground" Color="White" />
     <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="White" />
     <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="White" />
 
-    <!-- ============ Component Styles ============ -->
+    <!--  ============ Component Styles ============  -->
 
     <Style x:Key="LoginCardBorderStyle" TargetType="Border">
         <Setter Property="BorderBrush" Value="{StaticResource LoginOutlineBrush}" />

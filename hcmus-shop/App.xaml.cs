@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.Windows.ApplicationModel.WindowsAppRuntime;   
+using Microsoft.Windows.ApplicationModel.WindowsAppRuntime;
 using System;
 using System.IO;
 using System.Reflection;
@@ -20,10 +20,13 @@ using hcmus_shop.Services.License;
 using hcmus_shop.Services.Onboarding;
 using hcmus_shop.Services.Backup;
 using hcmus_shop.Services.Health;
+using hcmus_shop.Services.Promotions;
+using hcmus_shop.Services.Uploads;
 using hcmus_shop.ViewModels;
 using hcmus_shop.ViewModels.Auth;
 using hcmus_shop.ViewModels.Products;
 using hcmus_shop.ViewModels.Settings;
+using hcmus_shop.ViewModels.Promotions;
 using hcmus_shop.Views;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -72,7 +75,6 @@ namespace hcmus_shop
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IFeatureFlagService, FeatureFlagService>();
 
-            // Feature Services (replace old Repositories)
             services.AddSingleton<IBrandService, BrandService>();
             services.AddSingleton<ICategoryService, CategoryService>();
             services.AddSingleton<ISeriesService, SeriesService>();
@@ -83,6 +85,8 @@ namespace hcmus_shop
             services.AddSingleton<IOnboardingService, OnboardingService>();
             services.AddSingleton<IBackupService, BackupService>();
             services.AddSingleton<IHealthService, HealthService>();
+            services.AddSingleton<IPromotionService, PromotionService>();
+            services.AddSingleton<IFileUploadService, FileUploadService>();
 
             // ViewModels
             services.AddTransient<LoginViewModel>();
@@ -92,6 +96,8 @@ namespace hcmus_shop
             services.AddTransient<TrialExpiredViewModel>();
             services.AddTransient<ProductsViewModel>();
             services.AddTransient<AddProductViewModel>();
+            services.AddTransient<EditProductViewModel>();
+            services.AddTransient<PromotionsViewModel>();
 
             Ioc.Default.ConfigureServices(services.BuildServiceProvider());
         }

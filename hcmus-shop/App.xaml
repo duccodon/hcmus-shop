@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <Application
     x:Class="hcmus_shop.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -8,8 +8,8 @@
     RequestedTheme="Light">
     <Application.Resources>
         <ResourceDictionary>
-            <!-- Declare your converter here -->
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
             <converters:StockToneForegroundConverter x:Key="StockToneForegroundConverter" />
             <converters:StatusToneBackgroundConverter x:Key="StatusToneBackgroundConverter" />
@@ -21,7 +21,6 @@
             <converters:InvoiceLegendMarkerConverter x:Key="InvoiceLegendMarkerConverter" />
             <converters:StringToBooleanConverter x:Key="StringToBooleanConverter" />
             <converters:BooleanToInfoSeverityConverter x:Key="BooleanToInfoSeverityConverter" />
-            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <converters:RoleVisibilityConverter x:Key="RoleVisibility" />
 
             <ResourceDictionary.MergedDictionaries>
@@ -32,8 +31,8 @@
                 <ResourceDictionary Source="ms-appx:///Resources/Styles/FormStyles.xaml" />
                 <ResourceDictionary Source="ms-appx:///Resources/Styles/BadgeStyles.xaml" />
                 <ResourceDictionary Source="ms-appx:///Resources/Styles/TableStyles.xaml" />
+                <ResourceDictionary Source="ms-appx:///Resources/Styles/ProductTemplates.xaml" />
                 <ResourceDictionary Source="ms-appx:///Resources/Auth/LoginStyles.xaml" />
-                <!-- Add other merged dictionaries if you have more -->
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

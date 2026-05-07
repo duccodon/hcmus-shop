@@ -1,0 +1,210 @@
+<Page
+    x:Class="hcmus_shop.Views.PromotionsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:hcmus_shop.ViewModels.Promotions"
+    x:Name="Root">
+
+    <Grid Background="{StaticResource DashboardBackground}">
+        <ScrollViewer>
+            <Grid Margin="24">
+                <Border
+                    Background="{StaticResource CardBackground}"
+                    CornerRadius="16"
+                    Padding="20">
+                    <Grid RowSpacing="14">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Text="Promotions"
+                                Style="{StaticResource PageTitleStyle}" />
+                            <Button
+                                Grid.Column="1"
+                                Content="+ Add Promotion"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Command="{x:Bind ViewModel.AddPromotionCommand}" />
+                        </Grid>
+
+                        <Border Grid.Row="1" Height="1" Background="{StaticResource DividerBrush}" />
+
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" MaxWidth="320" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox
+                                PlaceholderText="Search by code"
+                                Style="{StaticResource SearchTextBoxStyle}"
+                                Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <StackPanel
+                                Grid.Column="1"
+                                Orientation="Horizontal"
+                                Spacing="8"
+                                HorizontalAlignment="Right">
+                                <ComboBox
+                                    Width="110"
+                                    Style="{StaticResource FormComboBoxStyle}"
+                                    ItemsSource="{x:Bind ViewModel.PageSizeOptions, Mode=OneWay}"
+                                    SelectedItem="{x:Bind ViewModel.SelectedPageSize, Mode=TwoWay}" />
+                                <Button
+                                    Content="Refresh"
+                                    Style="{StaticResource GhostButtonStyle}"
+                                    Command="{x:Bind ViewModel.RefreshCommand}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Grid.Row="3" MinHeight="320">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <InfoBar
+                                Grid.RowSpan="2"
+                                Margin="0,0,0,12"
+                                IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
+                                IsClosable="False"
+                                Severity="Error"
+                                Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1.3*" />
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="1.3*" />
+                                    <ColumnDefinition Width="0.9*" />
+                                    <ColumnDefinition Width="0.9*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Style="{StaticResource TableHeaderBorderStyle}">
+                                    <TextBlock Text="Code" Style="{StaticResource TableHeaderTextStyle}" />
+                                </Border>
+                                <Border Grid.Column="1" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Discount" Style="{StaticResource TableHeaderTextStyle}" />
+                                </Border>
+                                <Border Grid.Column="2" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Date Range" Style="{StaticResource TableHeaderTextStyle}" />
+                                </Border>
+                                <Border Grid.Column="3" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Status" Style="{StaticResource TableHeaderTextStyle}" />
+                                </Border>
+                                <Border Grid.Column="4" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Action" Style="{StaticResource TableHeaderTextStyle}" />
+                                </Border>
+                            </Grid>
+
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.Promotions, Mode=OneWay}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:PromotionListItemViewModel">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="1.3*" />
+                                                    <ColumnDefinition Width="1*" />
+                                                    <ColumnDefinition Width="1.3*" />
+                                                    <ColumnDefinition Width="0.9*" />
+                                                    <ColumnDefinition Width="0.9*" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Border Grid.Column="0" Style="{StaticResource TableRowBorderStyle}">
+                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind Code}" Style="{StaticResource BodyTextStyle}" />
+                                                </Border>
+                                                <Border Grid.Column="1" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind DiscountDisplay}" Style="{StaticResource BodyTextStyle}" />
+                                                </Border>
+                                                <Border Grid.Column="2" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind DateRangeDisplay}" Style="{StaticResource BodyTextStyle}" />
+                                                </Border>
+                                                <Border Grid.Column="3" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <Border
+                                                        Padding="10,5"
+                                                        CornerRadius="99"
+                                                        Background="{StaticResource SelectionHighlight}"
+                                                        HorizontalAlignment="Left">
+                                                        <TextBlock
+                                                            Text="{x:Bind StatusText}"
+                                                            Style="{StaticResource StatusBadgeTextStyle}"
+                                                            Foreground="{StaticResource TextPrimary}" />
+                                                    </Border>
+                                                </Border>
+                                                <Border Grid.Column="4" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <Button
+                                                            Style="{StaticResource GhostButtonStyle}"
+                                                            Command="{Binding DataContext.EditPromotionCommand, ElementName=Root}"
+                                                            CommandParameter="{x:Bind PromotionId}">
+                                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE70F;" />
+                                                        </Button>
+                                                        <Button
+                                                            Style="{StaticResource GhostButtonStyle}"
+                                                            Command="{Binding DataContext.DeletePromotionCommand, ElementName=Root}"
+                                                            CommandParameter="{x:Bind PromotionId}">
+                                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74D;" Foreground="{StaticResource DangerForeground}" />
+                                                        </Button>
+                                                    </StackPanel>
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+
+                            <Border
+                                Grid.RowSpan="2"
+                                Background="{StaticResource CardBackground}"
+                                Opacity="0.85"
+                                Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <ProgressRing IsActive="True" Width="36" Height="36" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+
+                            <Border
+                                Grid.Row="1"
+                                Background="Transparent"
+                                Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource EmptyStateTextStyle}"
+                                    Text="No promotions found." />
+                            </Border>
+                        </Grid>
+
+                        <Grid Grid.Row="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Text="{x:Bind ViewModel.ResultText, Mode=OneWay}"
+                                Style="{StaticResource BodySecondaryTextStyle}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <Button
+                                    Content="Previous"
+                                    Style="{StaticResource GhostButtonStyle}"
+                                    Command="{x:Bind ViewModel.PreviousPageCommand}" />
+                                <Button
+                                    Content="Next"
+                                    Style="{StaticResource GhostButtonStyle}"
+                                    Command="{x:Bind ViewModel.NextPageCommand}" />
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Page>

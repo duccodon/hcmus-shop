@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 
 namespace hcmus_shop.ViewModels.Products
 {
@@ -14,7 +15,8 @@ namespace hcmus_shop.ViewModels.Products
             string categoryDisplay,
             int stockQuantity,
             decimal sellingPrice,
-            bool isActive)
+            bool isActive,
+            Uri? thumbnailUri = null)
         {
             ProductId = productId;
             Sku = sku;
@@ -22,6 +24,7 @@ namespace hcmus_shop.ViewModels.Products
             CategoryDisplay = categoryDisplay;
             StockQuantity = stockQuantity;
             SellingPrice = sellingPrice;
+            ThumbnailUri = thumbnailUri;
             _isActive = isActive;
         }
 
@@ -31,6 +34,9 @@ namespace hcmus_shop.ViewModels.Products
         public string CategoryDisplay { get; }
         public int StockQuantity { get; }
         public decimal SellingPrice { get; }
+        public Uri? ThumbnailUri { get; }
+        public bool HasThumbnail => ThumbnailUri is not null;
+        public string FallbackGlyph => "\uEC8A";
 
         public bool IsSelected
         {

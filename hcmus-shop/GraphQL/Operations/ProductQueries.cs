@@ -5,10 +5,16 @@ namespace hcmus_shop.GraphQL.Operations
 		public const string GetProducts = @"
             query Products(
                 $search: String
+                $name: String
+                $sku: String
                 $categoryId: Int
                 $brandId: Int
+                $categoryIds: [Int!]
+                $brandIds: [Int!]
                 $minPrice: Float
                 $maxPrice: Float
+                $inStockOnly: Boolean
+                $sorts: [ProductSortInput!]
                 $sortBy: String
                 $sortOrder: String
                 $page: Int
@@ -16,10 +22,16 @@ namespace hcmus_shop.GraphQL.Operations
             ) {
                 products(
                     search: $search
+                    name: $name
+                    sku: $sku
                     categoryId: $categoryId
                     brandId: $brandId
+                    categoryIds: $categoryIds
+                    brandIds: $brandIds
                     minPrice: $minPrice
                     maxPrice: $maxPrice
+                    inStockOnly: $inStockOnly
+                    sorts: $sorts
                     sortBy: $sortBy
                     sortOrder: $sortOrder
                     page: $page

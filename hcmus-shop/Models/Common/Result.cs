@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace hcmus_shop.Models.Common
+﻿namespace hcmus_shop.Models.Common
 {
     public class Result<T>
     {

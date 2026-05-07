@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <SolidColorBrush x:Key="DashboardBackground" Color="#F3F0EC" />
     <SolidColorBrush x:Key="CardBackground" Color="#FFFBF8" />
@@ -37,4 +35,11 @@
     <SolidColorBrush x:Key="ImageUploadPreviewBackground" Color="#FFF1F5F0" />
     <SolidColorBrush x:Key="KpiIconBackground" Color="#1E3A50" />
     <SolidColorBrush x:Key="DashboardDividerBrush" Color="#32000000" />
+
+    <SolidColorBrush x:Key="DashboardCardStrokeBrush" Color="#1A000000" />
+    <SolidColorBrush x:Key="DashboardCardTitleBrush" Color="#1E1E2D" />
+    <SolidColorBrush x:Key="DashboardCardSubtitleBrush" Color="#7A7F9A" />
+    <SolidColorBrush x:Key="DashboardPillBackground" Color="#E6E8F5" />
+    <SolidColorBrush x:Key="DashboardOverlayBackground" Color="#CCFFFFFF" />
+    <SolidColorBrush x:Key="SidebarLogoutBackground" Color="#1F2937" />
 </ResourceDictionary>
