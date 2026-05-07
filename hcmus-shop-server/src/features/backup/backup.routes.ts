@@ -13,13 +13,13 @@ import { requireRoleRest } from "../../common/restAuth";
  */
 export const backupRouter = Router();
 
-backupRouter.use(requireRoleRest("Admin"));
-
 const PG_CONTAINER = process.env.POSTGRES_CONTAINER ?? "hcmus-shop-db";
 const PG_USER = process.env.POSTGRES_USER ?? "postgres";
 const PG_DB = process.env.POSTGRES_DB ?? "MyShop2026";
 
-backupRouter.get("/backup", (_req: Request, res: Response) => {
+// Auth attached per-route so the middleware only fires on /backup and /restore,
+// not on every request that passes through the mounted router.
+backupRouter.get("/backup", requireRoleRest("Admin"), (_req: Request, res: Response) => {
   res.setHeader("Content-Type", "application/sql");
   res.setHeader(
     "Content-Disposition",
@@ -59,6 +59,7 @@ const uploadMemory = multer({
 
 backupRouter.post(
   "/restore",
+  requireRoleRest("Admin"),
   uploadMemory.single("file"),
   (req: Request, res: Response) => {
     if (!req.file) {

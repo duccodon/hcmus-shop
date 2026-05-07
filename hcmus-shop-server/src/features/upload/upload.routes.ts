@@ -35,15 +35,14 @@ const upload = multer({
 
 export const uploadRouter = Router();
 
-// Admin-only: only managers should be uploading product images.
-uploadRouter.use(requireRoleRest("Admin"));
-
 /**
  * POST /uploads
+ * Admin-only multipart upload. Auth middleware attached per-route so it
+ * only fires for /uploads — not every request that reaches the router.
  * Multipart form-data with field "file" (single image, <= 5MB).
  * Returns: { url: "/uploads/products/<uuid>.<ext>" }
  */
-uploadRouter.post("/uploads", (req: Request, res: Response) => {
+uploadRouter.post("/uploads", requireRoleRest("Admin"), (req: Request, res: Response) => {
   upload.single("file")(req, res, (err) => {
     if (err) {
       return res.status(400).json({ error: err.message });
