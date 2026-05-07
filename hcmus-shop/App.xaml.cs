@@ -19,6 +19,7 @@ using hcmus_shop.Services.Settings;
 using hcmus_shop.Services.Trial;
 using hcmus_shop.Services.Onboarding;
 using hcmus_shop.Services.Backup;
+using hcmus_shop.Services.Health;
 using hcmus_shop.ViewModels;
 using hcmus_shop.ViewModels.Auth;
 using hcmus_shop.ViewModels.Products;
@@ -81,6 +82,7 @@ namespace hcmus_shop
             services.AddSingleton<ITrialService, TrialService>();
             services.AddSingleton<IOnboardingService, OnboardingService>();
             services.AddSingleton<IBackupService, BackupService>();
+            services.AddSingleton<IHealthService, HealthService>();
 
             // ViewModels
             services.AddTransient<LoginViewModel>();

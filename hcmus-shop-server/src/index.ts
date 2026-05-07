@@ -16,6 +16,7 @@ import { productResolver } from "./features/product/product.resolver";
 import { dashboardResolver } from "./features/dashboard/dashboard.resolver";
 import { uploadRouter } from "./features/upload/upload.routes";
 import { backupRouter } from "./features/backup/backup.routes";
+import { healthRouter } from "./features/health/health.routes";
 
 // Load .graphql type definitions
 function loadTypeDef(featurePath: string): string {
@@ -67,6 +68,9 @@ async function main() {
 
   // Enable CORS for all routes (uploads + static files + graphql)
   app.use(cors<cors.CorsRequest>());
+
+  // REST: health check (pre-flight liveness probe used by the client)
+  app.use(healthRouter);
 
   // REST: file upload endpoint
   app.use(uploadRouter);

@@ -44,6 +44,15 @@ namespace hcmus_shop.ViewModels
         public DashboardViewModel(IDashboardService dashboardService)
         {
             _dashboardService = dashboardService;
+
+            // Pre-populate 4 placeholder KPI cards because DashboardPage.xaml binds
+            // by index (KpiCards[0..3]). Without these, x:Bind throws ArgumentOutOfRange
+            // during the initial Loading event, before RefreshAsync runs.
+            for (int i = 0; i < 4; i++)
+            {
+                KpiCards.Add(new KpiCardItem { Title = "—", Value = "—" });
+            }
+
             // Empty axes so chart renders before first refresh.
             SalesXAxes.Add(new Axis { Labels = new List<string>() });
             SalesYAxes.Add(new Axis
@@ -75,36 +84,38 @@ namespace hcmus_shop.ViewModels
 
         private void ApplyStats(DashboardStatsDto stats)
         {
-            // KPI cards
-            KpiCards.Clear();
-            KpiCards.Add(new KpiCardItem
+            // KPI cards — REPLACE by index, don't Clear+Add.
+            // Reason: DashboardPage.xaml uses x:Bind KpiCards[0..3]. Replacing by
+            // index keeps the index valid and triggers CollectionChanged(Replace)
+            // which causes x:Bind to re-evaluate.
+            KpiCards[0] = new KpiCardItem
             {
                 Title = "Total Products",
                 Value = stats.TotalProducts.ToString("N0"),
                 Glyph = string.Empty,
                 IsPositive = true,
-            });
-            KpiCards.Add(new KpiCardItem
+            };
+            KpiCards[1] = new KpiCardItem
             {
                 Title = "Orders Today",
                 Value = stats.TotalOrdersToday.ToString("N0"),
                 Glyph = string.Empty,
                 IsPositive = true,
-            });
-            KpiCards.Add(new KpiCardItem
+            };
+            KpiCards[2] = new KpiCardItem
             {
                 Title = "Revenue Today",
                 Value = FormatCurrency(stats.TotalRevenueToday),
                 Glyph = string.Empty,
                 IsPositive = true,
-            });
-            KpiCards.Add(new KpiCardItem
+            };
+            KpiCards[3] = new KpiCardItem
             {
                 Title = "Low Stock",
                 Value = stats.LowStockProducts.Count.ToString("N0"),
                 Glyph = string.Empty,
                 IsPositive = stats.LowStockProducts.Count == 0,
-            });
+            };
 
             // Recent orders
             RecentInvoices.Clear();

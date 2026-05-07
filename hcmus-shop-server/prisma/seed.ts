@@ -331,12 +331,18 @@ async function main() {
 
   // For each category that's under target, generate variants from existing
   // templates that belong to that category until the count reaches the target.
+  // Safety: if a full pass through all templates produces no new SKU (because
+  // every combination already exists from another category's pass), break out
+  // to avoid an infinite loop.
   for (const category of allCategoryNames) {
     const templatesInCategory = baseTemplates.filter((p) =>
       p.categoryNames.includes(category)
     );
+    if (templatesInCategory.length === 0) continue;
     let suffixIndex = 0;
+    let safetyMaxAttempts = templatesInCategory.length * variantSuffixes.length * 2;
     while ((categoryCounts.get(category) || 0) < PRODUCTS_PER_CATEGORY) {
+      const countBefore = categoryCounts.get(category) || 0;
       for (const template of templatesInCategory) {
         if ((categoryCounts.get(category) || 0) >= PRODUCTS_PER_CATEGORY) break;
         const variant = variantSuffixes[suffixIndex % variantSuffixes.length];
@@ -378,101 +384,109 @@ async function main() {
           categoryCounts.set(cat, (categoryCounts.get(cat) || 0) + 1);
         }
       }
+
+      // Anti-livelock: if a full pass through templates produced zero new
+      // SKUs, every combination is already taken by previous category passes.
+      // Stop trying for this category — we've done our best.
+      const countAfter = categoryCounts.get(category) || 0;
+      if (countAfter === countBefore) break;
+
+      safetyMaxAttempts--;
+      if (safetyMaxAttempts <= 0) break;
     }
   }
 
   console.log(`Generated ${products.length} total products`);
 
+  // ---- Batched seeding ----
+  // Strategy: 4 bulk INSERTs (products, categories, images, instances) instead of
+  // ~1500 sequential upserts. Uses skipDuplicates for idempotency on unique cols.
+  // ProductImage has no unique constraint on (productId, imageUrl) so we filter
+  // existing rows in code before bulk insert.
+
+  // Validate brands present
   for (const seed of products) {
-    const brandId = brandMap.get(seed.brandName);
-    if (!brandId) {
+    if (!brandMap.has(seed.brandName)) {
       throw new Error(`Brand not found for product ${seed.sku}: ${seed.brandName}`);
     }
+  }
 
-    const product = await prisma.product.upsert({
-      where: { sku: seed.sku },
-      update: {
-        name: seed.name,
-        brandId,
-        importPrice: seed.importPrice,
-        sellingPrice: seed.sellingPrice,
-        stockQuantity: 3,
-        specifications: seed.specifications,
-        description: seed.description,
-        warrantyMonths: seed.warrantyMonths,
-        isActive: true,
-      },
-      create: {
-        sku: seed.sku,
-        name: seed.name,
-        brandId,
-        importPrice: seed.importPrice,
-        sellingPrice: seed.sellingPrice,
-        stockQuantity: 3,
-        specifications: seed.specifications,
-        description: seed.description,
-        warrantyMonths: seed.warrantyMonths,
-        isActive: true,
-      },
-    });
+  // 1. Bulk insert products (skip ones already seeded by SKU)
+  const productCreateRows = products.map((seed) => ({
+    sku: seed.sku,
+    name: seed.name,
+    brandId: brandMap.get(seed.brandName)!,
+    importPrice: seed.importPrice,
+    sellingPrice: seed.sellingPrice,
+    stockQuantity: 5,
+    specifications: seed.specifications,
+    description: seed.description,
+    warrantyMonths: seed.warrantyMonths,
+    isActive: true,
+  }));
 
+  const productResult = await prisma.product.createMany({
+    data: productCreateRows,
+    skipDuplicates: true,
+  });
+  console.log(`Inserted ${productResult.count} new products (skipped ${products.length - productResult.count} existing)`);
+
+  // 2. Fetch all products (need IDs for relations)
+  const allProducts = await prisma.product.findMany({ select: { productId: true, sku: true } });
+  const skuToId = new Map(allProducts.map((p) => [p.sku, p.productId]));
+
+  // 3. Bulk insert ProductCategory rows
+  const categoryRows: { productId: number; categoryId: number }[] = [];
+  for (const seed of products) {
+    const productId = skuToId.get(seed.sku);
+    if (productId == null) continue;
     for (const categoryName of seed.categoryNames) {
       const categoryId = categoryMap.get(categoryName);
-      if (!categoryId) {
-        continue;
-      }
-
-      await prisma.productCategory.upsert({
-        where: {
-          productId_categoryId: { productId: product.productId, categoryId },
-        },
-        update: {},
-        create: {
-          productId: product.productId,
-          categoryId,
-        },
-      });
+      if (categoryId != null) categoryRows.push({ productId, categoryId });
     }
+  }
+  const categoryResult = await prisma.productCategory.createMany({
+    data: categoryRows,
+    skipDuplicates: true, // composite PK (productId, categoryId)
+  });
+  console.log(`Inserted ${categoryResult.count} new product-category links`);
 
+  // 4. Bulk insert ProductImage rows
+  // No unique constraint on (productId, imageUrl) — must dedupe in code.
+  const existingImages = await prisma.productImage.findMany({
+    select: { productId: true, imageUrl: true },
+  });
+  const existingImageKeys = new Set(
+    existingImages.map((img) => `${img.productId}|${img.imageUrl}`)
+  );
+  const imageRows: { productId: number; imageUrl: string; displayOrder: number }[] = [];
+  for (const seed of products) {
+    const productId = skuToId.get(seed.sku);
+    if (productId == null) continue;
     for (let i = 1; i <= 3; i++) {
       const imageUrl = `/uploads/products/${seed.sku.toLowerCase()}-${i}.jpg`;
-      const existingImage = await prisma.productImage.findFirst({
-        where: { productId: product.productId, imageUrl },
-      });
-
-      if (!existingImage) {
-        await prisma.productImage.create({
-          data: {
-            productId: product.productId,
-            imageUrl,
-            displayOrder: i - 1,
-          },
-        });
-      }
+      if (existingImageKeys.has(`${productId}|${imageUrl}`)) continue;
+      imageRows.push({ productId, imageUrl, displayOrder: i - 1 });
     }
+  }
+  const imageResult = await prisma.productImage.createMany({ data: imageRows });
+  console.log(`Inserted ${imageResult.count} new product images`);
 
+  // 5. Bulk insert ProductInstance rows (serialNumber is unique)
+  const instanceRows: { productId: number; serialNumber: string; status: string }[] = [];
+  for (const seed of products) {
+    const productId = skuToId.get(seed.sku);
+    if (productId == null) continue;
     for (let i = 1; i <= 5; i++) {
       const serialNumber = `${seed.sku}-SN-${String(i).padStart(3, "0")}`;
-      await prisma.productInstance.upsert({
-        where: { serialNumber },
-        update: {
-          productId: product.productId,
-          status: "Available",
-        },
-        create: {
-          productId: product.productId,
-          serialNumber,
-          status: "Available",
-        },
-      });
+      instanceRows.push({ productId, serialNumber, status: "Available" });
     }
-
-    // Update product stock count to match available instances
-    await prisma.product.update({
-      where: { productId: product.productId },
-      data: { stockQuantity: 5 },
-    });
   }
+  const instanceResult = await prisma.productInstance.createMany({
+    data: instanceRows,
+    skipDuplicates: true,
+  });
+  console.log(`Inserted ${instanceResult.count} new product instances`);
 
   console.log(`Products seeded: ${products.length}`);
 

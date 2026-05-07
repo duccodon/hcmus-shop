@@ -2,7 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using hcmus_shop.Contracts.Services;
 using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace hcmus_shop.ViewModels.Auth
@@ -11,6 +10,7 @@ namespace hcmus_shop.ViewModels.Auth
     {
         private readonly IConfigService _config;
         private readonly IGraphQLClientService _graphQL;
+        private readonly IHealthService _healthService;
 
         [ObservableProperty]
         private string _serverUrl = string.Empty;
@@ -27,10 +27,24 @@ namespace hcmus_shop.ViewModels.Auth
         public event EventHandler? Saved;
         public event EventHandler? Cancelled;
 
-        public ConfigViewModel(IConfigService config, IGraphQLClientService graphQL)
+        public ConfigViewModel(
+            IConfigService config,
+            IGraphQLClientService graphQL,
+            IHealthService healthService)
         {
             _config = config;
             _graphQL = graphQL;
+            _healthService = healthService;
+            ServerUrl = _config.GetServerUrl();
+        }
+
+        /// <summary>
+        /// Reloads the current saved server URL into the form. Called by ConfigPage
+        /// on Loaded to guarantee the field shows the latest saved URL even if the
+        /// VM was constructed before the saved value changed.
+        /// </summary>
+        public void RefreshFromConfig()
+        {
             ServerUrl = _config.GetServerUrl();
         }
 
@@ -46,31 +60,14 @@ namespace hcmus_shop.ViewModels.Auth
             IsTesting = true;
             SetStatus("Testing...", false);
 
-            try
-            {
-                using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
-                var content = new StringContent(
-                    "{\"query\":\"{ __typename }\"}",
-                    System.Text.Encoding.UTF8,
-                    "application/json");
-                var response = await http.PostAsync(ServerUrl, content);
-                if (response.IsSuccessStatusCode)
-                {
-                    SetStatus("Connection successful.", false);
-                }
-                else
-                {
-                    SetStatus($"Server responded with {(int)response.StatusCode}.", true);
-                }
-            }
-            catch (Exception ex)
-            {
-                SetStatus($"Connection failed: {ex.Message}", true);
-            }
-            finally
-            {
-                IsTesting = false;
-            }
+            // Ping the /health endpoint of the URL the user typed (not the saved one).
+            var result = await _healthService.PingAsync(ServerUrl.Trim());
+
+            IsTesting = false;
+            if (result.IsSuccess)
+                SetStatus("Connection successful.", false);
+            else
+                SetStatus($"Connection failed: {result.Error}", true);
         }
 
         [RelayCommand]

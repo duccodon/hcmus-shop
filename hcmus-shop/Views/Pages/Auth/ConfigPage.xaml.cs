@@ -20,6 +20,10 @@ namespace hcmus_shop.Views
 
             ViewModel.Saved += (s, e) => Saved?.Invoke(this, EventArgs.Empty);
             ViewModel.Cancelled += (s, e) => Cancelled?.Invoke(this, EventArgs.Empty);
+
+            // Defensively refresh from disk on Loaded — prevents stale "placeholder
+            // shows but URL is set" bugs caused by DataContext-vs-binding timing.
+            Loaded += (_, _) => ViewModel.RefreshFromConfig();
         }
     }
 }

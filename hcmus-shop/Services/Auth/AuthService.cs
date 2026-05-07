@@ -1,5 +1,6 @@
 using hcmus_shop.Contracts.Services;
 using hcmus_shop.GraphQL.Operations;
+using hcmus_shop.Models.Common;
 using hcmus_shop.Models.DTOs;
 using hcmus_shop.Services.Auth.Dto;
 using hcmus_shop.Services.GraphQL;
@@ -25,7 +26,7 @@ namespace hcmus_shop.Services.Auth
         // ========================
         // LOGIN
         // ========================
-        public async Task<bool> LoginAsync(string username, string password)
+        public async Task<Result<bool>> LoginAsync(string username, string password, bool rememberMe = false)
         {
             var request = new LoginRequest
             {
@@ -43,16 +44,37 @@ namespace hcmus_shop.Services.Auth
 
             if (!result.IsSuccess)
             {
-                return false;
+                // Distinguish between "server unreachable" and "wrong credentials".
+                // SafeExecuteAsync prefixes errors: "Network: ..." or "GraphQL: ...".
+                var err = result.Error ?? "Unknown error.";
+                if (err.StartsWith("Network:", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Result<bool>.Failure("Cannot connect to server. Check the URL in Config.");
+                }
+                if (err.IndexOf("Invalid username or password", StringComparison.OrdinalIgnoreCase) >= 0
+                    || err.IndexOf("login", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return Result<bool>.Failure("Invalid username or password.");
+                }
+                return Result<bool>.Failure(err);
             }
 
             Token = result.Value!.Login.Token;
             CurrentUser = result.Value.Login.User;
-
             _graphQL.SetAuthToken(Token);
-            SaveToken(Token);
 
-            return true;
+            // Only persist the token if user opted in to "Remember me".
+            // Otherwise the session is ephemeral — closing the app forces re-login.
+            if (rememberMe)
+            {
+                SaveToken(Token);
+            }
+            else
+            {
+                ClearToken();
+            }
+
+            return Result<bool>.Success(true);
         }
 
         // ========================

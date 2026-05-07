@@ -11,13 +11,15 @@ namespace hcmus_shop.ViewModels
     {
         private const string RememberedUsernameKey = "remembered_username";
         private readonly IAuthService _authService;
+        private readonly IHealthService _healthService;
 
         public event EventHandler? LoginSucceeded;
         public event EventHandler? OpenConfigRequested;
 
-        public LoginViewModel(IAuthService authService)
+        public LoginViewModel(IAuthService authService, IHealthService healthService)
         {
             _authService = authService;
+            _healthService = healthService;
             LoadRememberedUsername();
         }
 
@@ -36,11 +38,55 @@ namespace hcmus_shop.ViewModels
         [ObservableProperty]
         private string? errorMessage;
 
+        // ---- Server status (from health probe) ----
+
+        public enum ServerStatus { Unknown, Checking, Online, Offline }
+
+        [ObservableProperty]
+        private ServerStatus _server = ServerStatus.Unknown;
+
+        [ObservableProperty]
+        private string? _serverErrorReason;
+
+        public bool IsServerOnline => Server == ServerStatus.Online;
+        public bool IsServerChecking => Server == ServerStatus.Checking;
+        public bool IsServerOffline => Server == ServerStatus.Offline;
+
+        partial void OnServerChanged(ServerStatus value)
+        {
+            OnPropertyChanged(nameof(IsServerOnline));
+            OnPropertyChanged(nameof(IsServerChecking));
+            OnPropertyChanged(nameof(IsServerOffline));
+            LoginCommand.NotifyCanExecuteChanged();
+        }
+
         public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
 
         partial void OnErrorMessageChanged(string? value)
         {
             OnPropertyChanged(nameof(HasError));
+        }
+
+        /// <summary>
+        /// Pings /health on the configured server URL. Called from LoginPage.Loaded.
+        /// </summary>
+        [RelayCommand]
+        public async Task CheckServerAsync()
+        {
+            Server = ServerStatus.Checking;
+            ServerErrorReason = null;
+
+            var result = await _healthService.PingAsync();
+            if (result.IsSuccess)
+            {
+                Server = ServerStatus.Online;
+                ServerErrorReason = null;
+            }
+            else
+            {
+                Server = ServerStatus.Offline;
+                ServerErrorReason = result.Error;
+            }
         }
 
         [RelayCommand(CanExecute = nameof(CanLogin))]
@@ -62,10 +108,10 @@ namespace hcmus_shop.ViewModels
             IsBusy = true;
             try
             {
-                var isLoggedIn = await _authService.LoginAsync(Username.Trim(), Password);
-                if (!isLoggedIn)
+                var loginResult = await _authService.LoginAsync(Username.Trim(), Password, RememberMe);
+                if (!loginResult.IsSuccess)
                 {
-                    ErrorMessage = "Invalid username or password.";
+                    ErrorMessage = loginResult.Error;
                     return;
                 }
 
@@ -83,18 +129,14 @@ namespace hcmus_shop.ViewModels
         }
 
         [RelayCommand]
-        private void Update()
-        {
-            ErrorMessage = "Use Config to update environment settings.";
-        }
-
-        [RelayCommand]
         private void OpenConfig()
         {
             OpenConfigRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        private bool CanLogin() => !IsBusy;
+        // Login is allowed only when not busy AND server is online.
+        // (Server=Unknown is treated as "not yet verified" — login disabled until we know.)
+        private bool CanLogin() => !IsBusy && Server == ServerStatus.Online;
 
         partial void OnIsBusyChanged(bool value)
         {

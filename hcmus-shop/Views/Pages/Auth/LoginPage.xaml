@@ -132,12 +132,48 @@
                         Content="Sign In"
                         Style="{StaticResource AccentButtonStyle}" />
 
-                    <!-- Server status -->
-                    <TextBlock
+                    <!-- Server status indicator + URL -->
+                    <StackPanel
                         Margin="0,16,0,0"
                         HorizontalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="6">
+
+                        <!-- Online dot -->
+                        <Ellipse
+                            Width="8" Height="8"
+                            VerticalAlignment="Center"
+                            Fill="#15803D"
+                            Visibility="{Binding IsServerOnline, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                        <!-- Offline dot -->
+                        <Ellipse
+                            Width="8" Height="8"
+                            VerticalAlignment="Center"
+                            Fill="#DC2626"
+                            Visibility="{Binding IsServerOffline, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                        <!-- Checking spinner -->
+                        <ProgressRing
+                            Width="10" Height="10"
+                            VerticalAlignment="Center"
+                            IsActive="{Binding IsServerChecking}"
+                            Visibility="{Binding IsServerChecking, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Style="{StaticResource CaptionSecondaryTextStyle}"
+                            Text="{x:Bind ServerUrlText}" />
+                    </StackPanel>
+
+                    <!-- Offline message -->
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        HorizontalAlignment="Center"
+                        Foreground="#DC2626"
                         Style="{StaticResource CaptionSecondaryTextStyle}"
-                        Text="{x:Bind ServerUrlText}" />
+                        Text="{Binding ServerErrorReason}"
+                        Visibility="{Binding IsServerOffline, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 </StackPanel>
             </Border>

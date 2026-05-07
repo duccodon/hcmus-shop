@@ -33,6 +33,10 @@ namespace hcmus_shop.Views
 
             var graphQL = Ioc.Default.GetRequiredService<IGraphQLClientService>();
             ServerUrlText = $"Server: {graphQL.ServerUrl}";
+
+            // Pre-flight health check when the page becomes visible.
+            // Disables the Sign In button if the server can't be reached.
+            Loaded += async (_, _) => await ViewModel.CheckServerAsync();
         }
 
         private void PasswordInput_PasswordChanged(object sender, RoutedEventArgs e)
