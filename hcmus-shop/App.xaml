@@ -4,7 +4,8 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:hcmus_shop"
-    xmlns:converters="using:hcmus_shop.Converters">
+    xmlns:converters="using:hcmus_shop.Converters"
+    RequestedTheme="Light">
     <Application.Resources>
         <ResourceDictionary>
             <!-- Declare your converter here -->

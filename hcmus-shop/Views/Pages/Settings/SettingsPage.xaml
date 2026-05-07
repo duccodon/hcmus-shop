@@ -5,7 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    Background="{StaticResource DashboardBackground}">
 
     <ScrollViewer VerticalScrollMode="Auto" HorizontalScrollMode="Disabled">
         <Grid Margin="32" RowSpacing="20" MaxWidth="800" HorizontalAlignment="Stretch">
@@ -19,8 +20,11 @@
 
             <!-- Header -->
             <StackPanel Grid.Row="0" Spacing="4">
-                <TextBlock FontSize="28" FontWeight="SemiBold" Text="Settings" />
-                <TextBlock FontSize="13" Foreground="{StaticResource TextSecondary}"
+                <TextBlock FontSize="28" FontWeight="SemiBold"
+                           Foreground="{StaticResource TextPrimary}"
+                           Text="Settings" />
+                <TextBlock FontSize="13"
+                           Foreground="{StaticResource TextSecondary}"
                            Text="Personalize how the app behaves after login." />
             </StackPanel>
 
@@ -29,7 +33,9 @@
                     Background="{StaticResource CardBackground}"
                     BorderBrush="{StaticResource DividerBrush}" BorderThickness="1">
                 <StackPanel Spacing="12">
-                    <TextBlock FontSize="16" FontWeight="SemiBold" Text="Display" />
+                    <TextBlock FontSize="16" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimary}"
+                               Text="Display" />
 
                     <Grid ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
@@ -37,11 +43,15 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Spacing="4">
-                            <TextBlock FontWeight="Medium" Text="Items per page" />
-                            <TextBlock FontSize="12" Foreground="{StaticResource TextSecondary}"
+                            <TextBlock FontWeight="Medium"
+                                       Foreground="{StaticResource TextPrimary}"
+                                       Text="Items per page" />
+                            <TextBlock FontSize="12"
+                                       Foreground="{StaticResource TextSecondary}"
                                        Text="Used in Products, Orders and other lists." />
                         </StackPanel>
                         <ComboBox Grid.Column="1" MinWidth="100"
+                                  Foreground="{StaticResource TextPrimary}"
                                   ItemsSource="{Binding PageSizeOptions}"
                                   SelectedItem="{Binding PageSize, Mode=TwoWay}" />
                     </Grid>
@@ -53,11 +63,15 @@
                     Background="{StaticResource CardBackground}"
                     BorderBrush="{StaticResource DividerBrush}" BorderThickness="1">
                 <StackPanel Spacing="12">
-                    <TextBlock FontSize="16" FontWeight="SemiBold" Text="Navigation" />
+                    <TextBlock FontSize="16" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimary}"
+                               Text="Navigation" />
 
                     <ToggleSwitch Header="Open last screen on startup"
+                                  Foreground="{StaticResource TextPrimary}"
                                   IsOn="{Binding RememberLastScreen, Mode=TwoWay}" />
-                    <TextBlock FontSize="12" Foreground="{StaticResource TextSecondary}"
+                    <TextBlock FontSize="12"
+                               Foreground="{StaticResource TextSecondary}"
                                Text="When enabled, the app jumps to the screen you last used after you log in." />
                 </StackPanel>
             </Border>
@@ -67,8 +81,11 @@
                     Background="{StaticResource CardBackground}"
                     BorderBrush="{StaticResource DividerBrush}" BorderThickness="1">
                 <StackPanel Spacing="12">
-                    <TextBlock FontSize="16" FontWeight="SemiBold" Text="Backup &amp; Restore" />
-                    <TextBlock FontSize="12" Foreground="{StaticResource TextSecondary}"
+                    <TextBlock FontSize="16" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimary}"
+                               Text="Backup &amp; Restore" />
+                    <TextBlock FontSize="12"
+                               Foreground="{StaticResource TextSecondary}"
                                Text="Export the entire database to a SQL file, or restore from a previous backup." />
 
                     <Grid ColumnSpacing="8">
@@ -79,12 +96,14 @@
                         <Button Grid.Column="0"
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center"
+                                Foreground="{StaticResource TextPrimary}"
                                 Command="{Binding DownloadBackupCommand}"
                                 IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}"
                                 Content="Download Backup" />
                         <Button Grid.Column="1"
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center"
+                                Foreground="{StaticResource TextPrimary}"
                                 Command="{Binding RestoreCommand}"
                                 IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}"
                                 Content="Restore from File" />
