@@ -14,10 +14,10 @@
                           Glyph="&#xE7BA;" />
                 <TextBlock HorizontalAlignment="Center" FontSize="22" FontWeight="SemiBold"
                            Foreground="{StaticResource TextPrimary}"
-                           Text="Trial Expired" />
+                           Text="{Binding Title}" />
                 <TextBlock HorizontalAlignment="Center" FontSize="13" TextWrapping="Wrap"
                            Foreground="{StaticResource TextSecondary}"
-                           Text="Your 15-day trial has ended. Enter your activation code below to continue using HCMUS Shop." />
+                           Text="{Binding Subtitle}" />
 
                 <TextBlock Margin="0,12,0,4" FontSize="13" FontWeight="Medium"
                            Foreground="{StaticResource TextPrimary}"

@@ -25,8 +25,20 @@ namespace hcmus_shop.Contracts.Services
     {
         LicenseStatus GetStatus();
 
-        /// <summary>True when the user is in the free trial (no valid activation yet).</summary>
-        bool IsTrial { get; }
+        /// <summary>
+        /// True when the user has a valid (non-expired) license. False during the
+        /// trial period and after a license has expired. Use this to decide
+        /// indicator text like "Trial — X days left" vs "Licensed — X days left".
+        /// </summary>
+        bool IsLicensed { get; }
+
+        /// <summary>
+        /// True when an activation code has previously been entered
+        /// (license_activated_date is present in storage), regardless of whether
+        /// it's still valid. Use this on the activation page to distinguish
+        /// "trial expired" (never activated) from "license expired" (was activated).
+        /// </summary>
+        bool WasActivated { get; }
 
         /// <summary>Days remaining in the current period (trial: ≤15, licensed: ≤365).</summary>
         int DaysRemaining { get; }

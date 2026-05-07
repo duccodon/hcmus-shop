@@ -22,6 +22,19 @@ namespace hcmus_shop.ViewModels.Auth
             _license = license;
         }
 
+        // Page title differs by reason: license-expired vs trial-expired.
+        public string Title => _license.WasActivated
+            ? "License Expired"
+            : "Trial Expired";
+
+        public string Subtitle => _license.WasActivated
+            ? "Your license has ended. Enter a new activation code to continue using HCMUS Shop."
+            : "Your 15-day trial has ended. Enter your activation code below to continue using HCMUS Shop.";
+
+        public string IconGlyph => _license.WasActivated
+            ? ""  // KeyboardLockKey — license/lock symbol
+            : ""; // Warning — trial expiry
+
         [RelayCommand]
         private void Activate()
         {

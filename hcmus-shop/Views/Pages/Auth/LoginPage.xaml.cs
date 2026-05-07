@@ -36,9 +36,9 @@ namespace hcmus_shop.Views
             ServerUrlText = $"Server: {graphQL.ServerUrl}";
 
             var license = Ioc.Default.GetRequiredService<ILicenseService>();
-            LicenseText = license.IsTrial
-                ? $"Trial — {license.DaysRemaining} day(s) left"
-                : $"Licensed — {license.DaysRemaining} day(s) left";
+            LicenseText = license.IsLicensed
+                ? $"Licensed — {license.DaysRemaining} day(s) left"
+                : $"Trial — {license.DaysRemaining} day(s) left";
 
             // Pre-flight health check when the page becomes visible.
             // Disables the Sign In button if the server can't be reached.

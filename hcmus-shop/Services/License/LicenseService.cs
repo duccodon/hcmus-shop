@@ -44,19 +44,18 @@ namespace hcmus_shop.Services.License
             return trialElapsed > TrialDays ? LicenseStatus.Expired : LicenseStatus.Active;
         }
 
-        public bool IsTrial
+        public bool IsLicensed
         {
             get
             {
                 var licenseDate = ParseDate(LicenseActivatedKey);
-                if (licenseDate.HasValue)
-                {
-                    var elapsed = (DateTime.UtcNow - licenseDate.Value).TotalDays;
-                    if (elapsed <= LicenseDays) return false; // licensed
-                }
-                return true; // trial (active or expired) or expired license
+                if (!licenseDate.HasValue) return false;
+                var elapsed = (DateTime.UtcNow - licenseDate.Value).TotalDays;
+                return elapsed <= LicenseDays;
             }
         }
+
+        public bool WasActivated => ParseDate(LicenseActivatedKey).HasValue;
 
         public int DaysRemaining
         {
