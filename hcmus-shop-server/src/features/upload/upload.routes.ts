@@ -3,6 +3,7 @@ import multer from "multer";
 import { randomUUID } from "crypto";
 import path from "path";
 import fs from "fs";
+import { requireRoleRest } from "../../common/restAuth";
 
 const UPLOAD_DIR = "uploads/products";
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -33,6 +34,9 @@ const upload = multer({
 });
 
 export const uploadRouter = Router();
+
+// Admin-only: only managers should be uploading product images.
+uploadRouter.use(requireRoleRest("Admin"));
 
 /**
  * POST /uploads
