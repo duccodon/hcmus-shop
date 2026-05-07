@@ -7,7 +7,7 @@ namespace hcmus_shop.ViewModels.Auth
 {
     public partial class TrialExpiredViewModel : ObservableObject
     {
-        private readonly ITrialService _trial;
+        private readonly ILicenseService _license;
 
         [ObservableProperty]
         private string _activationCode = string.Empty;
@@ -17,9 +17,9 @@ namespace hcmus_shop.ViewModels.Auth
 
         public event EventHandler? Activated;
 
-        public TrialExpiredViewModel(ITrialService trial)
+        public TrialExpiredViewModel(ILicenseService license)
         {
-            _trial = trial;
+            _license = license;
         }
 
         [RelayCommand]
@@ -32,7 +32,7 @@ namespace hcmus_shop.ViewModels.Auth
                 return;
             }
 
-            if (!_trial.Activate(ActivationCode))
+            if (!_license.Activate(ActivationCode))
             {
                 ErrorMessage = "Invalid activation code.";
                 return;

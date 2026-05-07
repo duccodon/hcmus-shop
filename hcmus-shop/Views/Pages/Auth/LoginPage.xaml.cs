@@ -13,6 +13,7 @@ namespace hcmus_shop.Views
         public LoginViewModel ViewModel { get; }
         public string VersionText { get; }
         public string ServerUrlText { get; }
+        public string LicenseText { get; }
 
         /// <summary>
         /// Raised when the user clicks the Config button.
@@ -33,6 +34,11 @@ namespace hcmus_shop.Views
 
             var graphQL = Ioc.Default.GetRequiredService<IGraphQLClientService>();
             ServerUrlText = $"Server: {graphQL.ServerUrl}";
+
+            var license = Ioc.Default.GetRequiredService<ILicenseService>();
+            LicenseText = license.IsTrial
+                ? $"Trial — {license.DaysRemaining} day(s) left"
+                : $"Licensed — {license.DaysRemaining} day(s) left";
 
             // Pre-flight health check when the page becomes visible.
             // Disables the Sign In button if the server can't be reached.

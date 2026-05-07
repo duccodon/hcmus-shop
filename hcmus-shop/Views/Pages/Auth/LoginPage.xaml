@@ -37,14 +37,23 @@
                     Text="Laptop Store Management System" />
             </StackPanel>
 
-            <!-- Version at bottom-left -->
-            <TextBlock
+            <!-- Version + License at bottom-left -->
+            <StackPanel
                 Margin="20,0,0,16"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
-                Style="{StaticResource BodySecondaryTextStyle}"
-                Foreground="{StaticResource LoginCardBackgroundBrush}"
-                Text="{x:Bind VersionText}" />
+                Spacing="2">
+                <TextBlock
+                    Style="{StaticResource BodySecondaryTextStyle}"
+                    Foreground="{StaticResource LoginCardBackgroundBrush}"
+                    Text="{x:Bind VersionText}" />
+                <TextBlock
+                    Style="{StaticResource BodySecondaryTextStyle}"
+                    Foreground="{StaticResource LoginCardBackgroundBrush}"
+                    Opacity="0.85"
+                    FontSize="11"
+                    Text="{x:Bind LicenseText}" />
+            </StackPanel>
         </Grid>
 
         <!-- Right Panel — Login Form -->

@@ -97,7 +97,7 @@ namespace hcmus_shop
         }
 
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
-        {
+        {           
             // 1. Trial check — if expired and not activated, block everything.
             var trial = Ioc.Default.GetRequiredService<ITrialService>();
             if (trial.GetStatus() == TrialStatus.Expired)
@@ -135,14 +135,15 @@ namespace hcmus_shop
 
         /// <summary>
         /// Called from TrialExpiredPage after the user enters a valid code.
+        /// Important: open the next window FIRST, then close the trial window.
+        /// If we close the trial window before awaiting, the await continuation
+        /// runs on a destroyed dispatcher context and crashes.
         /// </summary>
         public async void RelaunchAfterTrialActivation()
         {
-            _trialWindow?.Close();
-            _trialWindow = null;
-
             var auth = Ioc.Default.GetRequiredService<IAuthService>();
             var loggedIn = await auth.TryAutoLoginAsync();
+
             if (loggedIn)
             {
                 _mainWindow = new MainWindow();
@@ -151,8 +152,15 @@ namespace hcmus_shop
             }
             else
             {
-                OpenLoginWindow();
+                _loginWindow = new LoginWindow();
+                CurrentWindow = _loginWindow;
+                _loginWindow.Activate();
             }
+
+            // Now safe to close the trial window — there's another active window.
+            var trial = _trialWindow;
+            _trialWindow = null;
+            trial?.Close();
         }
 
         public void OpenMainWindow()
