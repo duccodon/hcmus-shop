@@ -24,6 +24,7 @@ namespace hcmus_shop.GraphQL.Operations
                     recentOrders {
                         orderId
                         customerName
+                        productSummary
                         finalAmount
                         status
                         createdAt

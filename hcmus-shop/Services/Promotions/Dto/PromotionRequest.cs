@@ -12,6 +12,7 @@ namespace hcmus_shop.Services.Promotions.Dto
         public string Code { get; set; } = string.Empty;
         public double? DiscountPercent { get; set; }
         public double? DiscountAmount { get; set; }
+        public string? MinimumCustomerRank { get; set; }
         public string StartDate { get; set; } = string.Empty;
         public string EndDate { get; set; } = string.Empty;
         public bool? IsActive { get; set; }
@@ -22,6 +23,7 @@ namespace hcmus_shop.Services.Promotions.Dto
         public string? Code { get; set; }
         public double? DiscountPercent { get; set; }
         public double? DiscountAmount { get; set; }
+        public string? MinimumCustomerRank { get; set; }
         public string? StartDate { get; set; }
         public string? EndDate { get; set; }
         public bool? IsActive { get; set; }

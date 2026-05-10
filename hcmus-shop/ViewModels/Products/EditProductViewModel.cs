@@ -15,7 +15,7 @@ namespace hcmus_shop.ViewModels.Products
 {
     public class EditProductViewModel : ObservableObject
     {
-        private const int MinimumImageCount = 1;
+        private const int MinimumImageCount = 3;
         private readonly IProductService _productService;
         private readonly IBrandService _brandService;
         private readonly ICategoryService _categoryService;
@@ -291,7 +291,7 @@ namespace hcmus_shop.ViewModels.Products
             Sku = product.Sku;
             Name = product.Name;
             Description = product.Description ?? string.Empty;
-            ImportPriceValue = product.ImportPrice;
+            ImportPriceValue = product.ImportPrice ?? 0;
             SellingPriceValue = product.SellingPrice;
             StockQuantityValue = product.StockQuantity;
             WarrantyMonthsValue = product.WarrantyMonths;

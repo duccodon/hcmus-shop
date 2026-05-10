@@ -1,0 +1,111 @@
+<Page
+    x:Class="hcmus_shop.Views.CustomerDetailPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Name="Root">
+    <Grid Background="{StaticResource DashboardBackground}">
+        <ScrollViewer>
+            <Grid Margin="24">
+                <Border Background="{StaticResource CardBackground}" CornerRadius="16" Padding="20">
+                    <Grid RowSpacing="14">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="4">
+                                <Button Content="Back to Customers" Style="{StaticResource GhostButtonStyle}" HorizontalAlignment="Left" Command="{x:Bind ViewModel.BackCommand}" />
+                                <TextBlock Text="Customer Detail" Style="{StaticResource PageTitleStyle}" />
+                                <TextBlock Text="Full customer profile is available to admin only. Loyalty rank is derived from purchase points." Style="{StaticResource BodySecondaryTextStyle}" TextWrapping="WrapWholeWords" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                                <Button
+                                    Content="Save"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Command="{x:Bind ViewModel.SaveCommand}"
+                                    Visibility="{x:Bind ViewModel.CanEdit, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <Button
+                                    Content="Delete"
+                                    Style="{StaticResource GhostButtonStyle}"
+                                    Command="{x:Bind ViewModel.DeleteCommand}"
+                                    Visibility="{x:Bind ViewModel.CanEdit, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Border Grid.Row="1" Height="1" Background="{StaticResource DividerBrush}" />
+
+                        <InfoBar
+                            Grid.Row="2"
+                            IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
+                            IsClosable="False"
+                            Severity="Error"
+                            Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+
+                        <InfoBar
+                            Grid.Row="3"
+                            IsOpen="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay}"
+                            IsClosable="False"
+                            Severity="Success"
+                            Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
+
+                        <Grid Grid.Row="4" ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1.2*" />
+                                <ColumnDefinition Width="0.8*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Spacing="12">
+                                <TextBox
+                                    Header="Customer Name"
+                                    Style="{StaticResource FormTextBoxStyle}"
+                                    Text="{x:Bind ViewModel.Name, Mode=TwoWay}"
+                                    IsEnabled="{x:Bind ViewModel.CanEdit, Mode=OneWay}" />
+                                <TextBox
+                                    Header="Phone"
+                                    Style="{StaticResource FormTextBoxStyle}"
+                                    Text="{x:Bind ViewModel.Phone, Mode=TwoWay}"
+                                    IsEnabled="{x:Bind ViewModel.CanEdit, Mode=OneWay}" />
+                                <TextBox
+                                    Header="Email"
+                                    Style="{StaticResource FormTextBoxStyle}"
+                                    Text="{x:Bind ViewModel.Email, Mode=TwoWay}"
+                                    IsEnabled="{x:Bind ViewModel.CanEdit, Mode=OneWay}" />
+                            </StackPanel>
+
+                            <Border Grid.Column="1" Background="{StaticResource SelectionHighlight}" CornerRadius="14" Padding="16">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="Customer Snapshot" Style="{StaticResource CardTitleStyle}" />
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Loyalty Points" Style="{StaticResource FieldLabelStyle}" />
+                                        <TextBlock Text="{x:Bind ViewModel.LoyaltyPoints, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Rank" Style="{StaticResource FieldLabelStyle}" />
+                                        <TextBlock Text="{x:Bind ViewModel.Rank, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Created" Style="{StaticResource FieldLabelStyle}" />
+                                        <TextBlock Text="{x:Bind ViewModel.CreatedAt, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Last Updated" Style="{StaticResource FieldLabelStyle}" />
+                                        <TextBlock Text="{x:Bind ViewModel.UpdatedAt, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Page>

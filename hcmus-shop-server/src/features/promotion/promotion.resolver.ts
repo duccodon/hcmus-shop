@@ -5,6 +5,7 @@ import {
   UpdatePromotionDto,
 } from "./promotion.dto";
 import { promotionService } from "./promotion.service";
+import { Context, requireAdmin } from "../../common/context";
 
 export const promotionResolver = {
   Promotion: {
@@ -19,18 +20,36 @@ export const promotionResolver = {
       promotionService.findAll(args),
     promotion: (_: unknown, { promotionId }: { promotionId: number }) =>
       promotionService.findById(promotionId),
-    validatePromotion: (_: unknown, { code }: { code: string }) =>
-      promotionService.validatePromotion(code),
+    validatePromotion: (
+      _: unknown,
+      { code, customerRank }: { code: string; customerRank?: string | null }
+    ) => promotionService.validatePromotion(code, customerRank),
   },
 
   Mutation: {
-    createPromotion: (_: unknown, { input }: { input: CreatePromotionDto }) =>
-      promotionService.create(input),
+    createPromotion: (
+      _: unknown,
+      { input }: { input: CreatePromotionDto },
+      context: Context
+    ) => {
+      requireAdmin(context);
+      return promotionService.create(input);
+    },
     updatePromotion: (
       _: unknown,
-      { promotionId, input }: { promotionId: number; input: UpdatePromotionDto }
-    ) => promotionService.update(promotionId, input),
-    deletePromotion: (_: unknown, { promotionId }: { promotionId: number }) =>
-      promotionService.delete(promotionId),
+      { promotionId, input }: { promotionId: number; input: UpdatePromotionDto },
+      context: Context
+    ) => {
+      requireAdmin(context);
+      return promotionService.update(promotionId, input);
+    },
+    deletePromotion: (
+      _: unknown,
+      { promotionId }: { promotionId: number },
+      context: Context
+    ) => {
+      requireAdmin(context);
+      return promotionService.delete(promotionId);
+    },
   },
 };

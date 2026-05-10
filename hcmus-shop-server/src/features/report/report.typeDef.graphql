@@ -1,0 +1,26 @@
+type SalesReportEntry {
+  period: String!
+  totalQuantity: Int!
+  totalRevenue: Float!
+  totalProfit: Float!
+}
+
+type TopProductEntry {
+  productId: Int!
+  name: String!
+  totalSold: Int!
+  totalRevenue: Float!
+}
+
+extend type Query {
+  salesReport(
+    fromDate: String!
+    toDate: String!
+    groupBy: String!
+  ): [SalesReportEntry!]!
+  topProducts(
+    fromDate: String!
+    toDate: String!
+    limit: Int
+  ): [TopProductEntry!]!
+}

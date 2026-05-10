@@ -34,6 +34,7 @@ namespace hcmus_shop.Models.DTOs
     {
         public string OrderId { get; set; } = string.Empty;
         public string? CustomerName { get; set; }
+        public string? ProductSummary { get; set; }
         public double FinalAmount { get; set; }
         public string Status { get; set; } = string.Empty;
         public string CreatedAt { get; set; } = string.Empty;

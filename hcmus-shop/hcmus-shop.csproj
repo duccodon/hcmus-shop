@@ -54,6 +54,9 @@
 	<!-- Sale Pages -->
 	<ItemGroup>
 		<Page Include="Views\Pages\Sale\**\*.xaml" />
+		<Page Include="Views\Pages\Orders\**\*.xaml" />
+		<Page Include="Views\Pages\Customers\**\*.xaml" />
+		<Page Include="Views\Pages\Reports\**\*.xaml" />
 	</ItemGroup>
 
 	<!-- Top-level Pages -->
@@ -164,6 +167,18 @@
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 		<Page Update="Views\Pages\Promotions\PromotionsPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="Views\Pages\Customers\CustomersPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="Views\Pages\Customers\CustomerDetailPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="Views\Pages\Orders\OrdersPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="Views\Pages\Reports\ReportsPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
         <Page Update="Views\Components\**\*.xaml">

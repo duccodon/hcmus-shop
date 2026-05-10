@@ -3,8 +3,10 @@ using CommunityToolkit.Mvvm.Input;
 using hcmus_shop.Contracts.Services;
 using hcmus_shop.Models.DTOs;
 using hcmus_shop.Services.Promotions.Dto;
+using hcmus_shop.ViewModels.Products;
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -15,6 +17,7 @@ namespace hcmus_shop.ViewModels.Promotions
     public class PromotionsViewModel : ObservableObject
     {
         private readonly IPromotionService _promotionService;
+        private readonly IAuthService _authService;
         private CancellationTokenSource? _searchDebounceCts;
         private string _searchQuery = string.Empty;
         private bool _isLoading;
@@ -24,26 +27,35 @@ namespace hcmus_shop.ViewModels.Promotions
         private int _selectedPageSize = 10;
         private int _totalCount;
 
-        public PromotionsViewModel(IPromotionService promotionService)
+        public PromotionsViewModel(IPromotionService promotionService, IAuthService authService)
         {
             _promotionService = promotionService;
+            _authService = authService;
 
             PageSizeOptions.Add(5);
             PageSizeOptions.Add(10);
             PageSizeOptions.Add(15);
             PageSizeOptions.Add(20);
+            RankOptions.Add("All ranks");
+            RankOptions.Add("Bronze");
+            RankOptions.Add("Silver");
+            RankOptions.Add("Gold");
+            RankOptions.Add("Diamond");
 
             InitializeCommand = new AsyncRelayCommand(InitializeAsync, () => !IsInitialized && !IsLoading);
-            AddPromotionCommand = new AsyncRelayCommand(AddPromotionAsync, () => !IsLoading);
-            EditPromotionCommand = new AsyncRelayCommand<int>(EditPromotionAsync, _ => !IsLoading);
-            DeletePromotionCommand = new AsyncRelayCommand<int>(DeletePromotionAsync, _ => !IsLoading);
+            AddPromotionCommand = new AsyncRelayCommand(AddPromotionAsync, () => CanManagePromotions && !IsLoading);
+            EditPromotionCommand = new AsyncRelayCommand<int>(EditPromotionAsync, _ => CanManagePromotions && !IsLoading);
+            DeletePromotionCommand = new AsyncRelayCommand<int>(DeletePromotionAsync, _ => CanManagePromotions && !IsLoading);
             PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => !IsLoading && CanGoPrevious);
             NextPageCommand = new AsyncRelayCommand(NextPageAsync, () => !IsLoading && CanGoNext);
+            GoToPageCommand = new AsyncRelayCommand<int>(GoToPageAsync);
             RefreshCommand = new AsyncRelayCommand(() => LoadPromotionsAsync(true), () => !IsLoading);
         }
 
         public ObservableCollection<PromotionListItemViewModel> Promotions { get; } = [];
         public ObservableCollection<int> PageSizeOptions { get; } = [];
+        public ObservableCollection<PageButtonItem> PageButtons { get; } = [];
+        public ObservableCollection<string> RankOptions { get; } = [];
 
         public IAsyncRelayCommand InitializeCommand { get; }
         public IAsyncRelayCommand AddPromotionCommand { get; }
@@ -51,10 +63,12 @@ namespace hcmus_shop.ViewModels.Promotions
         public IAsyncRelayCommand<int> DeletePromotionCommand { get; }
         public IAsyncRelayCommand PreviousPageCommand { get; }
         public IAsyncRelayCommand NextPageCommand { get; }
+        public IAsyncRelayCommand<int> GoToPageCommand { get; }
         public IAsyncRelayCommand RefreshCommand { get; }
 
         public Func<PromotionEditorState, Task<PromotionEditorResult?>>? RequestPromotionEditorAsync { get; set; }
         public Func<PromotionListItemViewModel, Task<bool>>? ConfirmDeletePromotionAsync { get; set; }
+        public bool CanManagePromotions => _authService.HasRole("Admin");
 
         public bool IsInitialized
         {
@@ -189,6 +203,7 @@ namespace hcmus_shop.ViewModels.Promotions
                 Code = draft.Code.Trim(),
                 DiscountPercent = draft.DiscountPercent,
                 DiscountAmount = draft.DiscountAmount,
+                MinimumCustomerRank = NormalizeMinimumRank(draft.MinimumCustomerRank),
                 StartDate = draft.StartDate.ToString("O"),
                 EndDate = draft.EndDate.ToString("O"),
                 IsActive = draft.IsActive
@@ -232,6 +247,7 @@ namespace hcmus_shop.ViewModels.Promotions
                 promotion.Code,
                 promotion.DiscountPercent,
                 promotion.DiscountAmount,
+                promotion.MinimumCustomerRank,
                 startDate,
                 endDate,
                 promotion.IsActive));
@@ -252,6 +268,7 @@ namespace hcmus_shop.ViewModels.Promotions
                 Code = draft.Code.Trim(),
                 DiscountPercent = draft.DiscountPercent,
                 DiscountAmount = draft.DiscountAmount,
+                MinimumCustomerRank = NormalizeMinimumRank(draft.MinimumCustomerRank),
                 StartDate = draft.StartDate.ToString("O"),
                 EndDate = draft.EndDate.ToString("O"),
                 IsActive = draft.IsActive
@@ -326,6 +343,17 @@ namespace hcmus_shop.ViewModels.Promotions
             await LoadPromotionsAsync();
         }
 
+        private async Task GoToPageAsync(int page)
+        {
+            if (page < 1 || page > TotalPages || page == _currentPage)
+            {
+                return;
+            }
+
+            _currentPage = page;
+            await LoadPromotionsAsync();
+        }
+
         public async Task LoadPromotionsAsync(bool clearError = true)
         {
             IsLoading = true;
@@ -347,6 +375,7 @@ namespace hcmus_shop.ViewModels.Promotions
                 {
                     Promotions.Clear();
                     _totalCount = 0;
+                    RebuildPageButtons();
                     ErrorMessage = result.Error ?? "Failed to load promotions.";
                     NotifyPagingChanged();
                     return;
@@ -370,11 +399,13 @@ namespace hcmus_shop.ViewModels.Promotions
                         promotion.Code,
                         promotion.DiscountPercent,
                         promotion.DiscountAmount,
+                        promotion.MinimumCustomerRank,
                         startDate,
                         endDate,
                         promotion.IsActive));
                 }
 
+                RebuildPageButtons();
                 NotifyPagingChanged();
             }
             finally
@@ -414,6 +445,66 @@ namespace hcmus_shop.ViewModels.Promotions
             PreviousPageCommand.NotifyCanExecuteChanged();
             NextPageCommand.NotifyCanExecuteChanged();
             OnPropertyChanged(nameof(IsEmpty));
+        }
+
+        private void RebuildPageButtons()
+        {
+            PageButtons.Clear();
+
+            PageButtons.Add(new PageButtonItem
+            {
+                Label = "<- Previous",
+                PageNumber = _currentPage - 1,
+                IsEnabled = _currentPage > 1,
+                IsCurrent = false
+            });
+
+            int? previousPage = null;
+            foreach (var page in BuildPageNumbers(_currentPage, TotalPages))
+            {
+                if (previousPage.HasValue && page - previousPage.Value > 1)
+                {
+                    PageButtons.Add(new PageButtonItem
+                    {
+                        Label = "...",
+                        PageNumber = -1,
+                        IsEnabled = false,
+                        IsCurrent = false
+                    });
+                }
+
+                PageButtons.Add(new PageButtonItem
+                {
+                    Label = page.ToString(),
+                    PageNumber = page,
+                    IsEnabled = page != _currentPage,
+                    IsCurrent = page == _currentPage
+                });
+                previousPage = page;
+            }
+
+            PageButtons.Add(new PageButtonItem
+            {
+                Label = "Next ->",
+                PageNumber = _currentPage + 1,
+                IsEnabled = _currentPage < TotalPages,
+                IsCurrent = false
+            });
+        }
+
+        private static IEnumerable<int> BuildPageNumbers(int currentPage, int totalPages)
+        {
+            var pages = new SortedSet<int> { 1, totalPages };
+            for (var offset = -1; offset <= 1; offset++)
+            {
+                var value = currentPage + offset;
+                if (value >= 1 && value <= totalPages)
+                {
+                    pages.Add(value);
+                }
+            }
+
+            return pages;
         }
 
         private static bool TryValidateEditorInput(PromotionEditorResult input, out string message)
@@ -471,6 +562,13 @@ namespace hcmus_shop.ViewModels.Promotions
 
             return DateTime.Today;
         }
+
+        private static string? NormalizeMinimumRank(string? rank)
+        {
+            return string.Equals(rank, "All ranks", StringComparison.OrdinalIgnoreCase)
+                ? null
+                : rank;
+        }
     }
 
     public class PromotionEditorState
@@ -479,6 +577,7 @@ namespace hcmus_shop.ViewModels.Promotions
         public string Code { get; init; } = string.Empty;
         public double? DiscountPercent { get; init; }
         public double? DiscountAmount { get; init; }
+        public string MinimumCustomerRank { get; init; } = "All ranks";
         public DateTimeOffset StartDate { get; init; } = DateTimeOffset.Now;
         public DateTimeOffset EndDate { get; init; } = DateTimeOffset.Now.AddDays(30);
         public bool IsActive { get; init; } = true;
@@ -491,6 +590,7 @@ namespace hcmus_shop.ViewModels.Promotions
             string code,
             double? discountPercent,
             double? discountAmount,
+            string? minimumCustomerRank,
             DateTime startDate,
             DateTime endDate,
             bool isActive) =>
@@ -500,6 +600,7 @@ namespace hcmus_shop.ViewModels.Promotions
                 Code = code,
                 DiscountPercent = discountPercent,
                 DiscountAmount = discountAmount,
+                MinimumCustomerRank = string.IsNullOrWhiteSpace(minimumCustomerRank) ? "All ranks" : minimumCustomerRank,
                 StartDate = new DateTimeOffset(startDate),
                 EndDate = new DateTimeOffset(endDate),
                 IsActive = isActive
@@ -511,6 +612,7 @@ namespace hcmus_shop.ViewModels.Promotions
         public string Code { get; init; } = string.Empty;
         public double? DiscountPercent { get; init; }
         public double? DiscountAmount { get; init; }
+        public string? MinimumCustomerRank { get; init; }
         public DateTimeOffset StartDate { get; init; }
         public DateTimeOffset EndDate { get; init; }
         public bool IsActive { get; init; }

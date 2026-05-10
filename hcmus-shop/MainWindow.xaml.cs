@@ -48,12 +48,20 @@ namespace hcmus_shop
             sender.IsOpen = false;
             if (sender == WelcomeTip)
             {
-                DashboardTip.Target = DashboardItem;
-                DashboardTip.IsOpen = true;
+                if (CanAccessFeature("Dashboard"))
+                {
+                    DashboardTip.Target = DashboardItem;
+                    DashboardTip.IsOpen = true;
+                }
+                else
+                {
+                    ProductsTip.Target = CanAccessFeature("Store") ? StoreItem : ProductsItem;
+                    ProductsTip.IsOpen = true;
+                }
             }
             else if (sender == DashboardTip)
             {
-                ProductsTip.Target = ProductsItem;
+                ProductsTip.Target = CanAccessFeature("Store") ? StoreItem : ProductsItem;
                 ProductsTip.IsOpen = true;
             }
             else if (sender == ProductsTip)
@@ -104,8 +112,11 @@ namespace hcmus_shop
                 case "Dashboard":
                     NavigateOrForbid(typeof(DashboardPage), "Dashboard");
                     break;
-                case "Sales":
-                    NavigateOrForbid(typeof(SalesPage), target);
+                case "Orders":
+                    NavigateOrForbid(typeof(OrdersPage), target);
+                    break;
+                case "Store":
+                    NavigateOrForbid(typeof(StorePage), target);
                     break;
                 case "Products":
                     NavigateOrForbid(typeof(ProductsPage), target);
@@ -113,14 +124,11 @@ namespace hcmus_shop
                 case "Promotions":
                     NavigateOrForbid(typeof(PromotionsPage), target);
                     break;
-                case "Store":
-                    NavigateOrForbid(typeof(StorePage), target);
+                case "Customers":
+                    NavigateOrForbid(typeof(CustomersPage), target);
                     break;
-                case "Messages":
-                    NavigateOrForbid(typeof(MessagesPage), target);
-                    break;
-                case "Inventory":
-                    NavigateOrForbid(typeof(InventoryPage), target);
+                case "Reports":
+                    NavigateOrForbid(typeof(ReportsPage), target);
                     break;
                 case "Settings":
                     NavigateOrForbid(typeof(SettingsPage), target);

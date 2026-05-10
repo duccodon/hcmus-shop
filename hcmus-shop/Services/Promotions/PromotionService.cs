@@ -96,12 +96,12 @@ namespace hcmus_shop.Services.Promotions
             return Result<bool>.Success(result.Value!.DeletePromotion.PromotionId > 0);
         }
 
-        public async Task<Result<PromotionValidationDto>> ValidateAsync(string code)
+        public async Task<Result<PromotionValidationDto>> ValidateAsync(string code, string? customerRank = null)
         {
             var result = await _graphQL.SafeExecuteAsync(() =>
                 _graphQL.QueryAsync<ValidatePromotionResponse>(
                     PromotionQueries.ValidatePromotion,
-                    new { code }));
+                    new { code, customerRank }));
 
             if (!result.IsSuccess)
             {

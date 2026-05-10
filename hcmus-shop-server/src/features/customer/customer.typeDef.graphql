@@ -1,0 +1,40 @@
+type Customer {
+  customerId: ID!
+  name: String!
+  phone: String
+  email: String
+  loyaltyPoints: Int!
+  rank: String!
+  createdAt: String!
+  updatedAt: String
+}
+
+type CustomerPage {
+  items: [Customer!]!
+  totalCount: Int!
+  page: Int!
+  pageSize: Int!
+}
+
+input CreateCustomerInput {
+  name: String!
+  phone: String
+  email: String
+}
+
+input UpdateCustomerInput {
+  name: String
+  phone: String
+  email: String
+}
+
+extend type Query {
+  customers(search: String, page: Int, pageSize: Int): CustomerPage!
+  customer(customerId: ID!): Customer
+}
+
+extend type Mutation {
+  createCustomer(input: CreateCustomerInput!): Customer!
+  updateCustomer(customerId: ID!, input: UpdateCustomerInput!): Customer!
+  deleteCustomer(customerId: ID!): Boolean!
+}

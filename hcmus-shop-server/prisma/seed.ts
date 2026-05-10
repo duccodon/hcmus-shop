@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -13,6 +13,35 @@ type ProductSeed = {
   description: string;
   specifications: Record<string, string>;
   categoryNames: string[];
+};
+
+type DemoCustomerSeed = {
+  customerId: string;
+  name: string;
+  phone: string;
+  email: string;
+  loyaltyPoints: number;
+};
+
+type DemoPromotionSeed = {
+  code: string;
+  discountPercent: number | null;
+  discountAmount: number | null;
+  minimumCustomerRank: string | null;
+  startDate: Date;
+  endDate: Date;
+  isActive: boolean;
+};
+
+type DemoOrderSeed = {
+  orderId: string;
+  customerId: string;
+  username: "admin" | "sale";
+  promotionCode: string | null;
+  status: "Created" | "Paid" | "Cancelled";
+  createdAt: Date;
+  notes: string;
+  serialNumbers: string[];
 };
 
 async function main() {
@@ -451,26 +480,30 @@ async function main() {
   });
   console.log(`Inserted ${categoryResult.count} new product-category links`);
 
-  // 4. Bulk insert ProductImage rows
-  // No unique constraint on (productId, imageUrl) — must dedupe in code.
-  const existingImages = await prisma.productImage.findMany({
-    select: { productId: true, imageUrl: true },
+  // 4. Replace ProductImage rows with a stable brand-gallery scheme so the
+  // demo only needs a small set of manually copied JPGs.
+  await prisma.productImage.deleteMany({
+    where: {
+      productId: {
+        in: allProducts.map((product) => product.productId),
+      },
+    },
   });
-  const existingImageKeys = new Set(
-    existingImages.map((img) => `${img.productId}|${img.imageUrl}`)
-  );
   const imageRows: { productId: number; imageUrl: string; displayOrder: number }[] = [];
   for (const seed of products) {
     const productId = skuToId.get(seed.sku);
     if (productId == null) continue;
-    for (let i = 1; i <= 3; i++) {
-      const imageUrl = `/uploads/products/${seed.sku.toLowerCase()}-${i}.jpg`;
-      if (existingImageKeys.has(`${productId}|${imageUrl}`)) continue;
-      imageRows.push({ productId, imageUrl, displayOrder: i - 1 });
+    const imageUrls = buildBrandImageUrls(seed.brandName);
+    for (let i = 0; i < imageUrls.length; i++) {
+      imageRows.push({
+        productId,
+        imageUrl: imageUrls[i],
+        displayOrder: i,
+      });
     }
   }
   const imageResult = await prisma.productImage.createMany({ data: imageRows });
-  console.log(`Inserted ${imageResult.count} new product images`);
+  console.log(`Inserted ${imageResult.count} brand-gallery product images`);
 
   // 5. Bulk insert ProductInstance rows (serialNumber is unique)
   const instanceRows: { productId: number; serialNumber: string; status: string }[] = [];
@@ -490,11 +523,12 @@ async function main() {
 
   console.log(`Products seeded: ${products.length}`);
 
-  const promotions = [
+  const promotions: DemoPromotionSeed[] = [
     {
       code: "WELCOME10",
       discountPercent: 10,
       discountAmount: null,
+      minimumCustomerRank: null,
       startDate: new Date("2026-01-01T00:00:00.000Z"),
       endDate: new Date("2026-12-31T23:59:59.999Z"),
       isActive: true,
@@ -503,17 +537,55 @@ async function main() {
       code: "SPRING500K",
       discountPercent: null,
       discountAmount: 500000,
+      minimumCustomerRank: "Silver",
       startDate: new Date("2026-03-01T00:00:00.000Z"),
       endDate: new Date("2026-06-30T23:59:59.999Z"),
+      isActive: true,
+    },
+    {
+      code: "GOLD12",
+      discountPercent: 12,
+      discountAmount: null,
+      minimumCustomerRank: "Gold",
+      startDate: new Date("2026-01-01T00:00:00.000Z"),
+      endDate: new Date("2026-12-31T23:59:59.999Z"),
+      isActive: true,
+    },
+    {
+      code: "DIAMOND15",
+      discountPercent: 15,
+      discountAmount: null,
+      minimumCustomerRank: "Diamond",
+      startDate: new Date("2026-01-01T00:00:00.000Z"),
+      endDate: new Date("2026-12-31T23:59:59.999Z"),
+      isActive: true,
+    },
+    {
+      code: "STUDENT300K",
+      discountPercent: null,
+      discountAmount: 300000,
+      minimumCustomerRank: null,
+      startDate: new Date("2026-01-01T00:00:00.000Z"),
+      endDate: new Date("2026-12-31T23:59:59.999Z"),
       isActive: true,
     },
     {
       code: "EXPIRED25",
       discountPercent: 25,
       discountAmount: null,
+      minimumCustomerRank: "Gold",
       startDate: new Date("2025-01-01T00:00:00.000Z"),
       endDate: new Date("2025-12-31T23:59:59.999Z"),
       isActive: false,
+    },
+    {
+      code: "JUNEFLASH8",
+      discountPercent: 8,
+      discountAmount: null,
+      minimumCustomerRank: null,
+      startDate: new Date("2026-06-01T00:00:00.000Z"),
+      endDate: new Date("2026-06-30T23:59:59.999Z"),
+      isActive: true,
     },
   ];
 
@@ -523,6 +595,7 @@ async function main() {
       update: {
         discountPercent: seed.discountPercent,
         discountAmount: seed.discountAmount,
+        minimumCustomerRank: seed.minimumCustomerRank,
         startDate: seed.startDate,
         endDate: seed.endDate,
         isActive: seed.isActive,
@@ -531,6 +604,7 @@ async function main() {
         code: seed.code,
         discountPercent: seed.discountPercent,
         discountAmount: seed.discountAmount,
+        minimumCustomerRank: seed.minimumCustomerRank,
         startDate: seed.startDate,
         endDate: seed.endDate,
         isActive: seed.isActive,
@@ -539,6 +613,191 @@ async function main() {
   }
 
   console.log(`Promotions seeded: ${promotions.length}`);
+
+  const demoCustomers: DemoCustomerSeed[] = [
+    {
+      customerId: "00000000-0000-0000-0000-000000000101",
+      name: "Nguyen Minh Anh",
+      phone: "0901000101",
+      email: "minh.anh.demo@hcmus-shop.local",
+      loyaltyPoints: 320,
+    },
+    {
+      customerId: "00000000-0000-0000-0000-000000000102",
+      name: "Tran Bao Chau",
+      phone: "0901000102",
+      email: "bao.chau.demo@hcmus-shop.local",
+      loyaltyPoints: 1450,
+    },
+    {
+      customerId: "00000000-0000-0000-0000-000000000103",
+      name: "Le Hoang Long",
+      phone: "0901000103",
+      email: "hoang.long.demo@hcmus-shop.local",
+      loyaltyPoints: 5620,
+    },
+    {
+      customerId: "00000000-0000-0000-0000-000000000104",
+      name: "Pham Gia Han",
+      phone: "0901000104",
+      email: "gia.han.demo@hcmus-shop.local",
+      loyaltyPoints: 11850,
+    },
+    {
+      customerId: "00000000-0000-0000-0000-000000000105",
+      name: "Do Quoc Viet",
+      phone: "0901000105",
+      email: "quoc.viet.demo@hcmus-shop.local",
+      loyaltyPoints: 780,
+    },
+  ];
+
+  for (const customer of demoCustomers) {
+    await prisma.customer.upsert({
+      where: { customerId: customer.customerId },
+      update: {
+        name: customer.name,
+        phone: customer.phone,
+        email: customer.email,
+        loyaltyPoints: customer.loyaltyPoints,
+      },
+      create: customer,
+    });
+  }
+  console.log(`Customers seeded: ${demoCustomers.length}`);
+
+  const demoOrders: DemoOrderSeed[] = [
+    {
+      orderId: "10000000-0000-0000-0000-000000000001",
+      customerId: demoCustomers[0].customerId,
+      username: "sale",
+      promotionCode: "WELCOME10",
+      status: "Paid",
+      createdAt: new Date("2026-01-15T09:20:00.000Z"),
+      notes: "January showroom sale with entry-level promotion.",
+      serialNumbers: [
+        "ASUS-ROG-G16-2026-SN-001",
+        "APPLE-MACBOOK-AIR-M3-13-SN-001",
+      ],
+    },
+    {
+      orderId: "10000000-0000-0000-0000-000000000002",
+      customerId: demoCustomers[1].customerId,
+      username: "sale",
+      promotionCode: "SPRING500K",
+      status: "Paid",
+      createdAt: new Date("2026-02-11T14:05:00.000Z"),
+      notes: "Silver-tier customer using fixed-amount spring discount.",
+      serialNumbers: [
+        "DELL-XPS-13-PLUS-2026-SN-001",
+        "ACER-SWIFT-GO-14-SN-001",
+      ],
+    },
+    {
+      orderId: "10000000-0000-0000-0000-000000000003",
+      customerId: demoCustomers[4].customerId,
+      username: "admin",
+      promotionCode: null,
+      status: "Paid",
+      createdAt: new Date("2026-03-03T10:15:00.000Z"),
+      notes: "Walk-in business sale without promotion.",
+      serialNumbers: [
+        "DELL-LATITUDE-5440-SN-001",
+      ],
+    },
+    {
+      orderId: "10000000-0000-0000-0000-000000000004",
+      customerId: demoCustomers[2].customerId,
+      username: "sale",
+      promotionCode: "GOLD12",
+      status: "Paid",
+      createdAt: new Date("2026-03-22T16:40:00.000Z"),
+      notes: "Gold-tier upsell bundle for premium customer.",
+      serialNumbers: [
+        "LENOVO-LEGION-5I-2026-SN-001",
+        "HP-ELITEBOOK-840-G10-SN-001",
+      ],
+    },
+    {
+      orderId: "10000000-0000-0000-0000-000000000005",
+      customerId: demoCustomers[3].customerId,
+      username: "sale",
+      promotionCode: "DIAMOND15",
+      status: "Paid",
+      createdAt: new Date("2026-04-18T11:00:00.000Z"),
+      notes: "Diamond customer high-value creator workstation order.",
+      serialNumbers: [
+        "MSI-STEALTH-16-AI-SN-001",
+        "ACER-PREDATOR-HELIOS-16-SN-001",
+      ],
+    },
+    {
+      orderId: "10000000-0000-0000-0000-000000000006",
+      customerId: demoCustomers[1].customerId,
+      username: "sale",
+      promotionCode: "STUDENT300K",
+      status: "Paid",
+      createdAt: new Date("2026-05-05T08:30:00.000Z"),
+      notes: "Early May sale to keep weekly reports active.",
+      serialNumbers: [
+        "ASUS-TUF-A15-2026-SN-001",
+      ],
+    },
+    {
+      orderId: "10000000-0000-0000-0000-000000000007",
+      customerId: demoCustomers[0].customerId,
+      username: "sale",
+      promotionCode: "WELCOME10",
+      status: "Paid",
+      createdAt: new Date("2026-05-09T13:10:00.000Z"),
+      notes: "Recent order for dashboard and invoice preview.",
+      serialNumbers: [
+        "HP-OMEN-16-2026-SN-001",
+      ],
+    },
+    {
+      orderId: "10000000-0000-0000-0000-000000000008",
+      customerId: demoCustomers[3].customerId,
+      username: "admin",
+      promotionCode: "DIAMOND15",
+      status: "Paid",
+      createdAt: new Date("2026-05-10T09:10:00.000Z"),
+      notes: "Today paid order to populate dashboard revenue today.",
+      serialNumbers: [
+        "LENOVO-THINKPAD-X1-CARBON-G12-SN-001",
+        "APPLE-MACBOOK-AIR-M3-13-SN-002",
+      ],
+    },
+    {
+      orderId: "10000000-0000-0000-0000-000000000009",
+      customerId: demoCustomers[1].customerId,
+      username: "sale",
+      promotionCode: "SPRING500K",
+      status: "Created",
+      createdAt: new Date("2026-05-10T10:45:00.000Z"),
+      notes: "Draft order kept in Created status for editing demo.",
+      serialNumbers: [
+        "HP-ELITEBOOK-840-G10-SN-002",
+      ],
+    },
+    {
+      orderId: "10000000-0000-0000-0000-000000000010",
+      customerId: demoCustomers[2].customerId,
+      username: "sale",
+      promotionCode: null,
+      status: "Cancelled",
+      createdAt: new Date("2026-05-08T15:25:00.000Z"),
+      notes: "Cancelled order for status filtering demo.",
+      serialNumbers: [
+        "DELL-XPS-13-PLUS-2026-SN-002",
+      ],
+    },
+  ];
+
+  await resetDemoOrders(demoOrders);
+  await createDemoOrders(demoOrders, { admin, sale });
+  await recalculateProductStock();
+  console.log(`Orders seeded: ${demoOrders.length}`);
 
   console.log("Seed completed!");
 }
@@ -549,3 +808,209 @@ main()
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());
+
+function buildBrandImageUrls(brandName: string) {
+  const slug = brandName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  return [
+    `/uploads/products/${slug}-1.jpg`,
+    `/uploads/products/${slug}-2.jpg`,
+    `/uploads/products/${slug}-3.jpg`,
+  ];
+}
+
+async function resetDemoOrders(demoOrders: DemoOrderSeed[]) {
+  const orderIds = demoOrders.map((order) => order.orderId);
+  const serialNumbers = [...new Set(demoOrders.flatMap((order) => order.serialNumbers))];
+
+  if (orderIds.length > 0) {
+    await prisma.inventoryLog.deleteMany({
+      where: {
+        OR: orderIds.map((orderId) => ({
+          reason: { contains: orderId },
+        })),
+      },
+    });
+
+    await prisma.orderItem.deleteMany({
+      where: {
+        orderId: { in: orderIds },
+      },
+    });
+
+    await prisma.order.deleteMany({
+      where: {
+        orderId: { in: orderIds },
+      },
+    });
+  }
+
+  if (serialNumbers.length > 0) {
+    await prisma.productInstance.updateMany({
+      where: {
+        serialNumber: { in: serialNumbers },
+      },
+      data: {
+        status: "Available",
+      },
+    });
+  }
+}
+
+async function createDemoOrders(
+  demoOrders: DemoOrderSeed[],
+  users: { admin: { userId: string }; sale: { userId: string } }
+) {
+  const userIdByUsername = new Map<string, string>([
+    ["admin", users.admin.userId],
+    ["sale", users.sale.userId],
+  ]);
+
+  for (const orderSeed of demoOrders) {
+    const instances = await prisma.productInstance.findMany({
+      where: {
+        serialNumber: { in: orderSeed.serialNumbers },
+      },
+      include: {
+        product: true,
+      },
+    });
+
+    if (instances.length !== orderSeed.serialNumbers.length) {
+      throw new Error(`Missing product instance(s) for demo order ${orderSeed.orderId}.`);
+    }
+
+    const instanceBySerial = new Map(
+      instances.map((instance) => [instance.serialNumber, instance])
+    );
+    const orderedInstances = orderSeed.serialNumbers.map((serialNumber) => {
+      const instance = instanceBySerial.get(serialNumber);
+      if (!instance) {
+        throw new Error(
+          `Serial ${serialNumber} was not found for demo order ${orderSeed.orderId}.`
+        );
+      }
+      return instance;
+    });
+
+    const promotion = orderSeed.promotionCode
+      ? await prisma.promotion.findUnique({
+          where: { code: orderSeed.promotionCode },
+        })
+      : null;
+
+    const subtotal = orderedInstances.reduce(
+      (sum, instance) => sum + Number(instance.product.sellingPrice),
+      0
+    );
+    const discountAmount = calculateDiscountAmount(subtotal, promotion);
+    const finalAmount = Math.max(subtotal - discountAmount, 0);
+    const userId = userIdByUsername.get(orderSeed.username);
+    if (!userId) {
+      throw new Error(`Missing user for demo order ${orderSeed.orderId}.`);
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.order.create({
+        data: {
+          orderId: orderSeed.orderId,
+          customerId: orderSeed.customerId,
+          userId,
+          promotionId: promotion?.promotionId ?? null,
+          subtotal,
+          discountAmount,
+          finalAmount,
+          status: orderSeed.status,
+          notes: orderSeed.notes,
+          createdAt: orderSeed.createdAt,
+          updatedAt: orderSeed.createdAt,
+          orderItems: {
+            create: orderedInstances.map((instance) => ({
+              instanceId: instance.instanceId,
+              unitSalePrice: Number(instance.product.sellingPrice),
+              quantity: 1,
+            })),
+          },
+        },
+      });
+
+      if (orderSeed.status === "Paid") {
+        for (const instance of orderedInstances) {
+          await tx.productInstance.update({
+            where: { instanceId: instance.instanceId },
+            data: {
+              status: "Sold",
+              updatedAt: orderSeed.createdAt,
+            },
+          });
+
+          await tx.inventoryLog.create({
+            data: {
+              productId: instance.productId,
+              instanceId: instance.instanceId,
+              userId,
+              quantityChange: -1,
+              changeType: "Export",
+              reason: `Seeded paid order ${orderSeed.orderId}`,
+              createdAt: orderSeed.createdAt,
+              updatedAt: orderSeed.createdAt,
+            },
+          });
+        }
+      }
+    });
+  }
+}
+
+function calculateDiscountAmount(
+  subtotal: number,
+  promotion: {
+    discountPercent: Prisma.Decimal | number | null;
+    discountAmount: Prisma.Decimal | number | null;
+  } | null
+) {
+  if (!promotion) {
+    return 0;
+  }
+
+  const percent = promotion.discountPercent == null ? null : Number(promotion.discountPercent);
+  const amount = promotion.discountAmount == null ? null : Number(promotion.discountAmount);
+
+  if (percent != null && percent > 0) {
+    return Math.min(Math.round((subtotal * percent) / 100), subtotal);
+  }
+
+  if (amount != null && amount > 0) {
+    return Math.min(amount, subtotal);
+  }
+
+  return 0;
+}
+
+async function recalculateProductStock() {
+  const availability = await prisma.productInstance.groupBy({
+    by: ["productId"],
+    _count: {
+      _all: true,
+    },
+    where: {
+      status: "Available",
+    },
+  });
+
+  const countByProductId = new Map(
+    availability.map((entry) => [entry.productId, entry._count._all])
+  );
+
+  const products = await prisma.product.findMany({
+    select: { productId: true },
+  });
+
+  for (const product of products) {
+    await prisma.product.update({
+      where: { productId: product.productId },
+      data: {
+        stockQuantity: countByProductId.get(product.productId) ?? 0,
+      },
+    });
+  }
+}

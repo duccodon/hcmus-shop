@@ -1,4 +1,5 @@
 import { categoryService } from "./category.service";
+import { Context, requireAdmin } from "../../common/context";
 
 export const categoryResolver = {
   Category: {
@@ -15,8 +16,10 @@ export const categoryResolver = {
   Mutation: {
     createCategory: (
       _: unknown,
-      args: { name: string; description?: string }
+      args: { name: string; description?: string },
+      context: Context
     ) => {
+      requireAdmin(context);
       return categoryService.create(args);
     },
 
@@ -25,15 +28,19 @@ export const categoryResolver = {
       {
         categoryId,
         ...data
-      }: { categoryId: number; name?: string; description?: string }
+      }: { categoryId: number; name?: string; description?: string },
+      context: Context
     ) => {
+      requireAdmin(context);
       return categoryService.update(categoryId, data);
     },
 
     deleteCategory: (
       _: unknown,
-      { categoryId }: { categoryId: number }
+      { categoryId }: { categoryId: number },
+      context: Context
     ) => {
+      requireAdmin(context);
       return categoryService.delete(categoryId);
     },
   },

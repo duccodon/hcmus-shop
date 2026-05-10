@@ -20,6 +20,7 @@ namespace hcmus_shop.Services.Products.Dto
         public double? MinPrice { get; set; }
         public double? MaxPrice { get; set; }
         public bool? InStockOnly { get; set; }
+        public bool? IncludeInactive { get; set; }
         public List<ProductSortCriterionDto>? Sorts { get; set; }
         public string? SortBy { get; set; }
         public string? SortOrder { get; set; }
@@ -71,6 +72,7 @@ namespace hcmus_shop.Services.Products.Dto
         public double? MinPrice { get; set; }
         public double? MaxPrice { get; set; }
         public bool? InStockOnly { get; set; }
+        public bool? IncludeInactive { get; set; }
         public List<ProductSortCriterionDto>? Sorts { get; set; }
         public string? SortBy { get; set; }
         public string? SortOrder { get; set; }
@@ -86,5 +88,12 @@ namespace hcmus_shop.Services.Products.Dto
     public class DeleteProductRequest
     {
         public int ProductId { get; set; }
+    }
+
+    public class ProductImportSummary
+    {
+        public int ImportedCount { get; set; }
+        public int FailedCount { get; set; }
+        public List<string> Messages { get; set; } = new();
     }
 }

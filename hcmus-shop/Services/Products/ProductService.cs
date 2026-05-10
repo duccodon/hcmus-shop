@@ -4,6 +4,10 @@ using hcmus_shop.Models.Common;
 using hcmus_shop.Models.DTOs;
 using hcmus_shop.Services.GraphQL;
 using hcmus_shop.Services.Products.Dto;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace hcmus_shop.Services.Products
@@ -31,6 +35,7 @@ namespace hcmus_shop.Services.Products
                 MinPrice = filter.MinPrice,
                 MaxPrice = filter.MaxPrice,
                 InStockOnly = filter.InStockOnly,
+                IncludeInactive = filter.IncludeInactive,
                 Sorts = filter.Sorts,
                 SortBy = filter.SortBy,
                 SortOrder = filter.SortOrder,
@@ -104,6 +109,65 @@ namespace hcmus_shop.Services.Products
                 return Result<bool>.Failure(result.Error!);
 
             return Result<bool>.Success(true);
+        }
+
+        public async Task<Result<string>> ExportCsvAsync(ProductFilterDto filter, string outputPath)
+        {
+            if (string.IsNullOrWhiteSpace(outputPath))
+            {
+                return Result<string>.Failure("Export path is required.");
+            }
+
+            var exportFilter = new ProductFilterDto
+            {
+                Search = filter.Search,
+                Name = filter.Name,
+                Sku = filter.Sku,
+                CategoryId = filter.CategoryId,
+                BrandId = filter.BrandId,
+                CategoryIds = filter.CategoryIds,
+                BrandIds = filter.BrandIds,
+                MinPrice = filter.MinPrice,
+                MaxPrice = filter.MaxPrice,
+                InStockOnly = filter.InStockOnly,
+                IncludeInactive = filter.IncludeInactive,
+                Sorts = filter.Sorts,
+                SortBy = filter.SortBy,
+                SortOrder = filter.SortOrder,
+                Page = 1,
+                PageSize = 5000
+            };
+
+            var result = await GetAllAsync(exportFilter);
+            if (!result.IsSuccess || result.Value is null)
+            {
+                return Result<string>.Failure(result.Error ?? "Failed to export products.");
+            }
+
+            var csv = new StringBuilder();
+            csv.AppendLine("ProductId,Sku,Name,Brand,Categories,SellingPrice,StockQuantity,Status");
+
+            foreach (var item in result.Value.Items)
+            {
+                csv.AppendLine(string.Join(",",
+                    EscapeCsv(item.ProductId.ToString(CultureInfo.InvariantCulture)),
+                    EscapeCsv(item.Sku),
+                    EscapeCsv(item.Name),
+                    EscapeCsv(item.Brand?.Name ?? string.Empty),
+                    EscapeCsv(string.Join("; ", item.Categories.Select(category => category.Name))),
+                    EscapeCsv(item.SellingPrice.ToString("0.##", CultureInfo.InvariantCulture)),
+                    EscapeCsv(item.StockQuantity.ToString(CultureInfo.InvariantCulture)),
+                    EscapeCsv(item.IsActive ? "Active" : "Inactive")));
+            }
+
+            File.WriteAllText(outputPath, csv.ToString(), Encoding.UTF8);
+            return Result<string>.Success(outputPath);
+        }
+
+        private static string EscapeCsv(string value)
+        {
+            var normalized = value.Replace("\"", "\"\"");
+            return $"\"{normalized}\"";
         }
     }
 }

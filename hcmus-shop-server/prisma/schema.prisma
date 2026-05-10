@@ -148,6 +148,7 @@ model Promotion {
   code            String    @unique
   discountPercent Decimal?
   discountAmount  Decimal?
+  minimumCustomerRank String? @db.VarChar(20)
   startDate       DateTime
   endDate         DateTime
   isActive        Boolean   @default(true)

@@ -12,5 +12,6 @@ namespace hcmus_shop.Contracts.Services
         Task<Result<ProductDto>> CreateAsync(CreateProductInput input);
         Task<Result<ProductDto>> UpdateAsync(int productId, UpdateProductInput input);
         Task<Result<bool>> DeleteAsync(int productId);
+        Task<Result<string>> ExportCsvAsync(ProductFilterDto filter, string outputPath);
     }
 }

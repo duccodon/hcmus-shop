@@ -44,8 +44,12 @@ export function requireAuth(context: Context): JwtPayload {
 
 export function requireRole(context: Context, role: string): JwtPayload {
   const user = requireAuth(context);
-  if (user.role !== role) {
+  if (user.role.localeCompare(role, undefined, { sensitivity: "accent" }) !== 0) {
     throw new Error(`Role '${role}' required`);
   }
   return user;
+}
+
+export function requireAdmin(context: Context): JwtPayload {
+  return requireRole(context, "Admin");
 }

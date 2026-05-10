@@ -16,9 +16,10 @@ namespace hcmus_shop.ViewModels.Products
     public class ProductsViewModel : ObservableObject
     {
         private readonly IProductService _productService;
+        private readonly IProductImportService _productImportService;
         private readonly IBrandService _brandService;
         private readonly ICategoryService _categoryService;
-        private readonly IGraphQLClientService _graphQLClientService;
+        private readonly IConfigService _configService;
 
         private CancellationTokenSource? _searchDebounceCts;
         private string _searchQuery = string.Empty;
@@ -40,17 +41,20 @@ namespace hcmus_shop.ViewModels.Products
         private string _minPrice = string.Empty;
         private string _maxPrice = string.Empty;
         private bool _inStockOnly;
+        private string _statusMessage = string.Empty;
 
         public ProductsViewModel(
             IProductService productService,
+            IProductImportService productImportService,
             IBrandService brandService,
             ICategoryService categoryService,
-            IGraphQLClientService graphQLClientService)
+            IConfigService configService)
         {
             _productService = productService;
+            _productImportService = productImportService;
             _brandService = brandService;
             _categoryService = categoryService;
-            _graphQLClientService = graphQLClientService;
+            _configService = configService;
 
             AddProductCommand = new RelayCommand(AddProduct);
             EditProductCommand = new RelayCommand<int>(EditProduct);
@@ -61,6 +65,8 @@ namespace hcmus_shop.ViewModels.Products
             ClearFiltersCommand = new AsyncRelayCommand(ClearFiltersAsync, () => !IsLoading);
             InitializeCommand = new AsyncRelayCommand(InitializeAsync, () => !IsInitialized && !IsLoading);
             ApplyAdvancedFiltersCommand = new AsyncRelayCommand(ApplyAdvancedFiltersAsync, () => !IsLoading);
+            ImportProductsCommand = new AsyncRelayCommand(ImportProductsAsync, () => !IsLoading);
+            ExportProductsCommand = new AsyncRelayCommand(ExportProductsAsync, () => !IsLoading);
             AddSortCriterionCommand = new RelayCommand(AddSortCriterion);
             RemoveSortCriterionCommand = new RelayCommand<ProductSortCriterionViewModel>(RemoveSortCriterion);
             MoveSortCriterionUpCommand = new RelayCommand<ProductSortCriterionViewModel>(MoveSortCriterionUp);
@@ -99,6 +105,8 @@ namespace hcmus_shop.ViewModels.Products
         public IAsyncRelayCommand ClearFiltersCommand { get; }
         public IAsyncRelayCommand InitializeCommand { get; }
         public IAsyncRelayCommand ApplyAdvancedFiltersCommand { get; }
+        public IAsyncRelayCommand ImportProductsCommand { get; }
+        public IAsyncRelayCommand ExportProductsCommand { get; }
         public IRelayCommand AddSortCriterionCommand { get; }
         public IRelayCommand<ProductSortCriterionViewModel> RemoveSortCriterionCommand { get; }
         public IRelayCommand<ProductSortCriterionViewModel> MoveSortCriterionUpCommand { get; }
@@ -110,6 +118,8 @@ namespace hcmus_shop.ViewModels.Products
         public event Action<int>? NavigateToEditProductRequested;
         public Func<int, Task<bool>>? ConfirmBulkDeleteAsync { get; set; }
         public Func<int, Task<bool>>? ConfirmRowDeleteAsync { get; set; }
+        public Func<Task<string?>>? RequestImportFilePathAsync { get; set; }
+        public Func<Task<string?>>? RequestExportFilePathAsync { get; set; }
 
         public string SearchQuery
         {
@@ -159,6 +169,8 @@ namespace hcmus_shop.ViewModels.Products
                     InitializeCommand.NotifyCanExecuteChanged();
                     ClearFiltersCommand.NotifyCanExecuteChanged();
                     ApplyAdvancedFiltersCommand.NotifyCanExecuteChanged();
+                    ImportProductsCommand.NotifyCanExecuteChanged();
+                    ExportProductsCommand.NotifyCanExecuteChanged();
                     ApplySortCommand.NotifyCanExecuteChanged();
                     ResetSortCommand.NotifyCanExecuteChanged();
                     OnPropertyChanged(nameof(IsBusy));
@@ -184,6 +196,20 @@ namespace hcmus_shop.ViewModels.Products
 
         public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
         public bool IsEmpty => !IsLoading && !HasError && PagedProducts.Count == 0;
+
+        public string StatusMessage
+        {
+            get => _statusMessage;
+            private set
+            {
+                if (SetProperty(ref _statusMessage, value))
+                {
+                    OnPropertyChanged(nameof(HasStatusMessage));
+                }
+            }
+        }
+
+        public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
 
         public string SortCriteriaSummary =>
             SortCriteria.Count == 0
@@ -286,6 +312,7 @@ namespace hcmus_shop.ViewModels.Products
 
         public bool HasSelection => PagedProducts.Any(product => product.IsSelected);
         public string SelectionActionText => $"{PagedProducts.Count(product => product.IsSelected)} selected";
+        public string BulkStatusActionLabel => "Toggle Active";
 
         public string ResultText
         {
@@ -352,6 +379,7 @@ namespace hcmus_shop.ViewModels.Products
 
         private async Task ClearFiltersAsync()
         {
+            StatusMessage = string.Empty;
             _suppressFilterReload = true;
             SelectedCategoryId = null;
             SelectedBrandId = null;
@@ -382,8 +410,109 @@ namespace hcmus_shop.ViewModels.Products
             }
 
             ErrorMessage = string.Empty;
+            StatusMessage = string.Empty;
             _currentPage = 1;
             await LoadProductsAsync();
+        }
+
+        private async Task ImportProductsAsync()
+        {
+            if (RequestImportFilePathAsync is null)
+            {
+                ErrorMessage = "Import picker is not available.";
+                return;
+            }
+
+            var filePath = await RequestImportFilePathAsync();
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+            IsLoading = true;
+            ErrorMessage = string.Empty;
+            StatusMessage = "Importing products from Excel...";
+
+            try
+            {
+                var result = await _productImportService.ImportAsync(filePath);
+                if (!result.IsSuccess || result.Value is null)
+                {
+                    StatusMessage = string.Empty;
+                    ErrorMessage = result.Error ?? "Failed to import products.";
+                    return;
+                }
+
+                StatusMessage = $"Imported {result.Value.ImportedCount} products. Failed: {result.Value.FailedCount}.";
+                if (result.Value.Messages.Count > 0 && result.Value.FailedCount > 0)
+                {
+                    ErrorMessage = string.Join(Environment.NewLine, result.Value.Messages.Take(5));
+                }
+
+                await LoadFilterOptionsAsync();
+                await LoadProductsAsync(clearError: false);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private async Task ExportProductsAsync()
+        {
+            if (RequestExportFilePathAsync is null)
+            {
+                ErrorMessage = "Export picker is not available.";
+                return;
+            }
+
+            if (!TryGetPriceRange(out var minPrice, out var maxPrice, out var validationError))
+            {
+                ErrorMessage = validationError;
+                return;
+            }
+
+            var outputPath = await RequestExportFilePathAsync();
+            if (string.IsNullOrWhiteSpace(outputPath))
+            {
+                return;
+            }
+
+            IsLoading = true;
+            ErrorMessage = string.Empty;
+            StatusMessage = "Exporting products to CSV...";
+
+            try
+            {
+                var result = await _productService.ExportCsvAsync(new ProductFilterDto
+                {
+                    Search = string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery.Trim(),
+                    Name = string.IsNullOrWhiteSpace(AdvancedName) ? null : AdvancedName.Trim(),
+                    Sku = string.IsNullOrWhiteSpace(AdvancedSku) ? null : AdvancedSku.Trim(),
+                    CategoryId = SelectedCategoryId,
+                    BrandId = SelectedBrandId,
+                    CategoryIds = GetSelectedAdvancedCategoryIds(),
+                    BrandIds = GetSelectedAdvancedBrandIds(),
+                    Sorts = GetSortCriteria(),
+                    MinPrice = minPrice,
+                    MaxPrice = maxPrice,
+                    InStockOnly = InStockOnly ? true : null,
+                    IncludeInactive = true
+                }, outputPath);
+
+                if (!result.IsSuccess)
+                {
+                    StatusMessage = string.Empty;
+                    ErrorMessage = result.Error ?? "Failed to export products.";
+                    return;
+                }
+
+                StatusMessage = $"Exported CSV to {result.Value}.";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private void AddSortCriterion()
@@ -638,6 +767,10 @@ namespace hcmus_shop.ViewModels.Products
             {
                 ErrorMessage = string.Empty;
             }
+            if (clearError)
+            {
+                StatusMessage = string.Empty;
+            }
 
             try
             {
@@ -667,6 +800,7 @@ namespace hcmus_shop.ViewModels.Products
                     MinPrice = minPrice,
                     MaxPrice = maxPrice,
                     InStockOnly = InStockOnly ? true : null,
+                    IncludeInactive = true,
                     Page = _currentPage,
                     PageSize = SelectedPageSize
                 });
@@ -900,7 +1034,7 @@ namespace hcmus_shop.ViewModels.Products
                 return absoluteUri;
             }
 
-            if (!Uri.TryCreate(_graphQLClientService.ServerUrl, UriKind.Absolute, out var graphQlUri))
+            if (!Uri.TryCreate(_configService.GetServerUrl(), UriKind.Absolute, out var graphQlUri))
             {
                 return null;
             }

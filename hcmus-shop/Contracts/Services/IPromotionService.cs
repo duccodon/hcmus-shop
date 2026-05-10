@@ -12,6 +12,6 @@ namespace hcmus_shop.Contracts.Services
         Task<Result<PromotionDto>> CreateAsync(CreatePromotionInput input);
         Task<Result<PromotionDto>> UpdateAsync(int promotionId, UpdatePromotionInput input);
         Task<Result<bool>> DeleteAsync(int promotionId);
-        Task<Result<PromotionValidationDto>> ValidateAsync(string code);
+        Task<Result<PromotionValidationDto>> ValidateAsync(string code, string? customerRank = null);
     }
 }

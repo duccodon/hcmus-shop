@@ -11,10 +11,14 @@ type PromotionInputPayload = {
   code?: string;
   discountPercent?: number | null;
   discountAmount?: number | null;
+  minimumCustomerRank?: string | null;
   startDate?: string;
   endDate?: string;
   isActive?: boolean;
 };
+
+const CUSTOMER_RANKS = ["Bronze", "Silver", "Gold", "Diamond"] as const;
+type CustomerRank = (typeof CUSTOMER_RANKS)[number];
 
 export class PromotionService {
   findAll(filter: PromotionFilterDto) {
@@ -91,9 +95,12 @@ export class PromotionService {
     }
   }
 
-  async validatePromotion(code: string): Promise<PromotionValidationResultDto> {
+  async validatePromotion(
+    code: string,
+    customerRank?: string | null
+  ): Promise<PromotionValidationResultDto> {
     try {
-      const promotion = await this.getValidPromotionByCode(code);
+      const promotion = await this.getValidPromotionByCode(code, new Date(), customerRank);
       if (!promotion) {
         return {
           isValid: false,
@@ -117,7 +124,11 @@ export class PromotionService {
     }
   }
 
-  async getValidPromotionByCode(code: string, now = new Date()) {
+  async getValidPromotionByCode(
+    code: string,
+    now = new Date(),
+    customerRank?: string | null
+  ) {
     const normalizedCode = code.trim();
     if (!normalizedCode) {
       throw new Error("Promotion code is required.");
@@ -137,6 +148,10 @@ export class PromotionService {
     }
 
     if (now > promotion.endDate) {
+      return null;
+    }
+
+    if (!this.isPromotionAccessibleToRank(promotion.minimumCustomerRank, customerRank)) {
       return null;
     }
 
@@ -176,7 +191,19 @@ export class PromotionService {
     dto: CreatePromotionDto
   ): Promise<Prisma.PromotionCreateInput> {
     const normalized = await this.normalizeAndValidateInput(dto);
-    return normalized;
+    return {
+      code: normalized.code,
+      startDate: normalized.startDate,
+      endDate: normalized.endDate,
+      isActive: normalized.isActive,
+      ...(normalized.discountPercent != null
+        ? { discountPercent: normalized.discountPercent }
+        : {}),
+      ...(normalized.discountAmount != null
+        ? { discountAmount: normalized.discountAmount }
+        : {}),
+      minimumCustomerRank: normalized.minimumCustomerRank,
+    } as Prisma.PromotionCreateInput;
   }
 
   private async buildUpdateInput(
@@ -184,7 +211,15 @@ export class PromotionService {
     existing: Promotion
   ): Promise<Prisma.PromotionUpdateInput> {
     const normalized = await this.normalizeAndValidateInput(dto, existing);
-    return normalized;
+    return {
+      code: normalized.code,
+      startDate: normalized.startDate,
+      endDate: normalized.endDate,
+      isActive: normalized.isActive,
+      discountPercent: normalized.discountPercent,
+      discountAmount: normalized.discountAmount,
+      minimumCustomerRank: normalized.minimumCustomerRank,
+    } as Prisma.PromotionUpdateInput;
   }
 
   private async normalizeAndValidateInput(
@@ -243,24 +278,17 @@ export class PromotionService {
       resolvedAmount ?? null
     );
 
-    const baseData = {
+    return {
       code,
       discountPercent: normalizedDiscount.discountPercent,
       discountAmount: normalizedDiscount.discountAmount,
+      minimumCustomerRank: this.normalizeCustomerRank(
+        dto.minimumCustomerRank ?? existing?.minimumCustomerRank ?? null
+      ),
       startDate,
       endDate,
       isActive: dto.isActive ?? existing?.isActive ?? true,
     };
-
-    if (existing) {
-      return {
-        ...baseData,
-      } satisfies Prisma.PromotionUpdateInput;
-    }
-
-    return {
-      ...baseData,
-    } satisfies Prisma.PromotionCreateInput;
   }
 
   private normalizeDiscountValues(
@@ -305,6 +333,37 @@ export class PromotionService {
     }
 
     return parsed;
+  }
+
+  private normalizeCustomerRank(value: string | null): CustomerRank | null {
+    const trimmed = value?.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    const match = CUSTOMER_RANKS.find(
+      (rank) => rank.localeCompare(trimmed, undefined, { sensitivity: "accent" }) === 0
+    );
+
+    if (!match) {
+      throw new Error("minimumCustomerRank must be Bronze, Silver, Gold, or Diamond.");
+    }
+
+    return match;
+  }
+
+  private isPromotionAccessibleToRank(
+    requiredRank: string | null,
+    currentRank?: string | null
+  ) {
+    if (!requiredRank) {
+      return true;
+    }
+
+    const normalizedRequiredRank = this.normalizeCustomerRank(requiredRank);
+    const normalizedCurrentRank = this.normalizeCustomerRank(currentRank ?? null) ?? "Bronze";
+
+    return CUSTOMER_RANKS.indexOf(normalizedCurrentRank) >= CUSTOMER_RANKS.indexOf(normalizedRequiredRank!);
   }
 }
 

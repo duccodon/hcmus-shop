@@ -26,6 +26,7 @@ type TopSellingProduct {
 type RecentOrder {
   orderId: ID!
   customerName: String
+  productSummary: String
   finalAmount: Float!
   status: String!
   createdAt: String!

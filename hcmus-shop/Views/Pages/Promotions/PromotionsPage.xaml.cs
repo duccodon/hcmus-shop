@@ -63,6 +63,12 @@ namespace hcmus_shop.Views
                 Minimum = 0
             };
 
+            var minimumRankBox = new ComboBox
+            {
+                ItemsSource = ViewModel.RankOptions,
+                SelectedItem = state.MinimumCustomerRank
+            };
+
             var startPicker = new DatePicker
             {
                 Date = startDate
@@ -90,6 +96,8 @@ namespace hcmus_shop.Views
                     percentBox,
                     new TextBlock { Text = "Discount Amount" },
                     amountBox,
+                    new TextBlock { Text = "Eligible Customer Rank" },
+                    minimumRankBox,
                     new TextBlock { Text = "Start Date" },
                     startPicker,
                     new TextBlock { Text = "End Date" },
@@ -119,6 +127,7 @@ namespace hcmus_shop.Views
                 Code = codeBox.Text,
                 DiscountPercent = percentBox.Value > 0 ? percentBox.Value : null,
                 DiscountAmount = amountBox.Value > 0 ? amountBox.Value : null,
+                MinimumCustomerRank = minimumRankBox.SelectedItem as string,
                 StartDate = startPicker.Date,
                 EndDate = endPicker.Date,
                 IsActive = activeSwitch.IsOn

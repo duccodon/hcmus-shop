@@ -16,7 +16,7 @@ namespace hcmus_shop.ViewModels.Products
 {
     public class AddProductViewModel : ObservableObject
     {
-        private const int MinimumImageCount = 1;
+        private const int MinimumImageCount = 3;
         private const string DraftStorageKey = "AddProductDraft";
 
         private readonly IProductService _productService;
@@ -892,6 +892,7 @@ namespace hcmus_shop.ViewModels.Products
         public async Task DiscardDraftAsync()
         {
             await ClearDraftAsync(resetRestoredState: true);
+            await ResetFormAsync();
             DraftEventMessage = "Draft discarded.";
         }
 
@@ -907,6 +908,47 @@ namespace hcmus_shop.ViewModels.Products
             }
 
             return Task.CompletedTask;
+        }
+
+        private async Task ResetFormAsync()
+        {
+            _isRestoringDraft = true;
+            try
+            {
+                SaveErrorMessage = string.Empty;
+                SaveStatusMessage = string.Empty;
+                CategoryErrorMessage = string.Empty;
+                NewCategoryName = string.Empty;
+                NewCategoryDescription = string.Empty;
+
+                Sku = string.Empty;
+                ProductName = string.Empty;
+                ProductDescription = string.Empty;
+                Specifications = string.Empty;
+                ImportPriceValue = 0;
+                SellingPriceValue = 0;
+                StockQuantityValue = 0;
+                WarrantyMonthsValue = 12;
+
+                PreviewImages.Clear();
+                MainPreview = new ImagePreview();
+
+                foreach (var option in CategoryOptions)
+                {
+                    option.IsSelected = false;
+                }
+
+                _suppressSeriesReload = true;
+                SelectedBrandId = BrandOptions.FirstOrDefault()?.Id;
+                _suppressSeriesReload = false;
+                await LoadSeriesOptionsAsync();
+                SelectedSeriesId = null;
+            }
+            finally
+            {
+                _isRestoringDraft = false;
+                _isDraftDirty = false;
+            }
         }
     }
 

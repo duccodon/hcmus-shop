@@ -125,7 +125,7 @@ namespace hcmus_shop.ViewModels
                 {
                     No = $"#{ShortId(order.OrderId)}",
                     Customer = order.CustomerName ?? "(walk-in)",
-                    Product = string.Empty,
+                    Product = string.IsNullOrWhiteSpace(order.ProductSummary) ? "No items" : order.ProductSummary,
                     Date = FormatDate(order.CreatedAt),
                     Status = order.Status,
                     Price = FormatCurrency(order.FinalAmount),
@@ -211,7 +211,10 @@ namespace hcmus_shop.ViewModels
 
         private static string DayLabel(string iso)
         {
-            if (iso.Length >= 10) return iso.Substring(8, 2);
+            if (System.DateTime.TryParse(iso, out var parsed))
+            {
+                return parsed.ToString("dd/MM");
+            }
             return iso;
         }
 

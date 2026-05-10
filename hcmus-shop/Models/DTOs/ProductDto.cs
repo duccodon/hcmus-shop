@@ -9,16 +9,18 @@ namespace hcmus_shop.Models.DTOs
         public string Name { get; set; } = string.Empty;
         public int BrandId { get; set; }
         public int? SeriesId { get; set; }
-        public double ImportPrice { get; set; }
+        public double? ImportPrice { get; set; }
         public double SellingPrice { get; set; }
         public int StockQuantity { get; set; }
         public string? Description { get; set; }
+        public object? Specifications { get; set; }
         public int WarrantyMonths { get; set; }
         public bool IsActive { get; set; }
         public BrandDto? Brand { get; set; }
         public SeriesDto? Series { get; set; }
         public List<CategoryDto> Categories { get; set; } = new();
         public List<ProductImageDto> Images { get; set; } = new();
+        public List<ProductInstanceDto> Instances { get; set; } = new();
     }
 
     public class ProductImageDto

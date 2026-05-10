@@ -13,6 +13,7 @@ using hcmus_shop.Services.Brands;
 using hcmus_shop.Services.Categories;
 using hcmus_shop.Services.Series;
 using hcmus_shop.Services.Products;
+using hcmus_shop.Services.Products.Dto;
 using hcmus_shop.Services.Config;
 using hcmus_shop.Services.Dashboard;
 using hcmus_shop.Services.Settings;
@@ -21,12 +22,20 @@ using hcmus_shop.Services.Onboarding;
 using hcmus_shop.Services.Backup;
 using hcmus_shop.Services.Health;
 using hcmus_shop.Services.Promotions;
+using hcmus_shop.Services.Customers;
+using hcmus_shop.Services.Orders;
+using hcmus_shop.Services.Reports;
+using hcmus_shop.Services.Invoices;
 using hcmus_shop.Services.Uploads;
 using hcmus_shop.ViewModels;
 using hcmus_shop.ViewModels.Auth;
+using hcmus_shop.ViewModels.Customers;
+using hcmus_shop.ViewModels.Orders;
 using hcmus_shop.ViewModels.Products;
+using hcmus_shop.ViewModels.Reports;
 using hcmus_shop.ViewModels.Settings;
 using hcmus_shop.ViewModels.Promotions;
+using hcmus_shop.ViewModels.Store;
 using hcmus_shop.Views;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -79,6 +88,7 @@ namespace hcmus_shop
             services.AddSingleton<ICategoryService, CategoryService>();
             services.AddSingleton<ISeriesService, SeriesService>();
             services.AddSingleton<IProductService, ProductService>();
+            services.AddSingleton<IProductImportService, ProductImportService>();
             services.AddSingleton<IDashboardService, DashboardService>();
             services.AddSingleton<ISettingsService, SettingsService>();
             services.AddSingleton<ILicenseService, LicenseService>();
@@ -86,6 +96,10 @@ namespace hcmus_shop
             services.AddSingleton<IBackupService, BackupService>();
             services.AddSingleton<IHealthService, HealthService>();
             services.AddSingleton<IPromotionService, PromotionService>();
+            services.AddSingleton<ICustomerService, CustomerService>();
+            services.AddSingleton<IOrderService, OrderService>();
+            services.AddSingleton<IReportService, ReportService>();
+            services.AddSingleton<IInvoiceService, InvoiceService>();
             services.AddSingleton<IFileUploadService, FileUploadService>();
 
             // ViewModels
@@ -98,6 +112,11 @@ namespace hcmus_shop
             services.AddTransient<AddProductViewModel>();
             services.AddTransient<EditProductViewModel>();
             services.AddTransient<PromotionsViewModel>();
+            services.AddTransient<CustomersViewModel>();
+            services.AddTransient<CustomerDetailViewModel>();
+            services.AddTransient<OrdersViewModel>();
+            services.AddTransient<ReportsViewModel>();
+            services.AddTransient<StoreViewModel>();
 
             Ioc.Default.ConfigureServices(services.BuildServiceProvider());
         }

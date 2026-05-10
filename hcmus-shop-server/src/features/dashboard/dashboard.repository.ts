@@ -119,11 +119,30 @@ export const dashboardRepository = {
         status: true,
         createdAt: true,
         customer: { select: { name: true } },
+        orderItems: {
+          select: {
+            instance: {
+              select: {
+                product: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
     return orders.map((o) => ({
       orderId: o.orderId,
       customerName: o.customer?.name ?? null,
+      productSummary:
+        o.orderItems
+          .map((item) => item.instance.product.name)
+          .filter((name, index, values) => values.indexOf(name) === index)
+          .slice(0, 2)
+          .join(", ") || null,
       finalAmount: Number(o.finalAmount),
       status: o.status,
       createdAt: o.createdAt.toISOString(),

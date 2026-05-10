@@ -14,6 +14,7 @@ namespace hcmus_shop.GraphQL.Operations
                 $minPrice: Float
                 $maxPrice: Float
                 $inStockOnly: Boolean
+                $includeInactive: Boolean
                 $sorts: [ProductSortInput!]
                 $sortBy: String
                 $sortOrder: String
@@ -31,6 +32,7 @@ namespace hcmus_shop.GraphQL.Operations
                     minPrice: $minPrice
                     maxPrice: $maxPrice
                     inStockOnly: $inStockOnly
+                    includeInactive: $includeInactive
                     sorts: $sorts
                     sortBy: $sortBy
                     sortOrder: $sortOrder
@@ -42,7 +44,6 @@ namespace hcmus_shop.GraphQL.Operations
                         sku
                         name
                         sellingPrice
-                        importPrice
                         stockQuantity
                         isActive
                         brand { brandId name }
@@ -62,6 +63,7 @@ namespace hcmus_shop.GraphQL.Operations
                     sku
                     name
                     description
+                    specifications
                     importPrice
                     sellingPrice
                     stockQuantity
@@ -71,6 +73,7 @@ namespace hcmus_shop.GraphQL.Operations
                     series { seriesId name }
                     categories { categoryId name }
                     images { imageId imageUrl displayOrder }
+                    instances { instanceId serialNumber status }
                 }
             }";
 

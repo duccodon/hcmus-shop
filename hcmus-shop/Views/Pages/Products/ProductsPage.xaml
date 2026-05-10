@@ -108,8 +108,8 @@
                                 Text="Products List"
                                 Style="{StaticResource PageTitleStyle}" />
                             <StackPanel x:Name="HeaderActions" Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                <Button Content="Import" Style="{StaticResource PrimaryButtonStyle}" />
-                                <Button Content="Export" Style="{StaticResource PrimaryButtonStyle}" />
+                                <Button Content="Import" Style="{StaticResource PrimaryButtonStyle}" Command="{x:Bind ViewModel.ImportProductsCommand}" />
+                                <Button Content="Export" Style="{StaticResource PrimaryButtonStyle}" Command="{x:Bind ViewModel.ExportProductsCommand}" />
                                 <Button
                                     Content="+ Add Product"
                                     Style="{StaticResource PrimaryButtonStyle}"
@@ -119,6 +119,14 @@
 
                         <!-- Row 1: Divider -->
                         <Border Grid.Row="1" Height="1" Background="{StaticResource DividerBrush}" />
+
+                        <TextBlock
+                            Grid.Row="1"
+                            Margin="0,8,0,0"
+                            HorizontalAlignment="Right"
+                            Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                            Style="{StaticResource BodySecondaryTextStyle}"
+                            Visibility="{x:Bind ViewModel.HasStatusMessage, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                         <!-- Row 2: Search + Filters -->
                         <Grid Grid.Row="2" x:Name="FilterGrid">
@@ -439,7 +447,7 @@
                                                     FontFamily="Segoe Fluent Icons"
                                                     Glyph="&#xE70F;"
                                                     FontSize="13" />
-                                                <TextBlock Text="Update Status" Style="{StaticResource BodySecondaryTextStyle}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{x:Bind ViewModel.BulkStatusActionLabel, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" VerticalAlignment="Center" />
                                             </StackPanel>
                                         </Button>
                                         <Button
@@ -581,7 +589,7 @@
                                                 </Border>
 
                                                 <Border Grid.Column="5" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
-                                                    <Border Padding="10,5" CornerRadius="99" Background="{x:Bind StatusTone, Mode=OneWay, Converter={StaticResource StatusToneBackgroundConverter}}" HorizontalAlignment="Left">
+                                                    <Border Padding="12,6" CornerRadius="10" Background="{x:Bind StatusTone, Mode=OneWay, Converter={StaticResource StatusToneBackgroundConverter}}" HorizontalAlignment="Left">
                                                         <TextBlock VerticalAlignment="Center" Text="{x:Bind StatusText, Mode=OneWay}" Style="{StaticResource StatusBadgeTextStyle}" Foreground="{x:Bind StatusTone, Mode=OneWay, Converter={StaticResource StatusToneForegroundConverter}}" />
                                                     </Border>
                                                 </Border>

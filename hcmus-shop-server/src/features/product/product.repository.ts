@@ -8,7 +8,11 @@ export class ProductRepository {
     const pageSize = filter.pageSize ?? 10;
     const skip = (page - 1) * pageSize;
 
-    const where: Prisma.ProductWhereInput = { isActive: true };
+    const where: Prisma.ProductWhereInput = {};
+
+    if (!filter.includeInactive) {
+      where.isActive = true;
+    }
 
     if (filter.search) {
       where.OR = [
@@ -123,6 +127,42 @@ export class ProductRepository {
     return prisma.productImage.findMany({
       where: { productId },
       orderBy: { displayOrder: "asc" },
+    });
+  }
+
+  findInstances(productId: number) {
+    return prisma.productInstance.findMany({
+      where: { productId },
+      orderBy: { serialNumber: "asc" },
+      include: {
+        product: true,
+      },
+    });
+  }
+
+  createInstances(productId: number, serialNumbers: string[]) {
+    if (serialNumbers.length == 0) {
+      return Promise.resolve();
+    }
+
+    return prisma.productInstance.createMany({
+      data: serialNumbers.map((serialNumber) => ({
+        productId,
+        serialNumber,
+        status: "Available",
+      })),
+    });
+  }
+
+  deleteInstances(instanceIds: number[]) {
+    if (instanceIds.length == 0) {
+      return Promise.resolve();
+    }
+
+    return prisma.productInstance.deleteMany({
+      where: {
+        instanceId: { in: instanceIds },
+      },
     });
   }
 

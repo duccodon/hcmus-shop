@@ -1,0 +1,92 @@
+type ProductInstance {
+  instanceId: Int!
+  serialNumber: String!
+  status: String!
+  createdAt: String!
+  updatedAt: String
+  product: Product!
+}
+
+extend type Product {
+  instances: [ProductInstance!]!
+}
+
+type ProductInstancePage {
+  items: [ProductInstance!]!
+  totalCount: Int!
+  page: Int!
+  pageSize: Int!
+}
+
+type Order {
+  orderId: ID!
+  customer: Customer
+  user: User!
+  orderItems: [OrderItem!]!
+  promotion: Promotion
+  subtotal: Float!
+  discountAmount: Float!
+  finalAmount: Float!
+  status: String!
+  notes: String
+  createdAt: String!
+  updatedAt: String
+}
+
+type OrderItem {
+  orderItemId: Int!
+  instance: ProductInstance!
+  unitSalePrice: Float!
+  quantity: Int!
+}
+
+type OrderPage {
+  items: [Order!]!
+  totalCount: Int!
+  page: Int!
+  pageSize: Int!
+}
+
+input OrderItemInput {
+  instanceId: Int!
+  quantity: Int!
+}
+
+input CreateOrderInput {
+  customerId: ID!
+  promotionCode: String
+  items: [OrderItemInput!]!
+  notes: String
+}
+
+input UpdateOrderInput {
+  customerId: ID
+  promotionCode: String
+  items: [OrderItemInput!]
+  notes: String
+}
+
+extend type Query {
+  orders(
+    status: String
+    fromDate: String
+    toDate: String
+    search: String
+    page: Int
+    pageSize: Int
+  ): OrderPage!
+  order(orderId: ID!): Order
+  availableProductInstances(
+    search: String
+    productId: Int
+    page: Int
+    pageSize: Int
+  ): ProductInstancePage!
+}
+
+extend type Mutation {
+  createOrder(input: CreateOrderInput!): Order!
+  updateOrder(orderId: ID!, input: UpdateOrderInput!): Order!
+  updateOrderStatus(orderId: ID!, status: String!): Order!
+  deleteOrder(orderId: ID!): Boolean!
+}

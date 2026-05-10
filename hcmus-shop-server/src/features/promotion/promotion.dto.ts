@@ -8,6 +8,7 @@ export interface CreatePromotionDto {
   code: string;
   discountPercent?: number | null;
   discountAmount?: number | null;
+  minimumCustomerRank?: string | null;
   startDate: string;
   endDate: string;
   isActive?: boolean;
@@ -17,6 +18,7 @@ export interface UpdatePromotionDto {
   code?: string;
   discountPercent?: number | null;
   discountAmount?: number | null;
+  minimumCustomerRank?: string | null;
   startDate?: string;
   endDate?: string;
   isActive?: boolean;

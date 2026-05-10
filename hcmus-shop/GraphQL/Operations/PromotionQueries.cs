@@ -10,6 +10,7 @@ namespace hcmus_shop.GraphQL.Operations
                         code
                         discountPercent
                         discountAmount
+                        minimumCustomerRank
                         startDate
                         endDate
                         isActive
@@ -29,6 +30,7 @@ namespace hcmus_shop.GraphQL.Operations
                     code
                     discountPercent
                     discountAmount
+                    minimumCustomerRank
                     startDate
                     endDate
                     isActive
@@ -38,8 +40,8 @@ namespace hcmus_shop.GraphQL.Operations
             }";
 
         public const string ValidatePromotion = @"
-            query ValidatePromotion($code: String!) {
-                validatePromotion(code: $code) {
+            query ValidatePromotion($code: String!, $customerRank: String) {
+                validatePromotion(code: $code, customerRank: $customerRank) {
                     isValid
                     message
                     promotion {
@@ -47,6 +49,7 @@ namespace hcmus_shop.GraphQL.Operations
                         code
                         discountPercent
                         discountAmount
+                        minimumCustomerRank
                         startDate
                         endDate
                         isActive
@@ -63,6 +66,7 @@ namespace hcmus_shop.GraphQL.Operations
                     code
                     discountPercent
                     discountAmount
+                    minimumCustomerRank
                     startDate
                     endDate
                     isActive
@@ -78,6 +82,7 @@ namespace hcmus_shop.GraphQL.Operations
                     code
                     discountPercent
                     discountAmount
+                    minimumCustomerRank
                     startDate
                     endDate
                     isActive

@@ -11,7 +11,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "seed": "ts-node prisma/seed.ts",
-    "test": "jest"
+    "test": "node --localstorage-file=./.jest-localstorage.sqlite ./node_modules/jest/bin/jest.js"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

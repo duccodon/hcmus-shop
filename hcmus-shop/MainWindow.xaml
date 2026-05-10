@@ -15,15 +15,19 @@
     </Window.SystemBackdrop>
 
     <Grid>
-        <NavigationView x:Name="AppNavigationView" SelectionChanged="AppNavigationView_SelectionChanged">
+            <NavigationView x:Name="AppNavigationView" SelectionChanged="AppNavigationView_SelectionChanged">
             <NavigationView.MenuItems>
                 <NavigationViewItem x:Name="DashboardItem" Content="Dashboard" Icon="Home" Tag="Dashboard" />
-                <NavigationViewItem x:Name="SalesItem" Content="Sales" Icon="Shop" Tag="Sales" />
+                <NavigationViewItem x:Name="StoreItem" Content="Store" Icon="Shop" Tag="Store" />
+                <NavigationViewItem x:Name="OrdersItem" Content="Orders" Icon="Shop" Tag="Orders" />
                 <NavigationViewItem x:Name="ProductsItem" Content="Products" Icon="AllApps" Tag="Products" />
                 <NavigationViewItem x:Name="PromotionsItem" Content="Promotions" Icon="Tag" Tag="Promotions" />
-                <NavigationViewItem x:Name="StoreItem" Content="Store" Icon="Shop" Tag="Store" />
-                <NavigationViewItem x:Name="MessagesItem" Content="Messages" Icon="Mail" Tag="Messages" />
-                <NavigationViewItem x:Name="InventoryItem" Content="Inventory" Icon="AllApps" Tag="Inventory" />
+                <NavigationViewItem x:Name="CustomersItem" Content="Customers" Icon="Contact" Tag="Customers" />
+                <NavigationViewItem x:Name="ReportsItem" Content="Reports" Tag="Reports">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="View" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem x:Name="AdminItem" Content="Admin" Icon="Admin" Tag="Admin" />
             </NavigationView.MenuItems>
 
@@ -58,8 +62,8 @@
                      CloseButtonClick="OnTipSkip" />
 
         <TeachingTip x:Name="ProductsTip"
-                     Title="Products"
-                     Subtitle="Browse, search, add and manage your laptops here."
+                     Title="Catalog"
+                     Subtitle="Browse products, check laptop details, and access catalog tools here."
                      ActionButtonContent="Next"
                      ActionButtonClick="OnTipNext"
                      CloseButtonContent="Skip"

@@ -14,6 +14,7 @@ export interface ProductFilterDto {
   minPrice?: number;
   maxPrice?: number;
   inStockOnly?: boolean;
+  includeInactive?: boolean;
   sorts?: ProductSortDto[];
   sortBy?: string;
   sortOrder?: string;

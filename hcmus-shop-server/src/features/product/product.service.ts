@@ -80,6 +80,12 @@ export class ProductService {
           : undefined,
       });
 
+      await this.syncAvailableInstances(
+        product.productId,
+        product.sku,
+        Math.max(0, dto.stockQuantity ?? 0)
+      );
+
       console.log("[ProductService] createProduct success", {
         productId: product.productId,
         sku: product.sku,
@@ -127,6 +133,14 @@ export class ProductService {
             : undefined,
       });
 
+      if (dto.stockQuantity !== undefined) {
+        await this.syncAvailableInstances(
+          product.productId,
+          product.sku,
+          Math.max(0, dto.stockQuantity)
+        );
+      }
+
       console.log("[ProductService] updateProduct success", {
         productId: product.productId,
         sku: product.sku,
@@ -170,6 +184,58 @@ export class ProductService {
   findImages(productId: number) {
     return productRepository.findImages(productId);
   }
+
+  findInstances(productId: number) {
+    return productRepository.findInstances(productId);
+  }
+
+  private async syncAvailableInstances(
+    productId: number,
+    sku: string,
+    desiredStock: number
+  ) {
+    const instances = await productRepository.findInstances(productId);
+    const availableInstances = instances
+      .filter((instance) => instance.status === "Available")
+      .sort((left, right) => left.serialNumber.localeCompare(right.serialNumber));
+
+    if (availableInstances.length < desiredStock) {
+      const missingCount = desiredStock - availableInstances.length;
+      const serialNumbers = buildNextSerialNumbers(sku, instances, missingCount);
+      await productRepository.createInstances(productId, serialNumbers);
+    } else if (availableInstances.length > desiredStock) {
+      const removableInstances = availableInstances
+        .slice(desiredStock)
+        .map((instance) => instance.instanceId);
+      await productRepository.deleteInstances(removableInstances);
+    }
+
+    await productRepository.update(productId, {
+      stockQuantity: desiredStock,
+    });
+  }
+}
+
+function buildNextSerialNumbers(
+  sku: string,
+  existingInstances: { serialNumber: string }[],
+  count: number
+) {
+  const prefix = `${sku}-SN-`;
+  const existingNumbers = existingInstances
+    .map((instance) => instance.serialNumber)
+    .filter((serial) => serial.startsWith(prefix))
+    .map((serial) => Number.parseInt(serial.slice(prefix.length), 10))
+    .filter((value) => Number.isFinite(value));
+
+  let nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
+  var serials: string[] = [];
+  for (let i = 0; i < count; i += 1) {
+    serials.push(`${prefix}${String(nextNumber).padStart(3, "0")}`);
+    nextNumber += 1;
+  }
+
+  return serials;
 }
 
 export const productService = new ProductService();

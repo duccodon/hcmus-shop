@@ -3,7 +3,11 @@ using hcmus_shop.ViewModels.Products;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Windows.Storage;
+using Windows.Storage.Pickers;
+using WinRT.Interop;
 
 namespace hcmus_shop.Views
 {
@@ -21,6 +25,8 @@ namespace hcmus_shop.Views
             ViewModel.NavigateToEditProductRequested += ViewModel_NavigateToEditProductRequested;
             ViewModel.ConfirmBulkDeleteAsync = ShowBulkDeleteConfirmAsync;
             ViewModel.ConfirmRowDeleteAsync = ShowRowDeleteConfirmAsync;
+            ViewModel.RequestImportFilePathAsync = RequestImportFilePathAsync;
+            ViewModel.RequestExportFilePathAsync = RequestExportFilePathAsync;
             Loaded += ProductsPage_Loaded;
             Unloaded += ProductsPage_Unloaded;
         }
@@ -41,6 +47,8 @@ namespace hcmus_shop.Views
             ViewModel.NavigateToEditProductRequested -= ViewModel_NavigateToEditProductRequested;
             ViewModel.ConfirmBulkDeleteAsync = null;
             ViewModel.ConfirmRowDeleteAsync = null;
+            ViewModel.RequestImportFilePathAsync = null;
+            ViewModel.RequestExportFilePathAsync = null;
         }
 
         private void ViewModel_NavigateToAddProductRequested(object? sender, EventArgs e)
@@ -83,6 +91,40 @@ namespace hcmus_shop.Views
 
             var result = await dialog.ShowAsync();
             return result == ContentDialogResult.Primary;
+        }
+
+        private async Task<string?> RequestImportFilePathAsync()
+        {
+            if ((Application.Current as App)?.CurrentWindow is not Window window)
+            {
+                return null;
+            }
+
+            var picker = new FileOpenPicker();
+            picker.FileTypeFilter.Add(".xlsx");
+            picker.FileTypeFilter.Add(".xlsm");
+            InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(window));
+
+            var file = await picker.PickSingleFileAsync();
+            return file?.Path;
+        }
+
+        private async Task<string?> RequestExportFilePathAsync()
+        {
+            if ((Application.Current as App)?.CurrentWindow is not Window window)
+            {
+                return null;
+            }
+
+            var picker = new FileSavePicker
+            {
+                SuggestedFileName = $"products-{DateTime.Now:yyyyMMdd-HHmmss}"
+            };
+            picker.FileTypeChoices.Add("CSV file", new List<string> { ".csv" });
+            InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(window));
+
+            StorageFile? file = await picker.PickSaveFileAsync();
+            return file?.Path;
         }
     }
 }

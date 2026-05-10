@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -14,11 +15,13 @@ namespace hcmus_shop.Services.Uploads
     public class FileUploadService : IFileUploadService
     {
         private readonly IGraphQLClientService _graphQLClientService;
+        private readonly IAuthService _authService;
         private readonly HttpClient _httpClient;
 
-        public FileUploadService(IGraphQLClientService graphQLClientService)
+        public FileUploadService(IGraphQLClientService graphQLClientService, IAuthService authService)
         {
             _graphQLClientService = graphQLClientService;
+            _authService = authService;
             _httpClient = new HttpClient();
         }
 
@@ -38,6 +41,7 @@ namespace hcmus_shop.Services.Uploads
 
             fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(GetMimeType(file.FileType));
             content.Add(fileContent, "file", file.Name);
+            ApplyAuthorizationHeader();
 
             HttpResponseMessage response;
             try
@@ -79,6 +83,14 @@ namespace hcmus_shop.Services.Uploads
             var message = $"[FileUploadService] {title}{Environment.NewLine}Endpoint: {uploadUrl}{Environment.NewLine}{details}";
             Debug.WriteLine(message);
             Console.Error.WriteLine(message);
+        }
+
+        private void ApplyAuthorizationHeader()
+        {
+            var token = _authService.Token;
+            _httpClient.DefaultRequestHeaders.Authorization = string.IsNullOrWhiteSpace(token)
+                ? null
+                : new AuthenticationHeaderValue("Bearer", token);
         }
 
         private static string BuildUploadEndpoint(string graphQLEndpoint)

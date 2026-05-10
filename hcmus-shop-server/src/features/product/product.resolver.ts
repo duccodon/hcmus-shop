@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { Context } from "../../common/context";
+import { Context, requireAdmin } from "../../common/context";
 import { productService } from "./product.service";
 import {
   ProductFilterDto,
@@ -17,6 +17,8 @@ export const productResolver = {
       productService.findCategories(parent.productId),
     images: (parent: { productId: number }) =>
       productService.findImages(parent.productId),
+    instances: (parent: { productId: number }) =>
+      productService.findInstances(parent.productId),
     /**
      * Role-based access: only Admin can see import price.
      * Sale users get null. Other roles also get null.
@@ -41,18 +43,30 @@ export const productResolver = {
   },
 
   Mutation: {
-    createProduct: (_: unknown, { input }: { input: CreateProductDto }) => {
+    createProduct: (
+      _: unknown,
+      { input }: { input: CreateProductDto },
+      context: Context
+    ) => {
+      requireAdmin(context);
       return productService.create(input);
     },
 
     updateProduct: (
       _: unknown,
-      { productId, input }: { productId: number; input: UpdateProductDto }
+      { productId, input }: { productId: number; input: UpdateProductDto },
+      context: Context
     ) => {
+      requireAdmin(context);
       return productService.update(productId, input);
     },
 
-    deleteProduct: (_: unknown, { productId }: { productId: number }) => {
+    deleteProduct: (
+      _: unknown,
+      { productId }: { productId: number },
+      context: Context
+    ) => {
+      requireAdmin(context);
       return productService.delete(productId);
     },
   },

@@ -3,6 +3,7 @@ type Promotion {
   code: String!
   discountPercent: Float
   discountAmount: Float
+  minimumCustomerRank: String
   startDate: String!
   endDate: String!
   isActive: Boolean!
@@ -27,6 +28,7 @@ input CreatePromotionInput {
   code: String!
   discountPercent: Float
   discountAmount: Float
+  minimumCustomerRank: String
   startDate: String!
   endDate: String!
   isActive: Boolean
@@ -36,6 +38,7 @@ input UpdatePromotionInput {
   code: String
   discountPercent: Float
   discountAmount: Float
+  minimumCustomerRank: String
   startDate: String
   endDate: String
   isActive: Boolean
@@ -44,7 +47,7 @@ input UpdatePromotionInput {
 extend type Query {
   promotions(search: String, page: Int, pageSize: Int): PromotionPage!
   promotion(promotionId: Int!): Promotion
-  validatePromotion(code: String!): PromotionValidationResult!
+  validatePromotion(code: String!, customerRank: String): PromotionValidationResult!
 }
 
 extend type Mutation {

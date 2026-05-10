@@ -9,6 +9,7 @@ namespace hcmus_shop.ViewModels.Promotions
             string code,
             double? discountPercent,
             double? discountAmount,
+            string? minimumCustomerRank,
             DateTime startDate,
             DateTime endDate,
             bool isActive)
@@ -17,6 +18,7 @@ namespace hcmus_shop.ViewModels.Promotions
             Code = code;
             DiscountPercent = discountPercent;
             DiscountAmount = discountAmount;
+            MinimumCustomerRank = minimumCustomerRank;
             StartDate = startDate;
             EndDate = endDate;
             IsActive = isActive;
@@ -26,6 +28,7 @@ namespace hcmus_shop.ViewModels.Promotions
         public string Code { get; }
         public double? DiscountPercent { get; }
         public double? DiscountAmount { get; }
+        public string? MinimumCustomerRank { get; }
         public DateTime StartDate { get; }
         public DateTime EndDate { get; }
         public bool IsActive { get; }
@@ -37,7 +40,10 @@ namespace hcmus_shop.ViewModels.Promotions
                     ? $"{DiscountAmount.Value:N0} VND"
                     : "N/A";
 
+        public string StartDateDisplay => StartDate.ToString("dd/MM/yyyy");
+        public string EndDateDisplay => EndDate.ToString("dd/MM/yyyy");
         public string DateRangeDisplay => $"{StartDate:dd/MM/yyyy} - {EndDate:dd/MM/yyyy}";
+        public string EligibilityDisplay => string.IsNullOrWhiteSpace(MinimumCustomerRank) ? "All ranks" : $"{MinimumCustomerRank}+";
         public string StatusText => IsActive ? "Active" : "Inactive";
     }
 }

@@ -16,6 +16,7 @@ type Product {
   series: Series
   categories: [Category!]!
   images: [ProductImage!]!
+  instances: [ProductInstance!]!
 }
 
 type ProductImage {
@@ -81,6 +82,7 @@ extend type Query {
     minPrice: Float
     maxPrice: Float
     inStockOnly: Boolean
+    includeInactive: Boolean
     sorts: [ProductSortInput!]
     sortBy: String
     sortOrder: String
