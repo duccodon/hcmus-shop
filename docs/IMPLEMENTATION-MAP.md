@@ -151,7 +151,33 @@ Client integration TBD by Dev B in `AddProductPage` flow.
 | JWT tests | `hcmus-shop-server/tests/jwt.test.ts` |
 | Role-filter tests | `hcmus-shop-server/tests/role-filter.test.ts` |
 | Auth plugin tests | `hcmus-shop-server/tests/auth-plugin.test.ts` |
+| Dev B product service tests | `hcmus-shop-server/tests/product.service.test.ts` |
+| Dev B promotion service tests | `hcmus-shop-server/tests/promotion.service.test.ts` |
 | Run | `npm test` (from `hcmus-shop-server/`) |
+
+---
+
+## Dev B Products & Promotions
+
+| Concern | File |
+|---------|------|
+| Dev B handoff/status | `docs/dev-b-status.md` |
+| Products page layout | `hcmus-shop/Views/Pages/Products/ProductsPage.xaml` |
+| Products page code-behind | `hcmus-shop/Views/Pages/Products/ProductsPage.xaml.cs` |
+| Products list/search/filter/sort/pagination ViewModel | `hcmus-shop/ViewModels/Products/ProductsViewModel.cs` |
+| Add product page | `hcmus-shop/Views/Pages/Products/AddProductPage.xaml` + `.xaml.cs` |
+| Add product ViewModel, image upload, draft autosave | `hcmus-shop/ViewModels/Products/AddProductViewModel.cs` |
+| Edit product page | `hcmus-shop/Views/Pages/Products/EditProductPage.xaml` + `.xaml.cs` |
+| Edit product ViewModel | `hcmus-shop/ViewModels/Products/EditProductViewModel.cs` |
+| Client product GraphQL service | `hcmus-shop/Services/Products/ProductService.cs` |
+| Product import service | `hcmus-shop/Services/Products/ProductImportService.cs` |
+| Product backend schema/resolvers/service/repository | `hcmus-shop-server/src/features/product/` |
+| Promotions page layout | `hcmus-shop/Views/Pages/Promotions/PromotionsPage.xaml` |
+| Promotions dialog validation | `hcmus-shop/Views/Pages/Promotions/PromotionsPage.xaml.cs` |
+| Promotions ViewModel | `hcmus-shop/ViewModels/Promotions/PromotionsViewModel.cs` |
+| Client promotion GraphQL service | `hcmus-shop/Services/Promotions/PromotionService.cs` |
+| Promotion backend schema/resolvers/service/repository | `hcmus-shop-server/src/features/promotion/` |
+| Order promotion application | `hcmus-shop-server/src/features/order/order.service.ts` |
 
 ---
 

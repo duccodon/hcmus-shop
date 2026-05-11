@@ -2,7 +2,7 @@
 
 **Last checked:** 2026-05-11
 **Owner:** Dev B / Buu
-**Scope:** Products CRUD, promotions, product advanced search, multi-sort, product draft auto-save, image upload integration.
+**Scope:** Products CRUD, promotions, product advanced search, multi-sort, product draft auto-save, image upload integration, Dev B backend tests.
 
 Use this note when a future coding agent re-reads the codebase. It records what Dev B has already implemented and what still needs attention.
 
@@ -81,6 +81,13 @@ Implemented:
   - move criteria up/down
   - choose field and direction
 - Pagination and page buttons.
+- Pagination reads `ISettingsService.PageSize`, normalizes invalid values to `10`, persists changes back to Settings, and uses the shared `5/10/15/20` options.
+- Admin-only product management controls:
+  - Add Product
+  - Edit Product
+  - Delete Product
+  - bulk status/delete
+  - Excel import
 - Add Product page:
   - file picker for images
   - uploads through `POST /uploads`
@@ -102,8 +109,10 @@ Implemented:
 Important locations:
 
 - `ProductsViewModel.cs`: list, search, filters, pagination, advanced search, multi-sort, import/export, delete.
+- `ProductsViewModel.cs`: also guards management commands with `IAuthService.HasRole("Admin")`.
 - `AddProductViewModel.cs`: add form, image upload, category creation, draft auto-save.
 - `EditProductViewModel.cs`: edit form, image upload, delete.
+- `AddProductPage.xaml.cs` and `EditProductPage.xaml.cs`: redirect non-admin users to `ForbiddenPage`.
 - `FileUploadService.cs`: builds `/uploads` endpoint from the configured GraphQL server URL.
 
 ### Promotions Backend
@@ -155,6 +164,12 @@ Implemented:
 
 - Promotions page with list/search/pagination.
 - Add/edit promotion dialog.
+- Add/edit promotion dialog validates inline and stays open for:
+  - missing code
+  - start date after end date
+  - both discount percent and amount supplied
+  - neither discount percent nor amount supplied
+  - discount percent over 100
 - Deactivate promotion confirmation.
 - Admin-only create/edit/delete controls through `IAuthService.HasRole("Admin")`.
 - Promotion rank options:
@@ -201,96 +216,69 @@ Implemented:
 
 ---
 
+## Dev B Backend Tests
+
+Files:
+
+```text
+hcmus-shop-server/tests/product.service.test.ts
+hcmus-shop-server/tests/promotion.service.test.ts
+```
+
+Implemented:
+
+- Product service tests:
+  - rejects `minPrice > maxPrice`
+  - rejects unsupported sort field
+  - rejects unsupported sort direction
+  - accepts valid multi-sort input
+- Promotion service tests:
+  - percent discount calculation
+  - fixed discount calculation
+  - discount capped at subtotal
+  - rejects both percent and amount
+  - rejects neither percent nor amount
+  - validates Bronze/Silver/Gold/Diamond rank order
+
+The tests mock repositories and do not require a live PostgreSQL database.
+
+---
+
 ## Known Gaps / Follow-Up
 
-### Backend TypeScript Currently Fails
+### Manual UI Verification Still Needed
 
-Command:
+Code review and builds/tests are green, but Dev B still needs a manual demo pass:
 
-```powershell
-cd hcmus-shop-server
-npx tsc --noEmit
-```
+- Products CRUD.
+- Product search/filter/advanced search/multi-sort.
+- Products pagination using Settings page size.
+- Product image upload and minimum 3-image validation.
+- Add Product draft restore/discard.
+- Excel import/export.
+- Admin versus Sale access on product management actions.
+- Promotions list/search/pagination.
+- Promotion add/edit/deactivate.
+- Promotion inline validation dialog.
+- Order promotion code apply flow.
 
-Observed failure:
+### Local Database Must Match Prisma Schema
+
+If the Promotions page shows this runtime error:
 
 ```text
-src/features/promotion/promotion.service.ts:
-Property 'minimumCustomerRank' does not exist on type Promotion
+The column `promotions.minimumCustomerRank` does not exist in the current database.
 ```
 
-The Prisma schema does contain:
-
-```prisma
-minimumCustomerRank String? @db.VarChar(20)
-```
-
-Likely fix:
+then code is ahead of the local database. Apply migrations or reset the local dev database according to the team workflow:
 
 ```powershell
 cd hcmus-shop-server
-npm install
 npx prisma generate
-npx tsc --noEmit
+npx prisma migrate dev
 ```
 
-Also make sure migrations are applied.
-
-### Backend Tests Are Missing For Dev B
-
-Existing tests only cover auth/JWT/role-filter. There are no product sort/filter tests and no promotion validation/discount tests yet.
-
-Suggested test coverage:
-
-- Promotion validates active date range.
-- Promotion rejects expired/inactive codes.
-- Percent discount calculation.
-- Fixed discount calculation.
-- Rank-restricted promotion rejects lower-rank customer.
-- Product multi-sort rejects unsupported fields.
-- Product price range rejects `minPrice > maxPrice`.
-
-### `npm test` Did Not Run In The Checked Workspace
-
-Observed failure:
-
-```text
-Cannot find module ... node_modules/jest/bin/jest.js
-```
-
-This means dependencies were not installed in `hcmus-shop-server/node_modules` at the time of verification.
-
-Likely fix:
-
-```powershell
-cd hcmus-shop-server
-npm install
-npm test
-```
-
-### Products Pagination Does Not Use Settings Page Size
-
-Docs say Dev B should read `ISettingsService.PageSize`.
-
-Current state:
-
-- `ProductsViewModel` hardcodes `_selectedPageSize = 10`.
-- `ProductsViewModel.PageSizeOptions` is `[10, 20, 50]`.
-- Expected project settings options are `5/10/15/20`.
-
-Future fix:
-
-- Inject `ISettingsService` into `ProductsViewModel`.
-- Initialize `_selectedPageSize` from `_settings.PageSize`.
-- Change `PageSizeOptions` to `5, 10, 15, 20`, or bind to the same options as Settings.
-
-Promotions pagination is also local/defaulted and does not read Settings.
-
-### Import Price Role-Based Visibility Needs UI Review
-
-Backend already returns `Product.importPrice = null` for non-admin users. Dev A also added `RoleVisibilityConverter`.
-
-Current Products list shows selling price only. Add/Edit product pages expose import price fields. If Sale users can access product add/edit, these fields should be hidden or access should be admin-only.
+Do not fix this by changing code unless Prisma schema and migrations are wrong.
 
 ### Product Image Upload Limitation
 
@@ -319,12 +307,14 @@ Result:
 
 ```powershell
 cd hcmus-shop-server
+npm install
+npx prisma generate
 npx tsc --noEmit
 ```
 
 Result:
 
-- Failed due to Prisma generated type missing `minimumCustomerRank`.
+- Passed.
 
 ```powershell
 cd hcmus-shop-server
@@ -333,18 +323,18 @@ npm test -- --runInBand
 
 Result:
 
-- Failed because Jest was missing from `node_modules`.
+- Passed: 5 suites, 22 tests.
 
 ---
 
 ## Quick Resume Checklist For Future Agent
 
 1. Run `git status --short --branch`.
-2. Run `cd hcmus-shop-server && npm install`.
+2. Run `cd hcmus-shop-server && npm install` if `node_modules` is missing.
 3. Run `npx prisma generate`.
 4. Run `npx tsc --noEmit`.
-5. Run `npm test`.
+5. Run `npm test -- --runInBand`.
 6. Build client with `dotnet build hcmus-shop.slnx`.
-7. Fix Products pagination to use `ISettingsService.PageSize`.
-8. Add Dev B backend tests for promotions and product filtering/sorting.
-9. Re-check Sale role access on Products/Add/Edit pages.
+7. If Promotions fails with a missing `minimumCustomerRank` column, apply the Prisma migration to the local database.
+8. Manually verify Products, Promotions, and order promotion apply flow in the WinUI app.
+9. Capture screenshots/test output for the final report or presentation.
