@@ -283,7 +283,9 @@ export class PromotionService {
       discountPercent: normalizedDiscount.discountPercent,
       discountAmount: normalizedDiscount.discountAmount,
       minimumCustomerRank: this.normalizeCustomerRank(
-        dto.minimumCustomerRank ?? existing?.minimumCustomerRank ?? null
+        dto.minimumCustomerRank !== undefined
+          ? dto.minimumCustomerRank
+          : existing?.minimumCustomerRank ?? null
       ),
       startDate,
       endDate,

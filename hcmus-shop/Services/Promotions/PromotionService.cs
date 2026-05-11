@@ -3,6 +3,7 @@ using hcmus_shop.GraphQL.Operations;
 using hcmus_shop.Models.Common;
 using hcmus_shop.Models.DTOs;
 using hcmus_shop.Services.Promotions.Dto;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace hcmus_shop.Services.Promotions
@@ -68,10 +69,25 @@ namespace hcmus_shop.Services.Promotions
 
         public async Task<Result<PromotionDto>> UpdateAsync(int promotionId, UpdatePromotionInput input)
         {
+            var updateInput = new Dictionary<string, object?>
+            {
+                ["code"] = input.Code,
+                ["discountPercent"] = input.DiscountPercent,
+                ["discountAmount"] = input.DiscountAmount,
+                ["minimumCustomerRank"] = input.MinimumCustomerRank,
+                ["startDate"] = input.StartDate,
+                ["endDate"] = input.EndDate,
+                ["isActive"] = input.IsActive,
+            };
+
             var result = await _graphQL.SafeExecuteAsync(() =>
                 _graphQL.MutateAsync<UpdatePromotionResponse>(
                     PromotionQueries.UpdatePromotion,
-                    new { promotionId, input }));
+                    new Dictionary<string, object?>
+                    {
+                        ["promotionId"] = promotionId,
+                        ["input"] = updateInput,
+                    }));
 
             if (!result.IsSuccess)
             {

@@ -40,9 +40,9 @@ namespace hcmus_shop.ViewModels.Promotions
                     ? $"{DiscountAmount.Value:N0} VND"
                     : "N/A";
 
-        public string StartDateDisplay => StartDate.ToString("dd/MM/yyyy");
-        public string EndDateDisplay => EndDate.ToString("dd/MM/yyyy");
-        public string DateRangeDisplay => $"{StartDate:dd/MM/yyyy} - {EndDate:dd/MM/yyyy}";
+        public string StartDateDisplay => StartDate.ToString("dd/MM/yyyy HH:mm");
+        public string EndDateDisplay => EndDate.ToString("dd/MM/yyyy HH:mm");
+        public string DateRangeDisplay => $"{StartDate:dd/MM/yyyy HH:mm} - {EndDate:dd/MM/yyyy HH:mm}";
         public string EligibilityDisplay => string.IsNullOrWhiteSpace(MinimumCustomerRank) ? "All ranks" : $"{MinimumCustomerRank}+";
         public string StatusText => IsActive ? "Active" : "Inactive";
     }

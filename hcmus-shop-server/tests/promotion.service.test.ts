@@ -5,13 +5,15 @@ import { promotionService } from "../src/features/promotion/promotion.service";
 jest.mock("../src/features/promotion/promotion.repository", () => ({
   promotionRepository: {
     findByCode: jest.fn(),
+    findById: jest.fn(),
     ensureUniqueCode: jest.fn(),
     create: jest.fn(),
+    update: jest.fn(),
   },
 }));
 
 const mockPromotionRepository = promotionRepository as unknown as jest.Mocked<
-  Pick<typeof promotionRepository, "findByCode" | "ensureUniqueCode" | "create">
+  Pick<typeof promotionRepository, "findByCode" | "findById" | "ensureUniqueCode" | "create" | "update">
 >;
 
 function promotionFixture(overrides: Partial<Promotion> = {}): Promotion {
@@ -126,5 +128,27 @@ describe("PromotionService Dev B logic", () => {
     await expect(promotionService.validatePromotion("GOLDONLY", "Diamond")).resolves.toMatchObject({
       isValid: true,
     });
+  });
+
+  it("clears minimum customer rank when update receives explicit null", async () => {
+    const existing = promotionFixture({
+      discountPercent: new Prisma.Decimal(10),
+      minimumCustomerRank: "Gold",
+    });
+    const updated = promotionFixture({
+      discountPercent: new Prisma.Decimal(10),
+      minimumCustomerRank: null,
+    });
+    mockPromotionRepository.findById.mockResolvedValue(existing);
+    mockPromotionRepository.update.mockResolvedValue(updated);
+
+    await expect(
+      promotionService.update(existing.promotionId, { minimumCustomerRank: null })
+    ).resolves.toMatchObject({ minimumCustomerRank: null });
+
+    expect(mockPromotionRepository.update).toHaveBeenCalledWith(
+      existing.promotionId,
+      expect.objectContaining({ minimumCustomerRank: null })
+    );
   });
 });

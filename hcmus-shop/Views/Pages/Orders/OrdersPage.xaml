@@ -186,7 +186,7 @@
                                         <TextBox
                                             PlaceholderText="Promotion code"
                                             Style="{StaticResource FormTextBoxStyle}"
-                                            Text="{x:Bind ViewModel.EditorPromotionCode, Mode=TwoWay}" />
+                                            Text="{x:Bind ViewModel.EditorPromotionCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                         <Button Content="Apply Promotion" Style="{StaticResource GhostButtonStyle}" Command="{x:Bind ViewModel.ApplyPromotionCommand}" />
                                         <TextBlock Text="{x:Bind ViewModel.PromotionSummary, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" />
                                         <TextBox

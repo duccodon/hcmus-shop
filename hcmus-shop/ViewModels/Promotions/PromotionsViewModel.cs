@@ -548,16 +548,16 @@ namespace hcmus_shop.ViewModels.Promotions
                 return DateTime.Today;
             }
 
-            if (DateTime.TryParse(
+            if (DateTimeOffset.TryParse(
                     value,
                     CultureInfo.InvariantCulture,
                     DateTimeStyles.RoundtripKind | DateTimeStyles.AllowWhiteSpaces,
-                    out var parsed))
+                    out var parsedOffset))
             {
-                return parsed;
+                return parsedOffset.LocalDateTime;
             }
 
-            if (DateTime.TryParse(value, out parsed))
+            if (DateTime.TryParse(value, out var parsed))
             {
                 return parsed;
             }
