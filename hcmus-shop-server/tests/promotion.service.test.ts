@@ -130,6 +130,17 @@ describe("PromotionService Dev B logic", () => {
     });
   });
 
+  it("trims promotion code before validation lookup", async () => {
+    mockPromotionRepository.findByCode.mockResolvedValue(
+      promotionFixture({ code: "WELCOME10", discountPercent: new Prisma.Decimal(10) })
+    );
+
+    await expect(promotionService.validatePromotion(" welcome10 ")).resolves.toMatchObject({
+      isValid: true,
+    });
+    expect(mockPromotionRepository.findByCode).toHaveBeenCalledWith("welcome10");
+  });
+
   it("clears minimum customer rank when update receives explicit null", async () => {
     const existing = promotionFixture({
       discountPercent: new Prisma.Decimal(10),

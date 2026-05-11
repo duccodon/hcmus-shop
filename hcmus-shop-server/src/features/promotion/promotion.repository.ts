@@ -32,8 +32,10 @@ export class PromotionRepository {
   }
 
   findByCode(code: string) {
-    return prisma.promotion.findUnique({
-      where: { code },
+    return prisma.promotion.findFirst({
+      where: {
+        code: { equals: code, mode: "insensitive" },
+      },
     });
   }
 
