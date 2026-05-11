@@ -85,11 +85,19 @@ namespace hcmus_shop.Views
                 IsOn = state.IsActive
             };
 
+            var validationText = new TextBlock
+            {
+                Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["DangerForeground"],
+                TextWrapping = TextWrapping.Wrap,
+                Visibility = Visibility.Collapsed
+            };
+
             var panel = new StackPanel
             {
                 Spacing = 10,
                 Children =
                 {
+                    validationText,
                     new TextBlock { Text = "Code" },
                     codeBox,
                     new TextBlock { Text = "Discount Percent (set one discount field only)" },
@@ -116,22 +124,43 @@ namespace hcmus_shop.Views
                 XamlRoot = XamlRoot
             };
 
+            dialog.PrimaryButtonClick += (_, args) =>
+            {
+                var draft = BuildPromotionEditorResult(
+                    codeBox,
+                    percentBox,
+                    amountBox,
+                    minimumRankBox,
+                    startPicker,
+                    endPicker,
+                    activeSwitch);
+
+                if (TryValidateEditorInput(draft, out var validationError))
+                {
+                    validationText.Text = string.Empty;
+                    validationText.Visibility = Visibility.Collapsed;
+                    return;
+                }
+
+                args.Cancel = true;
+                validationText.Text = validationError;
+                validationText.Visibility = Visibility.Visible;
+            };
+
             var result = await dialog.ShowAsync();
             if (result != ContentDialogResult.Primary)
             {
                 return null;
             }
 
-            return new PromotionEditorResult
-            {
-                Code = codeBox.Text,
-                DiscountPercent = percentBox.Value > 0 ? percentBox.Value : null,
-                DiscountAmount = amountBox.Value > 0 ? amountBox.Value : null,
-                MinimumCustomerRank = minimumRankBox.SelectedItem as string,
-                StartDate = startPicker.Date,
-                EndDate = endPicker.Date,
-                IsActive = activeSwitch.IsOn
-            };
+            return BuildPromotionEditorResult(
+                codeBox,
+                percentBox,
+                amountBox,
+                minimumRankBox,
+                startPicker,
+                endPicker,
+                activeSwitch);
         }
 
         private async Task<bool> ShowDeletePromotionConfirmAsync(PromotionListItemViewModel item)
@@ -148,6 +177,59 @@ namespace hcmus_shop.Views
 
             var result = await dialog.ShowAsync();
             return result == ContentDialogResult.Primary;
+        }
+
+        private static PromotionEditorResult BuildPromotionEditorResult(
+            TextBox codeBox,
+            NumberBox percentBox,
+            NumberBox amountBox,
+            ComboBox minimumRankBox,
+            DatePicker startPicker,
+            DatePicker endPicker,
+            ToggleSwitch activeSwitch)
+        {
+            return new PromotionEditorResult
+            {
+                Code = codeBox.Text,
+                DiscountPercent = percentBox.Value > 0 ? percentBox.Value : null,
+                DiscountAmount = amountBox.Value > 0 ? amountBox.Value : null,
+                MinimumCustomerRank = minimumRankBox.SelectedItem as string,
+                StartDate = startPicker.Date,
+                EndDate = endPicker.Date,
+                IsActive = activeSwitch.IsOn
+            };
+        }
+
+        private static bool TryValidateEditorInput(PromotionEditorResult input, out string message)
+        {
+            if (string.IsNullOrWhiteSpace(input.Code))
+            {
+                message = "Promotion code is required.";
+                return false;
+            }
+
+            if (input.StartDate > input.EndDate)
+            {
+                message = "Start date must be before or equal to end date.";
+                return false;
+            }
+
+            var hasPercent = input.DiscountPercent.HasValue && input.DiscountPercent.Value > 0;
+            var hasAmount = input.DiscountAmount.HasValue && input.DiscountAmount.Value > 0;
+            if (hasPercent == hasAmount)
+            {
+                message = "Provide either discount percent or discount amount.";
+                return false;
+            }
+
+            if (hasPercent && input.DiscountPercent!.Value > 100)
+            {
+                message = "Discount percent must be between 0 and 100.";
+                return false;
+            }
+
+            message = string.Empty;
+            return true;
         }
 
         private static DateTimeOffset ClampDateForPicker(DateTimeOffset value)
