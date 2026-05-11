@@ -108,12 +108,17 @@
                                 Text="Products List"
                                 Style="{StaticResource PageTitleStyle}" />
                             <StackPanel x:Name="HeaderActions" Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                <Button Content="Import" Style="{StaticResource PrimaryButtonStyle}" Command="{x:Bind ViewModel.ImportProductsCommand}" />
+                                <Button
+                                    Content="Import"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Command="{x:Bind ViewModel.ImportProductsCommand}"
+                                    Visibility="{x:Bind ViewModel.CanManageProducts, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                 <Button Content="Export" Style="{StaticResource PrimaryButtonStyle}" Command="{x:Bind ViewModel.ExportProductsCommand}" />
                                 <Button
                                     Content="+ Add Product"
                                     Style="{StaticResource PrimaryButtonStyle}"
-                                    Command="{x:Bind ViewModel.AddProductCommand}" />
+                                    Command="{x:Bind ViewModel.AddProductCommand}"
+                                    Visibility="{x:Bind ViewModel.CanManageProducts, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
                             </StackPanel>
                         </Grid>
 
@@ -423,7 +428,7 @@
                         <!-- Row 4: Bulk-action bar -->
                         <Grid
                             Grid.Row="4"
-                            Visibility="{x:Bind ViewModel.HasSelection, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            Visibility="{x:Bind ViewModel.HasManageableSelection, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Border
                                 Background="{StaticResource SelectionHighlight}"
                                 CornerRadius="8"
@@ -600,7 +605,8 @@
                                                             Style="{StaticResource GhostButtonStyle}"
                                                             Command="{Binding DataContext.EditProductCommand, ElementName=Root}"
                                                             CommandParameter="{x:Bind ProductId}"
-                                                            ToolTipService.ToolTip="Edit product">
+                                                            ToolTipService.ToolTip="Edit product"
+                                                            Visibility="{Binding DataContext.CanManageProducts, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                             <FontIcon
                                                                 FontFamily="Segoe Fluent Icons"
                                                                 Glyph="&#xE70F;"
@@ -611,7 +617,8 @@
                                                             Style="{StaticResource GhostButtonStyle}"
                                                             Command="{Binding DataContext.DeleteProductCommand, ElementName=Root}"
                                                             CommandParameter="{x:Bind ProductId}"
-                                                            ToolTipService.ToolTip="Delete product">
+                                                            ToolTipService.ToolTip="Delete product"
+                                                            Visibility="{Binding DataContext.CanManageProducts, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                             <FontIcon
                                                                 FontFamily="Segoe Fluent Icons"
                                                                 Glyph="&#xE74D;"

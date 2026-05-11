@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
+using hcmus_shop.Contracts.Services;
 using hcmus_shop.ViewModels;
 using hcmus_shop.ViewModels.Products;
 using Microsoft.UI.Xaml;
@@ -29,6 +30,12 @@ namespace hcmus_shop.Views
 
         private async void AddProductPage_Loaded(object sender, RoutedEventArgs e)
         {
+            if (!CanManageProducts())
+            {
+                Frame?.Navigate(typeof(ForbiddenPage));
+                return;
+            }
+
             if (!ViewModel.IsInitialized)
             {
                 await ViewModel.InitializeCommand.ExecuteAsync(null);
@@ -150,6 +157,12 @@ namespace hcmus_shop.Views
                 Name = nameBox.Text,
                 Description = descriptionBox.Text
             };
+        }
+
+        private static bool CanManageProducts()
+        {
+            var auth = Ioc.Default.GetRequiredService<IAuthService>();
+            return auth.HasRole("Admin");
         }
     }
 }

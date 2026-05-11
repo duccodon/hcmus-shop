@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
+using hcmus_shop.Contracts.Services;
 using hcmus_shop.ViewModels.Products;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -31,6 +32,12 @@ namespace hcmus_shop.Views
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
+
+            if (!CanManageProducts())
+            {
+                Frame?.Navigate(typeof(ForbiddenPage));
+                return;
+            }
 
             if (e.Parameter is int productId)
             {
@@ -136,6 +143,12 @@ namespace hcmus_shop.Views
             {
                 ViewModel.RemovePendingImageFile(pending);
             }
+        }
+
+        private static bool CanManageProducts()
+        {
+            var auth = Ioc.Default.GetRequiredService<IAuthService>();
+            return auth.HasRole("Admin");
         }
     }
 }

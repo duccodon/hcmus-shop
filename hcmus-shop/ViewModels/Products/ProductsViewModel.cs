@@ -21,6 +21,7 @@ namespace hcmus_shop.ViewModels.Products
         private readonly ICategoryService _categoryService;
         private readonly IConfigService _configService;
         private readonly ISettingsService _settingsService;
+        private readonly IAuthService _authService;
 
         private CancellationTokenSource? _searchDebounceCts;
         private string _searchQuery = string.Empty;
@@ -51,7 +52,8 @@ namespace hcmus_shop.ViewModels.Products
             IBrandService brandService,
             ICategoryService categoryService,
             IConfigService configService,
-            ISettingsService settingsService)
+            ISettingsService settingsService,
+            IAuthService authService)
         {
             _productService = productService;
             _productImportService = productImportService;
@@ -59,6 +61,7 @@ namespace hcmus_shop.ViewModels.Products
             _categoryService = categoryService;
             _configService = configService;
             _settingsService = settingsService;
+            _authService = authService;
 
             _selectedPageSize = NormalizePageSize(_settingsService.PageSize);
             if (_settingsService.PageSize != _selectedPageSize)
@@ -66,16 +69,16 @@ namespace hcmus_shop.ViewModels.Products
                 _settingsService.PageSize = _selectedPageSize;
             }
 
-            AddProductCommand = new RelayCommand(AddProduct);
-            EditProductCommand = new RelayCommand<int>(EditProduct);
-            DeleteProductCommand = new AsyncRelayCommand<int>(DeleteSingleProductAsync);
+            AddProductCommand = new RelayCommand(AddProduct, () => CanManageProducts);
+            EditProductCommand = new RelayCommand<int>(EditProduct, _ => CanManageProducts);
+            DeleteProductCommand = new AsyncRelayCommand<int>(DeleteSingleProductAsync, _ => CanManageProducts);
             GoToPageCommand = new AsyncRelayCommand<int>(GoToPageAsync);
-            BulkToggleStatusCommand = new AsyncRelayCommand(BulkToggleStatusAsync);
-            BulkDeleteCommand = new AsyncRelayCommand(BulkDeleteAsync);
+            BulkToggleStatusCommand = new AsyncRelayCommand(BulkToggleStatusAsync, () => CanManageProducts);
+            BulkDeleteCommand = new AsyncRelayCommand(BulkDeleteAsync, () => CanManageProducts);
             ClearFiltersCommand = new AsyncRelayCommand(ClearFiltersAsync, () => !IsLoading);
             InitializeCommand = new AsyncRelayCommand(InitializeAsync, () => !IsInitialized && !IsLoading);
             ApplyAdvancedFiltersCommand = new AsyncRelayCommand(ApplyAdvancedFiltersAsync, () => !IsLoading);
-            ImportProductsCommand = new AsyncRelayCommand(ImportProductsAsync, () => !IsLoading);
+            ImportProductsCommand = new AsyncRelayCommand(ImportProductsAsync, () => CanManageProducts && !IsLoading);
             ExportProductsCommand = new AsyncRelayCommand(ExportProductsAsync, () => !IsLoading);
             AddSortCriterionCommand = new RelayCommand(AddSortCriterion);
             RemoveSortCriterionCommand = new RelayCommand<ProductSortCriterionViewModel>(RemoveSortCriterion);
@@ -131,6 +134,8 @@ namespace hcmus_shop.ViewModels.Products
         public Func<Task<string?>>? RequestImportFilePathAsync { get; set; }
         public Func<Task<string?>>? RequestExportFilePathAsync { get; set; }
 
+        public bool CanManageProducts => _authService.HasRole("Admin");
+
         public string SearchQuery
         {
             get => _searchQuery;
@@ -183,6 +188,8 @@ namespace hcmus_shop.ViewModels.Products
                     ApplyAdvancedFiltersCommand.NotifyCanExecuteChanged();
                     ImportProductsCommand.NotifyCanExecuteChanged();
                     ExportProductsCommand.NotifyCanExecuteChanged();
+                    BulkToggleStatusCommand.NotifyCanExecuteChanged();
+                    BulkDeleteCommand.NotifyCanExecuteChanged();
                     ApplySortCommand.NotifyCanExecuteChanged();
                     ResetSortCommand.NotifyCanExecuteChanged();
                     OnPropertyChanged(nameof(IsBusy));
@@ -323,6 +330,7 @@ namespace hcmus_shop.ViewModels.Products
         }
 
         public bool HasSelection => PagedProducts.Any(product => product.IsSelected);
+        public bool HasManageableSelection => CanManageProducts && HasSelection;
         public string SelectionActionText => $"{PagedProducts.Count(product => product.IsSelected)} selected";
         public string BulkStatusActionLabel => "Toggle Active";
 
@@ -346,12 +354,17 @@ namespace hcmus_shop.ViewModels.Products
 
         private void AddProduct()
         {
+            if (!CanManageProducts)
+            {
+                return;
+            }
+
             NavigateToAddProductRequested?.Invoke(this, EventArgs.Empty);
         }
 
         private void EditProduct(int productId)
         {
-            if (productId <= 0)
+            if (!CanManageProducts || productId <= 0)
             {
                 return;
             }
@@ -429,6 +442,11 @@ namespace hcmus_shop.ViewModels.Products
 
         private async Task ImportProductsAsync()
         {
+            if (!CanManageProducts)
+            {
+                return;
+            }
+
             if (RequestImportFilePathAsync is null)
             {
                 ErrorMessage = "Import picker is not available.";
@@ -641,6 +659,11 @@ namespace hcmus_shop.ViewModels.Products
 
         private async Task BulkToggleStatusAsync()
         {
+            if (!CanManageProducts)
+            {
+                return;
+            }
+
             var selectedRows = PagedProducts.Where(product => product.IsSelected).ToList();
             if (selectedRows.Count == 0)
             {
@@ -680,6 +703,11 @@ namespace hcmus_shop.ViewModels.Products
 
         private async Task BulkDeleteAsync()
         {
+            if (!CanManageProducts)
+            {
+                return;
+            }
+
             var selectedIds = PagedProducts
                 .Where(product => product.IsSelected)
                 .Select(product => product.ProductId)
@@ -730,7 +758,7 @@ namespace hcmus_shop.ViewModels.Products
 
         private async Task DeleteSingleProductAsync(int productId)
         {
-            if (productId <= 0 || ConfirmRowDeleteAsync is null)
+            if (!CanManageProducts || productId <= 0 || ConfirmRowDeleteAsync is null)
             {
                 return;
             }
@@ -1021,6 +1049,7 @@ namespace hcmus_shop.ViewModels.Products
         private void NotifySelectionChanged()
         {
             OnPropertyChanged(nameof(HasSelection));
+            OnPropertyChanged(nameof(HasManageableSelection));
             OnPropertyChanged(nameof(SelectionActionText));
         }
 
