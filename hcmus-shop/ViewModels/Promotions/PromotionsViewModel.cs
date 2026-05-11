@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using hcmus_shop.Contracts.Services;
 using hcmus_shop.Models.DTOs;
 using hcmus_shop.Services.Promotions.Dto;
+using hcmus_shop.ViewModels.Common;
 using hcmus_shop.ViewModels.Products;
 using System;
 using System.Collections.ObjectModel;
@@ -106,7 +107,8 @@ namespace hcmus_shop.ViewModels.Promotions
             get => _errorMessage;
             private set
             {
-                if (SetProperty(ref _errorMessage, value))
+                var formattedValue = UserErrorMessageFormatter.Format(value);
+                if (SetProperty(ref _errorMessage, formattedValue))
                 {
                     OnPropertyChanged(nameof(HasError));
                     OnPropertyChanged(nameof(IsEmpty));

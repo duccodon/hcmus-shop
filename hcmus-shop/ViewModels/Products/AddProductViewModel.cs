@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using hcmus_shop.Contracts.Services;
 using hcmus_shop.Services.Products.Dto;
 using hcmus_shop.Services.Uploads;
+using hcmus_shop.ViewModels.Common;
 using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Generic;
@@ -144,7 +145,8 @@ namespace hcmus_shop.ViewModels.Products
             get => _saveErrorMessage;
             private set
             {
-                if (SetProperty(ref _saveErrorMessage, value))
+                var formattedValue = UserErrorMessageFormatter.Format(value);
+                if (SetProperty(ref _saveErrorMessage, formattedValue))
                 {
                     OnPropertyChanged(nameof(HasSaveError));
                 }
@@ -172,7 +174,8 @@ namespace hcmus_shop.ViewModels.Products
             get => _categoryErrorMessage;
             private set
             {
-                if (SetProperty(ref _categoryErrorMessage, value))
+                var formattedValue = UserErrorMessageFormatter.Format(value);
+                if (SetProperty(ref _categoryErrorMessage, formattedValue))
                 {
                     OnPropertyChanged(nameof(HasCategoryError));
                 }

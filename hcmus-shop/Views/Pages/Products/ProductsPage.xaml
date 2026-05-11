@@ -477,19 +477,20 @@
                         <Grid Grid.Row="5" MinHeight="300">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
                             <InfoBar
-                                Grid.RowSpan="2"
                                 Margin="0,0,0,12"
                                 IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
                                 IsClosable="False"
                                 Severity="Error"
+                                Visibility="{x:Bind ViewModel.HasError, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
                                 Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
 
                             <!-- Table header -->
-                            <Grid>
+                            <Grid Grid.Row="1">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="56" />
                                     <ColumnDefinition Width="2.6*" />
@@ -527,7 +528,7 @@
                             </Grid>
 
                             <!-- Table rows -->
-                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                 <ItemsControl ItemsSource="{x:Bind ViewModel.PagedProducts, Mode=OneWay}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="vm:ProductRowViewModel">
@@ -634,7 +635,7 @@
                             </ScrollViewer>
 
                             <Border
-                                Grid.RowSpan="2"
+                                Grid.RowSpan="3"
                                 Background="{StaticResource CardBackground}"
                                 Opacity="0.85"
                                 Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -642,7 +643,7 @@
                             </Border>
 
                             <Border
-                                Grid.Row="1"
+                                Grid.Row="2"
                                 Background="Transparent"
                                 Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock

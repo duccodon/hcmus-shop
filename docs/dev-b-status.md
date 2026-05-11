@@ -110,8 +110,10 @@ Important locations:
 
 - `ProductsViewModel.cs`: list, search, filters, pagination, advanced search, multi-sort, import/export, delete.
 - `ProductsViewModel.cs`: also guards management commands with `IAuthService.HasRole("Admin")`.
+- Products page errors are formatted through `UserErrorMessageFormatter` and shown above the table instead of overlaying rows.
 - `AddProductViewModel.cs`: add form, image upload, category creation, draft auto-save.
 - `EditProductViewModel.cs`: edit form, image upload, delete.
+- Add/Edit Product save/category errors also use the shared formatter.
 - `AddProductPage.xaml.cs` and `EditProductPage.xaml.cs`: redirect non-admin users to `ForbiddenPage`.
 - `FileUploadService.cs`: builds `/uploads` endpoint from the configured GraphQL server URL.
 
@@ -170,6 +172,7 @@ Implemented:
   - both discount percent and amount supplied
   - neither discount percent nor amount supplied
   - discount percent over 100
+- Promotion page backend errors are formatted through `UserErrorMessageFormatter` and shown above the table instead of overlaying rows.
 - Deactivate promotion confirmation.
 - Admin-only create/edit/delete controls through `IAuthService.HasRole("Admin")`.
 - Promotion rank options:

@@ -4,6 +4,7 @@ using hcmus_shop.Contracts.Services;
 using hcmus_shop.Models.DTOs;
 using hcmus_shop.Services.Products.Dto;
 using hcmus_shop.Services.Uploads;
+using hcmus_shop.ViewModels.Common;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -121,7 +122,7 @@ namespace hcmus_shop.ViewModels.Products
         public string SaveErrorMessage
         {
             get => _saveErrorMessage;
-            private set => SetProperty(ref _saveErrorMessage, value);
+            private set => SetProperty(ref _saveErrorMessage, UserErrorMessageFormatter.Format(value));
         }
 
         public string SaveStatusMessage
