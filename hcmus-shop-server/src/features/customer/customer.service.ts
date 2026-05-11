@@ -63,15 +63,15 @@ function normalizeOptionalText(value?: string | null) {
 }
 
 export function getCustomerRank(loyaltyPoints: number) {
-  if (loyaltyPoints >= 10000) {
+  if (loyaltyPoints >= 3000000) {
     return "Diamond";
   }
 
-  if (loyaltyPoints >= 5000) {
+  if (loyaltyPoints >= 2000000) {
     return "Gold";
   }
 
-  if (loyaltyPoints >= 1000) {
+  if (loyaltyPoints >= 1000000) {
     return "Silver";
   }
 

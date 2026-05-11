@@ -69,6 +69,22 @@ namespace hcmus_shop.GraphQL.Operations
                                     name
                                     sellingPrice
                                     stockQuantity
+                                    description
+                                    specifications
+                                    warrantyMonths
+                                    brand {
+                                        brandId
+                                        name
+                                    }
+                                    categories {
+                                        categoryId
+                                        name
+                                    }
+                                    images {
+                                        imageId
+                                        imageUrl
+                                        displayOrder
+                                    }
                                 }
                             }
                         }
@@ -131,6 +147,22 @@ namespace hcmus_shop.GraphQL.Operations
                                 name
                                 sellingPrice
                                 stockQuantity
+                                description
+                                specifications
+                                warrantyMonths
+                                brand {
+                                    brandId
+                                    name
+                                }
+                                categories {
+                                    categoryId
+                                    name
+                                }
+                                images {
+                                    imageId
+                                    imageUrl
+                                    displayOrder
+                                }
                             }
                         }
                     }
@@ -162,6 +194,22 @@ namespace hcmus_shop.GraphQL.Operations
                             name
                             sellingPrice
                             stockQuantity
+                            description
+                            specifications
+                            warrantyMonths
+                            brand {
+                                brandId
+                                name
+                            }
+                            categories {
+                                categoryId
+                                name
+                            }
+                            images {
+                                imageId
+                                imageUrl
+                                displayOrder
+                            }
                         }
                     }
                     totalCount

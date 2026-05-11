@@ -467,6 +467,11 @@ namespace hcmus_shop.ViewModels.Products
             await SaveDraftIfDirtyAsync();
         }
 
+        public Task PersistDraftAsync()
+        {
+            return SaveDraftIfDirtyAsync();
+        }
+
         private void MarkDraftDirty()
         {
             if (_isRestoringDraft)
@@ -609,6 +614,11 @@ namespace hcmus_shop.ViewModels.Products
             {
                 CategoryErrorMessage = categoriesResult.Error ?? "Failed to load categories.";
                 return false;
+            }
+
+            foreach (var option in CategoryOptions)
+            {
+                option.PropertyChanged -= CategoryOption_PropertyChanged;
             }
 
             CategoryOptions.Clear();
@@ -938,7 +948,9 @@ namespace hcmus_shop.ViewModels.Products
 
                 foreach (var option in CategoryOptions)
                 {
+                    option.PropertyChanged -= CategoryOption_PropertyChanged;
                     option.IsSelected = false;
+                    option.PropertyChanged += CategoryOption_PropertyChanged;
                 }
 
                 _suppressSeriesReload = true;

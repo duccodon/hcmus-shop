@@ -408,7 +408,7 @@ function calculateEarnedPoints(finalAmount: number) {
     return 0;
   }
 
-  return Math.floor(finalAmount / 100000);
+  return Math.floor(finalAmount / 100);
 }
 
 export const orderService = new OrderService();

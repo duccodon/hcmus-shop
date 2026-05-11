@@ -36,14 +36,28 @@
                         <Grid Grid.Row="2" ColumnSpacing="8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" MaxWidth="320" />
+                                <ColumnDefinition Width="160" />
+                                <ColumnDefinition Width="150" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBox
                                 PlaceholderText="Search by name, phone, or email"
                                 Style="{StaticResource SearchTextBoxStyle}"
                                 Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            <Button
+                            <ComboBox
                                 Grid.Column="1"
+                                Style="{StaticResource FormComboBoxStyle}"
+                                ItemsSource="{x:Bind ViewModel.SortFieldOptions, Mode=OneWay}"
+                                SelectedItem="{x:Bind ViewModel.SelectedSortField, Mode=TwoWay}"
+                                DisplayMemberPath="Label" />
+                            <ComboBox
+                                Grid.Column="2"
+                                Style="{StaticResource FormComboBoxStyle}"
+                                ItemsSource="{x:Bind ViewModel.SortDirectionOptions, Mode=OneWay}"
+                                SelectedItem="{x:Bind ViewModel.SelectedSortDirection, Mode=TwoWay}"
+                                DisplayMemberPath="Label" />
+                            <Button
+                                Grid.Column="3"
                                 Content="Refresh"
                                 Style="{StaticResource GhostButtonStyle}"
                                 Command="{x:Bind ViewModel.RefreshCommand}" />

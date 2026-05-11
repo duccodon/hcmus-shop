@@ -7,6 +7,7 @@ using hcmus_shop.ViewModels.Products;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,6 +25,8 @@ namespace hcmus_shop.ViewModels.Customers
         private int _selectedPageSize = 10;
         private int _currentPage = 1;
         private int _totalCount;
+        private CustomerSortOption? _selectedSortField;
+        private CustomerSortOption? _selectedSortDirection;
 
         public CustomersViewModel(ICustomerService customerService, IAuthService authService)
         {
@@ -38,11 +41,25 @@ namespace hcmus_shop.ViewModels.Customers
             AddCustomerCommand = new AsyncRelayCommand(AddCustomerAsync, () => !IsLoading);
             OpenCustomerDetailCommand = new RelayCommand<CustomerDto?>(OpenCustomerDetail, customer => CanViewCustomerDetails && customer is not null);
             DeleteCustomerCommand = new AsyncRelayCommand<CustomerDto>(DeleteCustomerAsync, customer => CanDeleteCustomers && customer is not null);
+
+            SortFieldOptions.Add(new CustomerSortOption("createdAt", "Created"));
+            SortFieldOptions.Add(new CustomerSortOption("name", "Customer"));
+            SortFieldOptions.Add(new CustomerSortOption("phone", "Phone"));
+            SortFieldOptions.Add(new CustomerSortOption("email", "Email"));
+            SortFieldOptions.Add(new CustomerSortOption("loyaltyPoints", "Points"));
+            SortFieldOptions.Add(new CustomerSortOption("rank", "Rank"));
+
+            SortDirectionOptions.Add(new CustomerSortOption("asc", "Ascending"));
+            SortDirectionOptions.Add(new CustomerSortOption("desc", "Descending"));
+            SelectedSortField = SortFieldOptions.FirstOrDefault(option => option.Key == "createdAt") ?? SortFieldOptions.FirstOrDefault();
+            SelectedSortDirection = SortDirectionOptions.FirstOrDefault(option => option.Key == "desc") ?? SortDirectionOptions.FirstOrDefault();
         }
 
         public ObservableCollection<CustomerDto> Customers { get; } = [];
         public ObservableCollection<int> PageSizeOptions { get; } = [10, 20, 50];
         public ObservableCollection<PageButtonItem> PageButtons { get; } = [];
+        public ObservableCollection<CustomerSortOption> SortFieldOptions { get; } = [];
+        public ObservableCollection<CustomerSortOption> SortDirectionOptions { get; } = [];
 
         public IAsyncRelayCommand InitializeCommand { get; }
         public IAsyncRelayCommand RefreshCommand { get; }
@@ -121,6 +138,32 @@ namespace hcmus_shop.ViewModels.Customers
                 ? "Admin can open a full customer profile, update contact details, and delete a customer."
                 : "Sales can create customers and use them in orders. Full customer profile is admin-only.";
 
+        public CustomerSortOption? SelectedSortField
+        {
+            get => _selectedSortField;
+            set
+            {
+                if (SetProperty(ref _selectedSortField, value) && IsInitialized)
+                {
+                    _currentPage = 1;
+                    _ = LoadCustomersAsync();
+                }
+            }
+        }
+
+        public CustomerSortOption? SelectedSortDirection
+        {
+            get => _selectedSortDirection;
+            set
+            {
+                if (SetProperty(ref _selectedSortDirection, value) && IsInitialized)
+                {
+                    _currentPage = 1;
+                    _ = LoadCustomersAsync();
+                }
+            }
+        }
+
         public int SelectedPageSize
         {
             get => _selectedPageSize;
@@ -194,7 +237,7 @@ namespace hcmus_shop.ViewModels.Customers
                 }
 
                 Customers.Clear();
-                foreach (var customer in result.Value.Items)
+                foreach (var customer in ApplySorting(result.Value.Items))
                 {
                     Customers.Add(customer);
                 }
@@ -208,6 +251,27 @@ namespace hcmus_shop.ViewModels.Customers
             {
                 IsLoading = false;
             }
+        }
+
+        private IEnumerable<CustomerDto> ApplySorting(IEnumerable<CustomerDto> items)
+        {
+            var direction = string.Equals(SelectedSortDirection?.Key, "desc", StringComparison.OrdinalIgnoreCase);
+            return (SelectedSortField?.Key ?? "createdAt") switch
+            {
+                "createdAt" => direction ? items.OrderByDescending(item => ParseDate(item.CreatedAt)) : items.OrderBy(item => ParseDate(item.CreatedAt)),
+                "phone" => direction ? items.OrderByDescending(item => item.Phone) : items.OrderBy(item => item.Phone),
+                "email" => direction ? items.OrderByDescending(item => item.Email) : items.OrderBy(item => item.Email),
+                "loyaltyPoints" => direction ? items.OrderByDescending(item => item.LoyaltyPoints) : items.OrderBy(item => item.LoyaltyPoints),
+                "rank" => direction ? items.OrderByDescending(item => item.Rank) : items.OrderBy(item => item.Rank),
+                _ => direction ? items.OrderByDescending(item => item.Name) : items.OrderBy(item => item.Name),
+            };
+        }
+
+        private static DateTime ParseDate(string? value)
+        {
+            return DateTime.TryParse(value, out var parsed)
+                ? parsed
+                : DateTime.MinValue;
         }
 
         private async Task PreviousPageAsync()
@@ -410,5 +474,17 @@ namespace hcmus_shop.ViewModels.Customers
         public string Name { get; set; } = string.Empty;
         public string? Phone { get; set; }
         public string? Email { get; set; }
+    }
+
+    public class CustomerSortOption
+    {
+        public CustomerSortOption(string key, string label)
+        {
+            Key = key;
+            Label = label;
+        }
+
+        public string Key { get; }
+        public string Label { get; }
     }
 }

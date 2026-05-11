@@ -32,8 +32,8 @@ namespace hcmus_shop.ViewModels.Store
         private int _totalCount;
         private StoreFilterOption? _selectedBrand;
         private StoreFilterOption? _selectedCategory;
-        private StoreProductListItemViewModel? _selectedProductCard;
-        private StoreProductDetailViewModel? _selectedProduct;
+        private StoreSortOption? _selectedSortField;
+        private StoreSortOption? _selectedSortDirection;
 
         public StoreViewModel(
             IProductService productService,
@@ -51,12 +51,23 @@ namespace hcmus_shop.ViewModels.Store
             PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => !IsLoading && CurrentPage > 1);
             NextPageCommand = new AsyncRelayCommand(NextPageAsync, () => !IsLoading && CurrentPage < TotalPages);
             GoToPageCommand = new AsyncRelayCommand<int>(GoToPageAsync);
+            OpenProductCommand = new RelayCommand<StoreProductCardViewModel?>(OpenProduct);
+
+            SortFieldOptions.Add(new StoreSortOption("name", "Name"));
+            SortFieldOptions.Add(new StoreSortOption("price", "Price"));
+            SortFieldOptions.Add(new StoreSortOption("stock", "Stock"));
+            SortFieldOptions.Add(new StoreSortOption("createdAt", "Newest"));
+
+            SortDirectionOptions.Add(new StoreSortOption("asc", "Ascending"));
+            SortDirectionOptions.Add(new StoreSortOption("desc", "Descending"));
         }
 
-        public ObservableCollection<StoreProductListItemViewModel> Products { get; } = [];
+        public ObservableCollection<StoreProductCardViewModel> Products { get; } = [];
         public ObservableCollection<StoreFilterOption> BrandOptions { get; } = [];
         public ObservableCollection<StoreFilterOption> CategoryOptions { get; } = [];
-        public ObservableCollection<int> PageSizeOptions { get; } = [12, 24, 48];
+        public ObservableCollection<StoreSortOption> SortFieldOptions { get; } = [];
+        public ObservableCollection<StoreSortOption> SortDirectionOptions { get; } = [];
+        public ObservableCollection<int> PageSizeOptions { get; } = [8, 12, 16];
         public ObservableCollection<PageButtonItem> PageButtons { get; } = [];
 
         public IAsyncRelayCommand InitializeCommand { get; }
@@ -64,6 +75,9 @@ namespace hcmus_shop.ViewModels.Store
         public IAsyncRelayCommand PreviousPageCommand { get; }
         public IAsyncRelayCommand NextPageCommand { get; }
         public IAsyncRelayCommand<int> GoToPageCommand { get; }
+        public IRelayCommand<StoreProductCardViewModel?> OpenProductCommand { get; }
+
+        public Action<int>? NavigateToProductRequested { get; set; }
 
         public bool IsInitialized
         {
@@ -107,7 +121,6 @@ namespace hcmus_shop.ViewModels.Store
 
         public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
         public bool IsEmpty => !IsLoading && Products.Count == 0 && !HasError;
-        public bool HasSelectedProduct => SelectedProduct is not null;
 
         public string SearchQuery
         {
@@ -161,6 +174,32 @@ namespace hcmus_shop.ViewModels.Store
             }
         }
 
+        public StoreSortOption? SelectedSortField
+        {
+            get => _selectedSortField;
+            set
+            {
+                if (SetProperty(ref _selectedSortField, value) && IsInitialized)
+                {
+                    CurrentPage = 1;
+                    _ = LoadProductsAsync();
+                }
+            }
+        }
+
+        public StoreSortOption? SelectedSortDirection
+        {
+            get => _selectedSortDirection;
+            set
+            {
+                if (SetProperty(ref _selectedSortDirection, value) && IsInitialized)
+                {
+                    CurrentPage = 1;
+                    _ = LoadProductsAsync();
+                }
+            }
+        }
+
         public int SelectedPageSize
         {
             get => _selectedPageSize;
@@ -193,57 +232,6 @@ namespace hcmus_shop.ViewModels.Store
                 ? "0 products"
                 : $"{((_currentPage - 1) * SelectedPageSize) + 1}-{Math.Min(_currentPage * SelectedPageSize, _totalCount)} of {_totalCount}";
 
-        public StoreProductListItemViewModel? SelectedProductCard
-        {
-            get => _selectedProductCard;
-            set
-            {
-                if (SetProperty(ref _selectedProductCard, value) && value is not null)
-                {
-                    _ = LoadProductDetailAsync(value.ProductId);
-                }
-            }
-        }
-
-        public StoreProductDetailViewModel? SelectedProduct
-        {
-            get => _selectedProduct;
-            private set
-            {
-                if (SetProperty(ref _selectedProduct, value))
-                {
-                    OnPropertyChanged(nameof(HasSelectedProduct));
-                    OnPropertyChanged(nameof(SelectedProductName));
-                    OnPropertyChanged(nameof(SelectedProductBrandName));
-                    OnPropertyChanged(nameof(SelectedProductSku));
-                    OnPropertyChanged(nameof(SelectedProductSeriesName));
-                    OnPropertyChanged(nameof(SelectedProductCategoriesDisplay));
-                    OnPropertyChanged(nameof(SelectedProductWarrantyDisplay));
-                    OnPropertyChanged(nameof(SelectedProductSellingPriceDisplay));
-                    OnPropertyChanged(nameof(SelectedProductStockDisplay));
-                    OnPropertyChanged(nameof(SelectedProductAvailableSerialCount));
-                    OnPropertyChanged(nameof(SelectedProductDescription));
-                    OnPropertyChanged(nameof(SelectedProductSpecificationsDisplay));
-                    OnPropertyChanged(nameof(SelectedProductPrimaryImageUri));
-                    OnPropertyChanged(nameof(SelectedProductHasPrimaryImage));
-                }
-            }
-        }
-
-        public string SelectedProductName => SelectedProduct?.Name ?? string.Empty;
-        public string SelectedProductBrandName => SelectedProduct?.BrandName ?? string.Empty;
-        public string SelectedProductSku => SelectedProduct?.Sku ?? string.Empty;
-        public string SelectedProductSeriesName => SelectedProduct?.SeriesName ?? string.Empty;
-        public string SelectedProductCategoriesDisplay => SelectedProduct?.CategoriesDisplay ?? string.Empty;
-        public string SelectedProductWarrantyDisplay => SelectedProduct?.WarrantyDisplay ?? string.Empty;
-        public string SelectedProductSellingPriceDisplay => SelectedProduct?.SellingPriceDisplay ?? string.Empty;
-        public string SelectedProductStockDisplay => SelectedProduct?.StockDisplay ?? string.Empty;
-        public int SelectedProductAvailableSerialCount => SelectedProduct?.AvailableSerialCount ?? 0;
-        public string SelectedProductDescription => SelectedProduct?.Description ?? string.Empty;
-        public string SelectedProductSpecificationsDisplay => SelectedProduct?.SpecificationsDisplay ?? string.Empty;
-        public Uri? SelectedProductPrimaryImageUri => SelectedProduct?.PrimaryImageUri;
-        public bool SelectedProductHasPrimaryImage => SelectedProduct?.HasPrimaryImage == true;
-
         private int TotalPages => Math.Max(1, (int)Math.Ceiling(Math.Max(_totalCount, 1) / (double)SelectedPageSize));
 
         private async Task InitializeAsync()
@@ -254,6 +242,8 @@ namespace hcmus_shop.ViewModels.Store
             }
 
             await LoadFilterOptionsAsync();
+            SelectedSortField ??= SortFieldOptions.FirstOrDefault(option => option.Key == "createdAt") ?? SortFieldOptions.FirstOrDefault();
+            SelectedSortDirection ??= SortDirectionOptions.FirstOrDefault(option => option.Key == "desc") ?? SortDirectionOptions.FirstOrDefault();
             await LoadProductsAsync();
             IsInitialized = true;
         }
@@ -300,8 +290,8 @@ namespace hcmus_shop.ViewModels.Store
                     BrandId = SelectedBrand?.Id,
                     CategoryId = SelectedCategory?.Id,
                     InStockOnly = InStockOnly,
-                    SortBy = "name",
-                    SortOrder = "asc",
+                    SortBy = SelectedSortField?.Key ?? "name",
+                    SortOrder = SelectedSortDirection?.Key ?? "asc",
                     Page = CurrentPage,
                     PageSize = SelectedPageSize
                 });
@@ -319,24 +309,15 @@ namespace hcmus_shop.ViewModels.Store
                 Products.Clear();
                 foreach (var product in result.Value.Items)
                 {
-                    Products.Add(StoreProductListItemViewModel.FromProduct(product, NormalizeImageUri));
+                    Products.Add(StoreProductCardViewModel.FromProduct(
+                        product,
+                        NormalizeImageUri,
+                        GetProductBadge(product)));
                 }
 
                 _totalCount = result.Value.TotalCount;
                 RebuildPageButtons();
                 OnPropertyChanged(nameof(ResultText));
-
-                if (Products.Count == 0)
-                {
-                    SelectedProductCard = null;
-                    SelectedProduct = null;
-                    return;
-                }
-
-                if (SelectedProductCard is null || Products.All(item => item.ProductId != SelectedProductCard.ProductId))
-                {
-                    SelectedProductCard = Products.First();
-                }
             }
             finally
             {
@@ -344,16 +325,29 @@ namespace hcmus_shop.ViewModels.Store
             }
         }
 
-        private async Task LoadProductDetailAsync(int productId)
+        private string GetProductBadge(ProductDto product)
         {
-            var result = await _productService.GetByIdAsync(productId);
-            if (!result.IsSuccess || result.Value is null)
+            if (product.StockQuantity >= 8)
             {
-                ErrorMessage = result.Error ?? "Failed to load product detail.";
+                return "Best Seller";
+            }
+
+            if (product.Categories.Count > 0)
+            {
+                return product.Categories[0].Name;
+            }
+
+            return "Featured";
+        }
+
+        private void OpenProduct(StoreProductCardViewModel? product)
+        {
+            if (product is null)
+            {
                 return;
             }
 
-            SelectedProduct = StoreProductDetailViewModel.FromProduct(result.Value, NormalizeImageUri);
+            NavigateToProductRequested?.Invoke(product.ProductId);
         }
 
         private async Task PreviousPageAsync()
@@ -510,24 +504,38 @@ namespace hcmus_shop.ViewModels.Store
         public string Name { get; }
     }
 
-    public class StoreProductListItemViewModel
+    public class StoreSortOption
     {
-        private StoreProductListItemViewModel(
+        public StoreSortOption(string key, string label)
+        {
+            Key = key;
+            Label = label;
+        }
+
+        public string Key { get; }
+        public string Label { get; }
+    }
+
+    public class StoreProductCardViewModel
+    {
+        private StoreProductCardViewModel(
             int productId,
+            string badgeText,
             string name,
-            string sku,
             string brandName,
             double sellingPrice,
             int stockQuantity,
             IEnumerable<ProductImageDto> images,
+            IEnumerable<string> highlights,
             Func<string?, Uri?> imageResolver)
         {
             ProductId = productId;
+            BadgeText = badgeText;
             Name = name;
-            Sku = sku;
             BrandName = brandName;
             PriceDisplay = sellingPrice.ToString("N0", CultureInfo.InvariantCulture) + " VND";
-            StockDisplay = stockQuantity > 0 ? $"{stockQuantity} in stock" : "Out of stock";
+            AvailabilityText = stockQuantity > 0 ? $"{stockQuantity} ready to ship" : "Out of stock";
+            Highlights = [.. highlights.Take(4)];
 
             var firstImage = images
                 .OrderBy(image => image.DisplayOrder)
@@ -538,88 +546,80 @@ namespace hcmus_shop.ViewModels.Store
         }
 
         public int ProductId { get; }
+        public string BadgeText { get; }
         public string Name { get; }
-        public string Sku { get; }
         public string BrandName { get; }
         public string PriceDisplay { get; }
-        public string StockDisplay { get; }
+        public string AvailabilityText { get; }
+        public IReadOnlyList<string> Highlights { get; }
         public Uri? ThumbnailUri { get; }
         public bool HasThumbnail => ThumbnailUri is not null;
 
-        public static StoreProductListItemViewModel FromProduct(ProductDto product, Func<string?, Uri?> imageResolver)
+        public static StoreProductCardViewModel FromProduct(
+            ProductDto product,
+            Func<string?, Uri?> imageResolver,
+            string badgeText)
         {
-            return new StoreProductListItemViewModel(
+            return new StoreProductCardViewModel(
                 product.ProductId,
+                badgeText,
                 product.Name,
-                product.Sku,
                 product.Brand?.Name ?? "Unknown brand",
                 product.SellingPrice,
                 product.StockQuantity,
                 product.Images,
+                BuildHighlights(product),
                 imageResolver);
         }
-    }
 
-    public class StoreProductDetailViewModel
-    {
-        private StoreProductDetailViewModel(ProductDto product, Func<string?, Uri?> imageResolver)
+        private static IEnumerable<string> BuildHighlights(ProductDto product)
         {
-            ProductId = product.ProductId;
-            Name = product.Name;
-            Sku = product.Sku;
-            BrandName = product.Brand?.Name ?? "Unknown brand";
-            SeriesName = product.Series?.Name ?? "Standard lineup";
-            Description = string.IsNullOrWhiteSpace(product.Description) ? "No description provided." : product.Description;
-            WarrantyDisplay = $"{product.WarrantyMonths} months";
-            CategoriesDisplay = product.Categories.Count == 0
-                ? "No categories"
-                : string.Join(", ", product.Categories.Select(category => category.Name));
-            SellingPriceDisplay = product.SellingPrice.ToString("N0", CultureInfo.InvariantCulture) + " VND";
-            StockDisplay = $"{product.StockQuantity} units ready";
-            AvailableSerialCount = product.Instances.Count(instance => string.Equals(instance.Status, "Available", StringComparison.OrdinalIgnoreCase));
-            SpecificationsDisplay = FormatSpecifications(product.Specifications);
+            var lines = new List<string>();
 
-            var firstImage = product.Images
-                .OrderBy(image => image.DisplayOrder)
-                .Select(image => image.ImageUrl)
-                .FirstOrDefault(url => !string.IsNullOrWhiteSpace(url));
-
-            PrimaryImageUri = imageResolver(firstImage);
-        }
-
-        public int ProductId { get; }
-        public string Name { get; }
-        public string Sku { get; }
-        public string BrandName { get; }
-        public string SeriesName { get; }
-        public string Description { get; }
-        public string CategoriesDisplay { get; }
-        public string WarrantyDisplay { get; }
-        public string SellingPriceDisplay { get; }
-        public string StockDisplay { get; }
-        public int AvailableSerialCount { get; }
-        public string SpecificationsDisplay { get; }
-        public Uri? PrimaryImageUri { get; }
-        public bool HasPrimaryImage => PrimaryImageUri is not null;
-
-        public static StoreProductDetailViewModel FromProduct(ProductDto product, Func<string?, Uri?> imageResolver)
-        {
-            return new StoreProductDetailViewModel(product, imageResolver);
-        }
-
-        private static string FormatSpecifications(object? specifications)
-        {
-            if (specifications is null)
+            if (product.Specifications is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.Object)
             {
-                return "No technical specifications provided.";
+                var orderedKeys = new[] { "cpu", "processor", "gpu", "graphics", "ram", "memory", "display", "screen" };
+                foreach (var key in orderedKeys)
+                {
+                    if (!TryGetPropertyIgnoreCase(jsonElement, key, out var property))
+                    {
+                        continue;
+                    }
+
+                    var value = property.ToString();
+                    if (!string.IsNullOrWhiteSpace(value) && !lines.Contains(value, StringComparer.OrdinalIgnoreCase))
+                    {
+                        lines.Add(value);
+                    }
+                }
             }
 
-            if (specifications is JsonElement jsonElement)
+            if (lines.Count == 0)
             {
-                return jsonElement.ToString();
+                if (product.Categories.Count > 0)
+                {
+                    lines.Add(string.Join(" / ", product.Categories.Select(category => category.Name)));
+                }
+
+                lines.Add($"{product.WarrantyMonths} month warranty");
             }
 
-            return specifications.ToString() ?? "No technical specifications provided.";
+            return lines.Take(4);
+        }
+
+        private static bool TryGetPropertyIgnoreCase(JsonElement element, string propertyName, out JsonElement property)
+        {
+            foreach (var candidate in element.EnumerateObject())
+            {
+                if (string.Equals(candidate.Name, propertyName, StringComparison.OrdinalIgnoreCase))
+                {
+                    property = candidate.Value;
+                    return true;
+                }
+            }
+
+            property = default;
+            return false;
         }
     }
 }

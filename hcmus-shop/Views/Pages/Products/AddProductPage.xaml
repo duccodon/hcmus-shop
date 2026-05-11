@@ -39,20 +39,18 @@
                     </StackPanel>
                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
                         <Button
-                            Style="{StaticResource PillButtonStyle}"
+                            Style="{StaticResource GhostButtonStyle}"
                             Command="{x:Bind ViewModel.DiscardDraftCommand}"
                             Visibility="{x:Bind ViewModel.HasSavedDraft, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74D;" />
                                 <TextBlock Text="Discard Draft" Style="{StaticResource FieldLabelStyle}" />
                             </StackPanel>
                         </Button>
                         <Button
-                            Style="{StaticResource PrimaryPillButtonStyle}"
+                            Style="{StaticResource PrimaryButtonStyle}"
                             Command="{x:Bind ViewModel.SaveProductCommand}"
-                            IsEnabled="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource InverseBooleanConverter}}"
-                            Background="{StaticResource LoginPrimaryBrush}"
-                            Foreground="White">
+                            IsEnabled="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource InverseBooleanConverter}}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE73E;" />
                                 <TextBlock Text="Add Product" Style="{StaticResource FieldLabelStyle}" />
@@ -94,10 +92,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <Border
-                            Background="{StaticResource CardBackground}"
-                            CornerRadius="16"
-                            Padding="16">
+                        <Border Style="{StaticResource FormCardBorderStyle}">
                             <Grid RowSpacing="12">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -200,11 +195,7 @@
                                 </Grid>
                             </Grid>
                         </Border>
-                        <Border
-                            Grid.Row="1"
-                            Background="{StaticResource CardBackground}"
-                            CornerRadius="16"
-                            Padding="16">
+                        <Border Grid.Row="1" Style="{StaticResource FormCardBorderStyle}">
                             <Grid RowSpacing="12">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -258,10 +249,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <Border
-                            Background="{StaticResource CardBackground}"
-                            CornerRadius="16"
-                            Padding="16">
+                        <Border Style="{StaticResource FormCardBorderStyle}">
                             <Grid RowSpacing="12">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -269,14 +257,7 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <TextBlock Text="Upload Img" Style="{StaticResource CardTitleStyle}" />
-                                <Border
-                                    Grid.Row="1"
-                                    CornerRadius="12"
-                                    Background="#FFEAF4E8"
-                                    BorderBrush="#22000000"
-                                    BorderThickness="1"
-                                    MinHeight="290"
-                                    Padding="8">
+                                <Border Grid.Row="1" MinHeight="290" Style="{StaticResource ImageUploadSurfaceStyle}">
                                     <Grid>
                                         <Image
                                             Source="{x:Bind ViewModel.MainPreview.Bitmap, Mode=OneWay}"
@@ -287,11 +268,7 @@
                                             VerticalAlignment="Center"
                                             Spacing="10"
                                             Visibility="{x:Bind ViewModel.HasMainPreview, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                                            <Border
-                                                Width="110"
-                                                Height="110"
-                                                CornerRadius="55"
-                                                Background="{StaticResource ImageUploadPlaceholderBackground}">
+                                            <Border Style="{StaticResource ImagePlaceholderCircleStyle}">
                                                 <FontIcon
                                                     FontFamily="Segoe Fluent Icons"
                                                     Glyph="&#xEC8A;"
@@ -310,12 +287,9 @@
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
                                     <Button
-                                        Width="72"
-                                        Height="72"
-                                        Style="{StaticResource GhostButtonStyle}"
+                                        Style="{StaticResource ImageUploadAddButtonStyle}"
                                         Click="AddImageButton_Click"
-                                        Background="{StaticResource ImageUploadButtonBackground}"
-                                        Foreground="{StaticResource LoginPrimaryBrush}">
+                                        >
                                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE710;" FontSize="18" />
                                     </Button>
                                     <ScrollViewer
@@ -334,13 +308,7 @@
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="vm:ImagePreview">
                                                     <Button
-                                                        Width="72"
-                                                        Height="72"
-                                                        Padding="0"
-                                                        Background="{StaticResource ImageUploadPreviewBackground}"
-                                                        BorderBrush="{StaticResource TableRowBorder}"
-                                                        BorderThickness="1"
-                                                        CornerRadius="8"
+                                                        Style="{StaticResource ImageUploadPreviewButtonStyle}"
                                                         Command="{Binding DataContext.SelectPreviewCommand, ElementName=Root}"
                                                         CommandParameter="{x:Bind}">
                                                         <Image Source="{x:Bind Bitmap, Mode=OneWay}" Stretch="UniformToFill" />
@@ -352,11 +320,7 @@
                                 </Grid>
                             </Grid>
                         </Border>
-                        <Border
-                            Grid.Row="1"
-                            Background="{StaticResource CardBackground}"
-                            CornerRadius="16"
-                            Padding="16">
+                        <Border Grid.Row="1" Style="{StaticResource FormCardBorderStyle}">
                             <Grid RowSpacing="12">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -380,11 +344,9 @@
                                     Grid.Row="3"
                                     Margin="0,6,0,0"
                                     Content="{x:Bind ViewModel.AddCategoryButtonText, Mode=OneWay}"
-                                    Style="{StaticResource PrimaryPillButtonStyle}"
+                                    Style="{StaticResource PrimaryButtonStyle}"
                                     HorizontalAlignment="Left"
-                                    Command="{x:Bind ViewModel.AddCategoryCommand}"
-                                    Background="{StaticResource LoginPrimaryBrush}"
-                                    Foreground="White" />
+                                    Command="{x:Bind ViewModel.AddCategoryCommand}" />
 
                                 <TextBlock
                                     Grid.Row="3"

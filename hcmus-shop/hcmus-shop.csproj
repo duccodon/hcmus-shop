@@ -68,6 +68,7 @@
 		<Page Include="Views\Pages\Products\ProductsPage.xaml" />
 		<Page Include="Views\Pages\Promotions\PromotionsPage.xaml" />
 		<Page Include="Views\Pages\Store\StorePage.xaml" />
+		<Page Include="Views\Pages\Store\StoreDetailPage.xaml" />
 		<Page Include="Views\Pages\Messages\MessagesPage.xaml" />
 		<Page Include="Views\Pages\Settings\**\*.xaml" />
 	</ItemGroup>
@@ -185,6 +186,9 @@
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 		<Page Update="Views\Pages\Store\StorePage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="Views\Pages\Store\StoreDetailPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 	</ItemGroup>

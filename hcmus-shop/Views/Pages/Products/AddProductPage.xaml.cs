@@ -47,6 +47,7 @@ namespace hcmus_shop.Views
         private void AddProductPage_Unloaded(object sender, RoutedEventArgs e)
         {
             ViewModel.StopAutoSave();
+            _ = ViewModel.PersistDraftAsync();
             ViewModel.ProductSaved -= ViewModel_ProductSaved;
             ViewModel.RequestCategoryInputAsync = null;
             Loaded -= AddProductPage_Loaded;

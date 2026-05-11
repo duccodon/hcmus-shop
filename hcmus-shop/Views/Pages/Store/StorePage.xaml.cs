@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using hcmus_shop.ViewModels.Store;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
 
 namespace hcmus_shop.Views
 {
@@ -14,6 +15,7 @@ namespace hcmus_shop.Views
             InitializeComponent();
             ViewModel = Ioc.Default.GetRequiredService<StoreViewModel>();
             DataContext = this;
+            ViewModel.NavigateToProductRequested = NavigateToProduct;
             Loaded += StorePage_Loaded;
             Unloaded += StorePage_Unloaded;
         }
@@ -30,6 +32,12 @@ namespace hcmus_shop.Views
         {
             Loaded -= StorePage_Loaded;
             Unloaded -= StorePage_Unloaded;
+            ViewModel.NavigateToProductRequested = null;
+        }
+
+        private void NavigateToProduct(int productId)
+        {
+            Frame?.Navigate(typeof(StoreDetailPage), productId);
         }
     }
 }

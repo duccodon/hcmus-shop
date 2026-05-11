@@ -27,6 +27,9 @@ namespace hcmus_shop.ViewModels.Promotions
         private int _currentPage = 1;
         private int _selectedPageSize = 10;
         private int _totalCount;
+        private PromotionTableOption? _selectedSortField;
+        private PromotionTableOption? _selectedSortDirection;
+        private string _selectedStatusFilter = "All";
 
         public PromotionsViewModel(IPromotionService promotionService, IAuthService authService)
         {
@@ -42,6 +45,19 @@ namespace hcmus_shop.ViewModels.Promotions
             RankOptions.Add("Silver");
             RankOptions.Add("Gold");
             RankOptions.Add("Diamond");
+            SortFieldOptions.Add(new PromotionTableOption("createdAt", "Created"));
+            SortFieldOptions.Add(new PromotionTableOption("code", "Code"));
+            SortFieldOptions.Add(new PromotionTableOption("discount", "Discount"));
+            SortFieldOptions.Add(new PromotionTableOption("rank", "Eligible Rank"));
+            SortFieldOptions.Add(new PromotionTableOption("startDate", "Start Date"));
+            SortFieldOptions.Add(new PromotionTableOption("endDate", "End Date"));
+            SortDirectionOptions.Add(new PromotionTableOption("asc", "Ascending"));
+            SortDirectionOptions.Add(new PromotionTableOption("desc", "Descending"));
+            StatusFilterOptions.Add("All");
+            StatusFilterOptions.Add("Active");
+            StatusFilterOptions.Add("Inactive");
+            SelectedSortField = SortFieldOptions.FirstOrDefault(option => option.Key == "createdAt") ?? SortFieldOptions.FirstOrDefault();
+            SelectedSortDirection = SortDirectionOptions.FirstOrDefault(option => option.Key == "desc") ?? SortDirectionOptions.FirstOrDefault();
 
             InitializeCommand = new AsyncRelayCommand(InitializeAsync, () => !IsInitialized && !IsLoading);
             AddPromotionCommand = new AsyncRelayCommand(AddPromotionAsync, () => CanManagePromotions && !IsLoading);
@@ -57,6 +73,9 @@ namespace hcmus_shop.ViewModels.Promotions
         public ObservableCollection<int> PageSizeOptions { get; } = [];
         public ObservableCollection<PageButtonItem> PageButtons { get; } = [];
         public ObservableCollection<string> RankOptions { get; } = [];
+        public ObservableCollection<PromotionTableOption> SortFieldOptions { get; } = [];
+        public ObservableCollection<PromotionTableOption> SortDirectionOptions { get; } = [];
+        public ObservableCollection<string> StatusFilterOptions { get; } = [];
 
         public IAsyncRelayCommand InitializeCommand { get; }
         public IAsyncRelayCommand AddPromotionCommand { get; }
@@ -128,6 +147,45 @@ namespace hcmus_shop.ViewModels.Promotions
                 {
                     _currentPage = 1;
                     DebounceSearch();
+                }
+            }
+        }
+
+        public PromotionTableOption? SelectedSortField
+        {
+            get => _selectedSortField;
+            set
+            {
+                if (SetProperty(ref _selectedSortField, value) && IsInitialized)
+                {
+                    _currentPage = 1;
+                    _ = LoadPromotionsAsync();
+                }
+            }
+        }
+
+        public PromotionTableOption? SelectedSortDirection
+        {
+            get => _selectedSortDirection;
+            set
+            {
+                if (SetProperty(ref _selectedSortDirection, value) && IsInitialized)
+                {
+                    _currentPage = 1;
+                    _ = LoadPromotionsAsync();
+                }
+            }
+        }
+
+        public string SelectedStatusFilter
+        {
+            get => _selectedStatusFilter;
+            set
+            {
+                if (SetProperty(ref _selectedStatusFilter, value) && IsInitialized)
+                {
+                    _currentPage = 1;
+                    _ = LoadPromotionsAsync();
                 }
             }
         }
@@ -391,7 +449,7 @@ namespace hcmus_shop.ViewModels.Promotions
                 }
 
                 Promotions.Clear();
-                foreach (var promotion in page.Items)
+                foreach (var promotion in ApplyPromotionTableOperations(page.Items))
                 {
                     var startDate = ParsePromotionDate(promotion.StartDate);
                     var endDate = ParsePromotionDate(promotion.EndDate);
@@ -414,6 +472,41 @@ namespace hcmus_shop.ViewModels.Promotions
             {
                 IsLoading = false;
             }
+        }
+
+        private IEnumerable<PromotionDto> ApplyPromotionTableOperations(IEnumerable<PromotionDto> items)
+        {
+            IEnumerable<PromotionDto> query = items;
+
+            query = SelectedStatusFilter switch
+            {
+                "Active" => query.Where(item => item.IsActive),
+                "Inactive" => query.Where(item => !item.IsActive),
+                _ => query
+            };
+
+            var descending = string.Equals(SelectedSortDirection?.Key, "desc", StringComparison.OrdinalIgnoreCase);
+            query = (SelectedSortField?.Key ?? "createdAt") switch
+            {
+                "createdAt" => descending
+                    ? query.OrderByDescending(item => ParsePromotionDate(item.CreatedAt))
+                    : query.OrderBy(item => ParsePromotionDate(item.CreatedAt)),
+                "discount" => descending
+                    ? query.OrderByDescending(item => item.DiscountPercent ?? item.DiscountAmount ?? 0)
+                    : query.OrderBy(item => item.DiscountPercent ?? item.DiscountAmount ?? 0),
+                "rank" => descending
+                    ? query.OrderByDescending(item => item.MinimumCustomerRank)
+                    : query.OrderBy(item => item.MinimumCustomerRank),
+                "startDate" => descending
+                    ? query.OrderByDescending(item => ParsePromotionDate(item.StartDate))
+                    : query.OrderBy(item => ParsePromotionDate(item.StartDate)),
+                "endDate" => descending
+                    ? query.OrderByDescending(item => ParsePromotionDate(item.EndDate))
+                    : query.OrderBy(item => ParsePromotionDate(item.EndDate)),
+                _ => descending ? query.OrderByDescending(item => item.Code) : query.OrderBy(item => item.Code),
+            };
+
+            return query;
         }
 
         private void DebounceSearch()
@@ -618,5 +711,17 @@ namespace hcmus_shop.ViewModels.Promotions
         public DateTimeOffset StartDate { get; init; }
         public DateTimeOffset EndDate { get; init; }
         public bool IsActive { get; init; }
+    }
+
+    public class PromotionTableOption
+    {
+        public PromotionTableOption(string key, string label)
+        {
+            Key = key;
+            Label = label;
+        }
+
+        public string Key { get; }
+        public string Label { get; }
     }
 }
