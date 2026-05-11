@@ -13,6 +13,11 @@ export const promotionResolver = {
       parent.discountPercent != null ? Number(parent.discountPercent) : null,
     discountAmount: (parent: { discountAmount: Prisma.Decimal | null }) =>
       parent.discountAmount != null ? Number(parent.discountAmount) : null,
+    startDate: (parent: { startDate: Date }) => parent.startDate.toISOString(),
+    endDate: (parent: { endDate: Date }) => parent.endDate.toISOString(),
+    createdAt: (parent: { createdAt: Date }) => parent.createdAt.toISOString(),
+    updatedAt: (parent: { updatedAt: Date | null }) =>
+      parent.updatedAt != null ? parent.updatedAt.toISOString() : null,
   },
 
   Query: {

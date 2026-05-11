@@ -74,9 +74,19 @@ namespace hcmus_shop.Views
                 Date = startDate
             };
 
+            var startTimePicker = new TimePicker
+            {
+                Time = startDate.TimeOfDay
+            };
+
             var endPicker = new DatePicker
             {
                 Date = endDate
+            };
+
+            var endTimePicker = new TimePicker
+            {
+                Time = endDate.TimeOfDay
             };
 
             var activeSwitch = new ToggleSwitch
@@ -100,6 +110,7 @@ namespace hcmus_shop.Views
                     validationText,
                     new TextBlock { Text = "Code" },
                     codeBox,
+                    activeSwitch,
                     new TextBlock { Text = "Discount Percent (set one discount field only)" },
                     percentBox,
                     new TextBlock { Text = "Discount Amount" },
@@ -108,16 +119,26 @@ namespace hcmus_shop.Views
                     minimumRankBox,
                     new TextBlock { Text = "Start Date" },
                     startPicker,
+                    new TextBlock { Text = "Start Time" },
+                    startTimePicker,
                     new TextBlock { Text = "End Date" },
                     endPicker,
-                    activeSwitch
+                    new TextBlock { Text = "End Time" },
+                    endTimePicker
                 }
+            };
+
+            var scrollViewer = new ScrollViewer
+            {
+                Content = panel,
+                MaxHeight = 560,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto
             };
 
             var dialog = new ContentDialog
             {
                 Title = state.IsEditMode ? "Edit Promotion" : "Add Promotion",
-                Content = panel,
+                Content = scrollViewer,
                 PrimaryButtonText = state.IsEditMode ? "Save" : "Create",
                 CloseButtonText = "Cancel",
                 DefaultButton = ContentDialogButton.Primary,
@@ -132,7 +153,9 @@ namespace hcmus_shop.Views
                     amountBox,
                     minimumRankBox,
                     startPicker,
+                    startTimePicker,
                     endPicker,
+                    endTimePicker,
                     activeSwitch);
 
                 if (TryValidateEditorInput(draft, out var validationError))
@@ -159,7 +182,9 @@ namespace hcmus_shop.Views
                 amountBox,
                 minimumRankBox,
                 startPicker,
+                startTimePicker,
                 endPicker,
+                endTimePicker,
                 activeSwitch);
         }
 
@@ -185,7 +210,9 @@ namespace hcmus_shop.Views
             NumberBox amountBox,
             ComboBox minimumRankBox,
             DatePicker startPicker,
+            TimePicker startTimePicker,
             DatePicker endPicker,
+            TimePicker endTimePicker,
             ToggleSwitch activeSwitch)
         {
             return new PromotionEditorResult
@@ -194,8 +221,8 @@ namespace hcmus_shop.Views
                 DiscountPercent = percentBox.Value > 0 ? percentBox.Value : null,
                 DiscountAmount = amountBox.Value > 0 ? amountBox.Value : null,
                 MinimumCustomerRank = minimumRankBox.SelectedItem as string,
-                StartDate = startPicker.Date,
-                EndDate = endPicker.Date,
+                StartDate = CombineDateAndTime(startPicker.Date, startTimePicker.Time),
+                EndDate = CombineDateAndTime(endPicker.Date, endTimePicker.Time),
                 IsActive = activeSwitch.IsOn
             };
         }
@@ -248,6 +275,19 @@ namespace hcmus_shop.Views
             }
 
             return value;
+        }
+
+        private static DateTimeOffset CombineDateAndTime(DateTimeOffset date, TimeSpan time)
+        {
+            var localDateTime = new DateTime(
+                date.Year,
+                date.Month,
+                date.Day,
+                time.Hours,
+                time.Minutes,
+                time.Seconds);
+
+            return new DateTimeOffset(localDateTime, TimeZoneInfo.Local.GetUtcOffset(localDateTime));
         }
     }
 }
