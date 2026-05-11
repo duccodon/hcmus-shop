@@ -20,10 +20,12 @@ namespace hcmus_shop.ViewModels.Products
         private readonly IBrandService _brandService;
         private readonly ICategoryService _categoryService;
         private readonly IConfigService _configService;
+        private readonly ISettingsService _settingsService;
 
         private CancellationTokenSource? _searchDebounceCts;
         private string _searchQuery = string.Empty;
-        private int _selectedPageSize = 10;
+        private const int DefaultPageSize = 10;
+        private int _selectedPageSize = DefaultPageSize;
         private bool _isAllOnPageSelected;
         private int _currentPage = 1;
         private int _totalCount;
@@ -48,13 +50,21 @@ namespace hcmus_shop.ViewModels.Products
             IProductImportService productImportService,
             IBrandService brandService,
             ICategoryService categoryService,
-            IConfigService configService)
+            IConfigService configService,
+            ISettingsService settingsService)
         {
             _productService = productService;
             _productImportService = productImportService;
             _brandService = brandService;
             _categoryService = categoryService;
             _configService = configService;
+            _settingsService = settingsService;
+
+            _selectedPageSize = NormalizePageSize(_settingsService.PageSize);
+            if (_settingsService.PageSize != _selectedPageSize)
+            {
+                _settingsService.PageSize = _selectedPageSize;
+            }
 
             AddProductCommand = new RelayCommand(AddProduct);
             EditProductCommand = new RelayCommand<int>(EditProduct);
@@ -86,7 +96,7 @@ namespace hcmus_shop.ViewModels.Products
         }
 
         public ObservableCollection<ProductRowViewModel> PagedProducts { get; } = [];
-        public ObservableCollection<int> PageSizeOptions { get; } = [10, 20, 50];
+        public ObservableCollection<int> PageSizeOptions { get; } = [5, 10, 15, 20];
         public ObservableCollection<PageButtonItem> PageButtons { get; } = [];
         public ObservableCollection<FilterOptionViewModel> CategoryOptions { get; } = [];
         public ObservableCollection<FilterOptionViewModel> BrandOptions { get; } = [];
@@ -139,8 +149,10 @@ namespace hcmus_shop.ViewModels.Products
             get => _selectedPageSize;
             set
             {
-                if (SetProperty(ref _selectedPageSize, value))
+                var normalizedValue = NormalizePageSize(value);
+                if (SetProperty(ref _selectedPageSize, normalizedValue))
                 {
+                    _settingsService.PageSize = normalizedValue;
                     _currentPage = 1;
                     _ = LoadProductsAsync();
                 }
@@ -1060,6 +1072,11 @@ namespace hcmus_shop.ViewModels.Products
             }
 
             return pages;
+        }
+
+        private static int NormalizePageSize(int value)
+        {
+            return value is 5 or 10 or 15 or 20 ? value : DefaultPageSize;
         }
 
         private List<int>? GetSelectedAdvancedBrandIds()

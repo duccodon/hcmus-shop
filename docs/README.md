@@ -7,6 +7,7 @@ All project documentation lives here. Different docs for different audiences.
 | If you are... | Read |
 |---------------|------|
 | **A future maintainer of Dev A's work** | [HANDOVER.md](HANDOVER.md) |
+| **A future maintainer of Dev B's work** | [dev-b-status.md](dev-b-status.md) |
 | **New to WinUI / MVVM / DI** | [client-guide/README.md](client-guide/README.md) |
 | **Looking for a specific file** | [IMPLEMENTATION-MAP.md](IMPLEMENTATION-MAP.md) |
 | **Debugging an issue** | [FAQ.md](FAQ.md) → [FLOWS.md](FLOWS.md) |
@@ -19,6 +20,7 @@ All project documentation lives here. Different docs for different audiences.
 docs/
 ├── README.md                           ← you are here
 ├── HANDOVER.md                         ← Dev A handover (start here for anything Dev A built)
+├── dev-b-status.md                     ← Dev B Products/Promotions status + gaps
 ├── IMPLEMENTATION-MAP.md               ← feature → file path lookup
 ├── FLOWS.md                            ← step-by-step runtime flows for each user action
 ├── FAQ.md                              ← common questions and answers
