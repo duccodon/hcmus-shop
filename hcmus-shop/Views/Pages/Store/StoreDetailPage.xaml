@@ -50,7 +50,8 @@
 
                             <StackPanel Spacing="14">
                                 <Border
-                                    MinHeight="360"
+                                    Width="520"
+                                    Height="360"
                                     Style="{StaticResource FormCardBorderStyle}">
                                     <Grid>
                                         <Image
@@ -84,7 +85,7 @@
                                                     Style="{StaticResource ImageUploadPreviewButtonStyle}"
                                                     Command="{Binding DataContext.ViewModel.SelectImageCommand, ElementName=Root}"
                                                     CommandParameter="{x:Bind}">
-                                                    <Image Stretch="UniformToFill">
+                                                    <Image Width="88" Height="88" Stretch="UniformToFill">
                                                         <Image.Source>
                                                             <BitmapImage UriSource="{x:Bind ImageUri, Mode=OneWay}" />
                                                         </Image.Source>

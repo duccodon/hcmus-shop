@@ -78,9 +78,10 @@
 
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="1.6*" />
+                                    <ColumnDefinition Width="1.4*" />
                                     <ColumnDefinition Width="1*" />
-                                    <ColumnDefinition Width="1.2*" />
+                                    <ColumnDefinition Width="1.1*" />
+                                    <ColumnDefinition Width="0.9*" />
                                     <ColumnDefinition Width="0.9*" />
                                     <ColumnDefinition Width="1*" />
                                 </Grid.ColumnDefinitions>
@@ -94,30 +95,35 @@
                                     <TextBlock Text="Email" Style="{StaticResource TableHeaderTextStyle}" />
                                 </Border>
                                 <Border Grid.Column="3" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
-                                    <TextBlock Text="Rank" Style="{StaticResource TableHeaderTextStyle}" />
+                                    <TextBlock Text="Loyalty Points" Style="{StaticResource TableHeaderTextStyle}" />
                                 </Border>
                                 <Border Grid.Column="4" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Rank" Style="{StaticResource TableHeaderTextStyle}" />
+                                </Border>
+                                <Border Grid.Column="5" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
                                     <TextBlock Text="Action" Style="{StaticResource TableHeaderTextStyle}" />
                                 </Border>
                             </Grid>
 
-                            <ScrollViewer Grid.Row="1">
-                                <ItemsControl ItemsSource="{x:Bind ViewModel.Customers, Mode=OneWay}">
-                                    <ItemsControl.ItemTemplate>
+                            <ListView Grid.Row="1"
+                                      x:Name="CustomersListView"
+                                      ItemsSource="{x:Bind ViewModel.Customers, Mode=OneWay}"
+                                      IsItemClickEnabled="True"
+                                      ItemClick="CustomersListView_ItemClick"
+                                      SelectionMode="None">
+                                    <ListView.ItemTemplate>
                                         <DataTemplate x:DataType="dto:CustomerDto">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="1.6*" />
+                                                    <ColumnDefinition Width="1.4*" />
                                                     <ColumnDefinition Width="1*" />
-                                                    <ColumnDefinition Width="1.2*" />
+                                                    <ColumnDefinition Width="1.1*" />
+                                                    <ColumnDefinition Width="0.9*" />
                                                     <ColumnDefinition Width="0.9*" />
                                                     <ColumnDefinition Width="1*" />
                                                 </Grid.ColumnDefinitions>
                                                 <Border Grid.Column="0" Style="{StaticResource TableRowBorderStyle}">
-                                                    <StackPanel Spacing="2">
-                                                        <TextBlock Text="{x:Bind Name}" Style="{StaticResource BodyTextStyle}" />
-                                                        <TextBlock Text="{x:Bind LoyaltyPoints, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" />
-                                                    </StackPanel>
+                                                    <TextBlock Text="{x:Bind Name}" Style="{StaticResource BodyTextStyle}" />
                                                 </Border>
                                                 <Border Grid.Column="1" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
                                                     <TextBlock Text="{x:Bind Phone}" Style="{StaticResource BodyTextStyle}" />
@@ -126,14 +132,17 @@
                                                     <TextBlock Text="{x:Bind Email}" Style="{StaticResource BodyTextStyle}" />
                                                 </Border>
                                                 <Border Grid.Column="3" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <TextBlock Text="{x:Bind LoyaltyPoints, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+                                                </Border>
+                                                <Border Grid.Column="4" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
                                                     <Border Padding="12,6" CornerRadius="10" Background="{StaticResource SelectionHighlight}" HorizontalAlignment="Left">
                                                         <TextBlock Text="{x:Bind Rank}" Style="{StaticResource StatusBadgeTextStyle}" Foreground="{StaticResource TextPrimary}" />
                                                     </Border>
                                                 </Border>
-                                                <Border Grid.Column="4" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                <Border Grid.Column="5" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
                                                     <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                                                         <Button
-                                                            Content="View"
+                                                            Content="Update"
                                                             Style="{StaticResource GhostButtonStyle}"
                                                             Command="{Binding DataContext.ViewModel.OpenCustomerDetailCommand, ElementName=Root}"
                                                             CommandParameter="{Binding}"
@@ -153,9 +162,8 @@
                                                 </Border>
                                             </Grid>
                                         </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
+                                    </ListView.ItemTemplate>
+                            </ListView>
                         </Grid>
 
                         <components:PaginationFooter

@@ -18,6 +18,7 @@ import { promotionResolver } from "./features/promotion/promotion.resolver";
 import { customerResolver } from "./features/customer/customer.resolver";
 import { orderResolver } from "./features/order/order.resolver";
 import { reportResolver } from "./features/report/report.resolver";
+import { userResolver } from "./features/user/user.resolver";
 import { uploadRouter } from "./features/upload/upload.routes";
 import { backupRouter } from "./features/backup/backup.routes";
 import { healthRouter } from "./features/health/health.routes";
@@ -38,6 +39,7 @@ const typeDefs = [
   loadTypeDef("customer/customer.typeDef.graphql"),
   loadTypeDef("order/order.typeDef.graphql"),
   loadTypeDef("report/report.typeDef.graphql"),
+  loadTypeDef("user/user.typeDef.graphql"),
 ].join("\n");
 
 // Merge resolvers by type (Query, Mutation, etc.)
@@ -63,7 +65,8 @@ const resolvers = mergeResolvers(
   promotionResolver,
   customerResolver,
   orderResolver,
-  reportResolver
+  reportResolver,
+  userResolver
 );
 
 async function main() {

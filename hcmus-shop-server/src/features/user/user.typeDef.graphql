@@ -1,0 +1,31 @@
+type UserPage {
+  items: [User!]!
+  totalCount: Int!
+  page: Int!
+  pageSize: Int!
+}
+
+input CreateUserInput {
+  username: String!
+  fullName: String!
+  password: String!
+  role: String!
+}
+
+input UpdateUserInput {
+  username: String!
+  fullName: String!
+  password: String
+  role: String!
+}
+
+type Query {
+  users(search: String, role: String, page: Int = 1, pageSize: Int = 10): UserPage!
+  user(userId: ID!): User
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!): User!
+  updateUser(userId: ID!, input: UpdateUserInput!): User!
+  deleteUser(userId: ID!): Boolean!
+}

@@ -22,6 +22,7 @@ namespace hcmus_shop.ViewModels.Products
         private readonly ICategoryService _categoryService;
         private readonly ISeriesService _seriesService;
         private readonly IFileUploadService _fileUploadService;
+        private readonly IConfigService _configService;
 
         private int _productId;
         private bool _isInitialized;
@@ -48,13 +49,15 @@ namespace hcmus_shop.ViewModels.Products
             IBrandService brandService,
             ICategoryService categoryService,
             ISeriesService seriesService,
-            IFileUploadService fileUploadService)
+            IFileUploadService fileUploadService,
+            IConfigService configService)
         {
             _productService = productService;
             _brandService = brandService;
             _categoryService = categoryService;
             _seriesService = seriesService;
             _fileUploadService = fileUploadService;
+            _configService = configService;
 
             SaveProductCommand = new AsyncRelayCommand(SaveProductAsync, CanSaveOrDelete);
             DeleteProductCommand = new AsyncRelayCommand(DeleteProductAsync, CanSaveOrDelete);
@@ -66,6 +69,7 @@ namespace hcmus_shop.ViewModels.Products
         public ObservableCollection<LookupOptionViewModel> SeriesOptions { get; } = [];
         public ObservableCollection<CategoryOptionViewModel> CategoryOptions { get; } = [];
         public ObservableCollection<string> ImageUrls { get; } = [];
+        public ObservableCollection<ProductImagePreviewItemViewModel> ImagePreviews { get; } = [];
         public ObservableCollection<PendingImageFileViewModel> PendingImageFiles { get; } = [];
 
         public IAsyncRelayCommand SaveProductCommand { get; }
@@ -319,6 +323,7 @@ namespace hcmus_shop.ViewModels.Products
                     ImageUrls.Add(image.ImageUrl);
                 }
             }
+            SyncImagePreviews();
         }
 
         private async Task LoadSeriesOptionsAsync()
@@ -484,6 +489,7 @@ namespace hcmus_shop.ViewModels.Products
 
             ImageUrls.Add(value);
             NewImageUrl = string.Empty;
+            SyncImagePreviews();
         }
 
         public void AddPendingImageFile(StorageFile file)
@@ -520,6 +526,40 @@ namespace hcmus_shop.ViewModels.Products
             }
 
             ImageUrls.Remove(imageUrl);
+            SyncImagePreviews();
+        }
+
+        private void SyncImagePreviews()
+        {
+            ImagePreviews.Clear();
+            foreach (var imageUrl in ImageUrls)
+            {
+                ImagePreviews.Add(new ProductImagePreviewItemViewModel(imageUrl, NormalizeImageUri(imageUrl)));
+            }
+        }
+
+        private Uri? NormalizeImageUri(string? imageUrl)
+        {
+            if (string.IsNullOrWhiteSpace(imageUrl))
+            {
+                return null;
+            }
+
+            if (Uri.TryCreate(imageUrl, UriKind.Absolute, out var absoluteUri))
+            {
+                return absoluteUri;
+            }
+
+            if (!Uri.TryCreate(_configService.GetServerUrl(), UriKind.Absolute, out var graphQlUri))
+            {
+                return null;
+            }
+
+            var baseOrigin = new Uri(graphQlUri.GetLeftPart(UriPartial.Authority));
+            var normalizedPath = imageUrl.StartsWith("/", StringComparison.Ordinal) ? imageUrl : $"/{imageUrl}";
+            return Uri.TryCreate(baseOrigin, normalizedPath, out var resolvedUri)
+                ? resolvedUri
+                : null;
         }
 
         private bool CanSaveOrDelete()
@@ -540,9 +580,24 @@ namespace hcmus_shop.ViewModels.Products
         {
             File = file;
             Name = file.Name;
+            PreviewUri = new Uri(file.Path, UriKind.Absolute);
         }
 
         public StorageFile File { get; }
         public string Name { get; }
+        public Uri PreviewUri { get; }
+    }
+
+    public class ProductImagePreviewItemViewModel
+    {
+        public ProductImagePreviewItemViewModel(string imageUrl, Uri? previewUri)
+        {
+            ImageUrl = imageUrl;
+            PreviewUri = previewUri;
+        }
+
+        public string ImageUrl { get; }
+        public Uri? PreviewUri { get; }
+        public bool HasPreview => PreviewUri is not null;
     }
 }

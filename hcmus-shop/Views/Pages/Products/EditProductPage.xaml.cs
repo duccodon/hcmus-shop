@@ -103,6 +103,11 @@ namespace hcmus_shop.Views
             Frame?.Navigate(typeof(ProductsPage));
         }
 
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            BackButton_Click(sender, e);
+        }
+
         private async void PickLocalImagesButton_Click(object sender, RoutedEventArgs e)
         {
             var picker = new FileOpenPicker();

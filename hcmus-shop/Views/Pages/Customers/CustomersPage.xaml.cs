@@ -90,6 +90,14 @@ namespace hcmus_shop.Views
             Frame?.Navigate(typeof(CustomerDetailPage), customerId);
         }
 
+        private void CustomersListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is CustomerDto customer && ViewModel.CanViewCustomerDetails)
+            {
+                NavigateToCustomerDetail(customer.CustomerId);
+            }
+        }
+
         private async Task<bool> ShowDeleteConfirmAsync(CustomerDto customer)
         {
             var dialog = new ContentDialog

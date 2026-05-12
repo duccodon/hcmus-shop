@@ -23,16 +23,14 @@
                 <NavigationViewItem x:Name="ProductsItem" Content="Products" Icon="AllApps" Tag="Products" />
                 <NavigationViewItem x:Name="PromotionsItem" Content="Promotions" Icon="Tag" Tag="Promotions" />
                 <NavigationViewItem x:Name="CustomersItem" Content="Customers" Icon="Contact" Tag="Customers" />
-                <NavigationViewItem x:Name="ReportsItem" Content="Reports" Tag="Reports">
+                <NavigationViewItem x:Name="UsersItem" Content="Sales Users" Tag="Users">
                     <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="View" />
+                        <SymbolIcon Symbol="People" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="AdminItem" Content="Admin" Icon="Admin" Tag="Admin" />
             </NavigationView.MenuItems>
 
             <NavigationView.FooterMenuItems>
-                <NavigationViewItem x:Name="SettingsItem" Content="Settings" Icon="Setting" Tag="Settings" />
                 <NavigationViewItem x:Name="LogoutItem" Content="Log Out" Tag="Logout">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xF3B1;" />
@@ -69,12 +67,5 @@
                      CloseButtonContent="Skip"
                      CloseButtonClick="OnTipSkip" />
 
-        <TeachingTip x:Name="SettingsTip"
-                     Title="Settings"
-                     Subtitle="Adjust page size, restore the last screen, and back up your data."
-                     ActionButtonContent="Done"
-                     ActionButtonClick="OnTipFinish"
-                     CloseButtonContent="Skip"
-                     CloseButtonClick="OnTipSkip" />
     </Grid>
 </Window>

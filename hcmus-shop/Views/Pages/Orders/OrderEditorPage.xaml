@@ -1,0 +1,186 @@
+<Page
+    x:Class="hcmus_shop.Views.OrderEditorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:hcmus_shop.ViewModels.Orders"
+    x:Name="Root">
+    <Grid Background="{StaticResource DashboardBackground}" PointerPressed="Root_PointerPressed">
+        <ScrollViewer>
+            <Grid Margin="24">
+                <Border Background="{StaticResource CardBackground}" CornerRadius="16" Padding="20">
+                    <Grid RowSpacing="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="{x:Bind ViewModel.EditorTitle, Mode=OneWay}" Style="{StaticResource PageTitleStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.AutoSaveStatusText, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" Visibility="{x:Bind ViewModel.HasAutoSaveStatusText, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <Button Content="Discard Draft" Style="{StaticResource GhostButtonStyle}" Command="{x:Bind ViewModel.DiscardDraftCommand}" Visibility="{x:Bind ViewModel.IsEditMode, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                <Button Content="Save" Style="{StaticResource PrimaryButtonStyle}" Command="{x:Bind ViewModel.SaveOrderCommand}" />
+                                <Button Content="Close" Style="{StaticResource GhostButtonStyle}" Click="CloseButton_Click" />
+                            </StackPanel>
+                        </Grid>
+
+                        <InfoBar
+                            Grid.Row="1"
+                            IsOpen="{x:Bind ViewModel.HasEditorError, Mode=OneWay}"
+                            IsClosable="False"
+                            Severity="Error"
+                            Message="{x:Bind ViewModel.EditorErrorMessage, Mode=OneWay}" />
+
+                        <Grid Grid.Row="2" ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1.8*" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Spacing="12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Cart" Style="{StaticResource CardTitleStyle}" />
+                                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.CartSummaryText, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" VerticalAlignment="Center" />
+                                </Grid>
+
+                                <Border Height="1" Background="{StaticResource DividerBrush}" />
+
+                                <AutoSuggestBox
+                                    x:Name="InstanceSuggestBox"
+                                    PlaceholderText="Search products by name or SKU"
+                                    ItemsSource="{x:Bind ViewModel.ProductSuggestions, Mode=OneWay}"
+                                    Text="{x:Bind ViewModel.InstanceSearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    TextChanged="InstanceSuggestBox_TextChanged"
+                                    SuggestionChosen="InstanceSuggestBox_SuggestionChosen"
+                                    QuerySubmitted="InstanceSuggestBox_QuerySubmitted"
+                                    GotFocus="InstanceSuggestBox_GotFocus"
+                                    LostFocus="InstanceSuggestBox_LostFocus">
+                                    <AutoSuggestBox.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:OrderProductSuggestionViewModel">
+                                            <StackPanel Spacing="2">
+                                                <TextBlock Text="{x:Bind DisplayText}" Style="{StaticResource BodyTextStyle}" />
+                                                <TextBlock Text="{x:Bind SecondaryText}" Style="{StaticResource BodySecondaryTextStyle}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </AutoSuggestBox.ItemTemplate>
+                                </AutoSuggestBox>
+
+                                <TextBlock Text="{x:Bind ViewModel.EditorStatusMessage, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" Visibility="{x:Bind ViewModel.IsEditorBusy, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                                <ScrollViewer MaxHeight="620">
+                                    <StackPanel Spacing="12">
+                                        <ItemsControl ItemsSource="{x:Bind ViewModel.CartItems, Mode=OneWay}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:OrderCartItemViewModel">
+                                                    <Border Background="{StaticResource SelectionHighlight}" CornerRadius="16" Padding="16">
+                                                        <Grid ColumnSpacing="12">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel Spacing="6">
+                                                                <TextBlock Text="{x:Bind ProductName, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" TextWrapping="WrapWholeWords" />
+                                                                <TextBlock Text="{x:Bind SerialDisplay, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" />
+                                                                <TextBlock Text="{x:Bind UnitPriceDisplay, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" />
+                                                            </StackPanel>
+
+                                                            <StackPanel Grid.Column="1" Spacing="12" HorizontalAlignment="Right">
+                                                                <Border Background="{StaticResource CardBackground}" CornerRadius="12" Padding="8,6">
+                                                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                                                        <Button Content="-" Style="{StaticResource GhostButtonStyle}" Command="{Binding DataContext.ViewModel.DecreaseQuantityCommand, ElementName=Root}" CommandParameter="{x:Bind}" />
+                                                                        <TextBlock Text="{x:Bind Quantity, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" VerticalAlignment="Center" />
+                                                                        <Button Content="+" Style="{StaticResource GhostButtonStyle}" Command="{Binding DataContext.ViewModel.IncreaseQuantityCommand, ElementName=Root}" CommandParameter="{x:Bind}" />
+                                                                    </StackPanel>
+                                                                </Border>
+                                                                <TextBlock Text="{x:Bind LineTotalDisplay, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" HorizontalAlignment="Right" />
+                                                                <Button Content="Remove" Style="{StaticResource GhostButtonStyle}" Command="{Binding DataContext.ViewModel.RemoveCartItemCommand, ElementName=Root}" CommandParameter="{x:Bind}" />
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+
+                                        <TextBlock
+                                            Text="No products selected yet."
+                                            Style="{StaticResource BodySecondaryTextStyle}"
+                                            Visibility="{x:Bind ViewModel.HasSelectedOrderItems, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Spacing="14">
+                                <TextBlock Text="Order Information" Style="{StaticResource CardTitleStyle}" />
+
+                                <Border Background="{StaticResource SelectionHighlight}" CornerRadius="16" Padding="16">
+                                    <StackPanel Spacing="10">
+                                        <TextBlock Text="Customer" Style="{StaticResource FieldLabelStyle}" />
+                                        <Grid ColumnSpacing="8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <ComboBox
+                                                Style="{StaticResource FormComboBoxStyle}"
+                                                PlaceholderText="Walk-in customer"
+                                                ItemsSource="{x:Bind ViewModel.Customers, Mode=OneWay}"
+                                                DisplayMemberPath="Name"
+                                                SelectedValuePath="CustomerId"
+                                                SelectedValue="{x:Bind ViewModel.EditorCustomerId, Mode=TwoWay}" />
+                                            <Button
+                                                Grid.Column="1"
+                                                Content="+ New customer"
+                                                Style="{StaticResource GhostButtonStyle}"
+                                                Command="{x:Bind ViewModel.CreateInlineCustomerCommand}" />
+                                        </Grid>
+
+                                        <TextBlock Text="Subtotal" Style="{StaticResource FieldLabelStyle}" />
+                                        <TextBlock Text="{x:Bind vm:OrdersViewModel.FormatCurrency(ViewModel.EditorSubtotal), Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+
+                                        <TextBlock Text="Discount" Style="{StaticResource FieldLabelStyle}" />
+                                        <TextBlock Text="{x:Bind vm:OrdersViewModel.FormatCurrency(ViewModel.EditorDiscountAmount), Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+
+                                        <TextBlock Text="Final Amount" Style="{StaticResource FieldLabelStyle}" />
+                                        <TextBlock Text="{x:Bind vm:OrdersViewModel.FormatCurrency(ViewModel.EditorFinalAmount), Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{StaticResource SelectionHighlight}" CornerRadius="16" Padding="16">
+                                    <StackPanel Spacing="10">
+                                        <TextBlock Text="Order Notes" Style="{StaticResource FieldLabelStyle}" />
+                                        <TextBox
+                                            AcceptsReturn="True"
+                                            MinHeight="110"
+                                            Style="{StaticResource FormTextBoxStyle}"
+                                            Text="{x:Bind ViewModel.EditorNotes, Mode=TwoWay}" />
+
+                                        <TextBlock Text="Promotion Code" Style="{StaticResource FieldLabelStyle}" />
+                                        <TextBox
+                                            Style="{StaticResource FormTextBoxStyle}"
+                                            Text="{x:Bind ViewModel.EditorPromotionCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        <Button Content="Apply Promotion" Style="{StaticResource GhostButtonStyle}" Command="{x:Bind ViewModel.ApplyPromotionCommand}" />
+                                        <TextBlock Text="{x:Bind ViewModel.PromotionSummary, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Button Content="Save Order" Style="{StaticResource PrimaryButtonStyle}" Command="{x:Bind ViewModel.SaveOrderCommand}" />
+                                <Button Content="Continue Shopping" Style="{StaticResource GhostButtonStyle}" Click="CloseButton_Click" />
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Page>

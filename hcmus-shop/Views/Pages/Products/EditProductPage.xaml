@@ -21,12 +21,11 @@
                     </Grid.ColumnDefinitions>
 
                     <Button
-                        Padding="12,8"
-                        CornerRadius="8"
+                        Style="{StaticResource GhostButtonStyle}"
                         Click="BackButton_Click">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE72B;" />
-                            <TextBlock Text="Return" />
+                            <TextBlock Text="Back" />
                         </StackPanel>
                     </Button>
 
@@ -37,31 +36,24 @@
                         VerticalAlignment="Center"
                         Spacing="8">
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE70F;" FontSize="18" Foreground="{StaticResource TextPrimary}" />
-                        <TextBlock
-                            Text="Edit Product"
-                            FontSize="28"
-                            FontWeight="SemiBold"
-                            Foreground="{StaticResource TextPrimary}" />
+                        <TextBlock Text="Edit Product" Style="{StaticResource PageTitleStyle}" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
                         <Button
-                            Padding="18,8"
-                            CornerRadius="999"
-                            Command="{x:Bind ViewModel.DeleteProductCommand}"
-                            Background="{StaticResource DangerBackgroundSubtle}">
+                            Style="{StaticResource DangerButtonStyle}"
+                            Command="{x:Bind ViewModel.DeleteProductCommand}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74D;" Foreground="{StaticResource DangerForeground}" />
                                 <TextBlock Text="Delete" FontWeight="SemiBold" Foreground="{StaticResource DangerForeground}" />
                             </StackPanel>
                         </Button>
 
+                        <Button Content="Cancel" Style="{StaticResource GhostButtonStyle}" Click="CancelButton_Click" />
+
                         <Button
-                            Padding="18,8"
-                            CornerRadius="999"
                             Command="{x:Bind ViewModel.SaveProductCommand}"
-                            Background="{StaticResource LoginPrimaryBrush}"
-                            Foreground="White">
+                            Style="{StaticResource PrimaryButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE73E;" />
                                 <TextBlock Text="Save Changes" FontWeight="SemiBold" />
@@ -304,19 +296,29 @@
                                     <ItemsControl ItemsSource="{x:Bind ViewModel.PendingImageFiles, Mode=OneWay}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="productVm:PendingImageFileViewModel">
-                                                <Grid Margin="0,0,0,6">
+                                                <Grid Margin="0,0,0,10">
                                                     <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
                                                         <ColumnDefinition Width="*" />
                                                         <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
+                                                    <Border Width="72" Height="72" CornerRadius="12" Background="{StaticResource SelectionHighlight}">
+                                                        <Image Stretch="UniformToFill">
+                                                            <Image.Source>
+                                                                <BitmapImage UriSource="{x:Bind PreviewUri, Mode=OneWay}" />
+                                                            </Image.Source>
+                                                        </Image>
+                                                    </Border>
                                                     <TextBlock
+                                                        Grid.Column="1"
+                                                        Margin="12,0,0,0"
                                                         Text="{x:Bind Name, Mode=OneWay}"
                                                         VerticalAlignment="Center"
                                                         Foreground="{StaticResource TextSecondary}" />
                                                     <Button
-                                                        Grid.Column="1"
+                                                        Grid.Column="2"
                                                         Margin="8,0,0,0"
-                                                        Padding="8,4"
+                                                        Style="{StaticResource GhostButtonStyle}"
                                                         Click="RemovePendingImageButton_Click"
                                                         Tag="{x:Bind}">
                                                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74D;" Foreground="{StaticResource DangerForeground}" />
@@ -326,30 +328,51 @@
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
 
-                                    <ItemsControl ItemsSource="{x:Bind ViewModel.ImageUrls, Mode=OneWay}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="x:String">
-                                            <Grid Margin="0,0,0,6">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock
-                                                    Text="{x:Bind}"
-                                                    TextWrapping="WrapWholeWords"
-                                                    VerticalAlignment="Center"
-                                                    Foreground="{StaticResource TextPrimary}" />
-                                                <Button
-                                                    Grid.Column="1"
-                                                    Margin="8,0,0,0"
-                                                    Padding="8,4"
-                                                    Command="{Binding DataContext.RemoveImageUrlCommand, ElementName=Root}"
-                                                    CommandParameter="{x:Bind}">
-                                                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74D;" Foreground="{StaticResource DangerForeground}" />
-                                                </Button>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
+                                    <ItemsControl ItemsSource="{x:Bind ViewModel.ImagePreviews, Mode=OneWay}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="productVm:ProductImagePreviewItemViewModel">
+                                                <Grid Margin="0,0,0,10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Width="72" Height="72" CornerRadius="12" Background="{StaticResource SelectionHighlight}">
+                                                        <Grid>
+                                                            <Image
+                                                                Stretch="UniformToFill"
+                                                                Visibility="{x:Bind HasPreview, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                <Image.Source>
+                                                                    <BitmapImage UriSource="{x:Bind PreviewUri, Mode=OneWay}" />
+                                                                </Image.Source>
+                                                            </Image>
+                                                            <FontIcon
+                                                                HorizontalAlignment="Center"
+                                                                VerticalAlignment="Center"
+                                                                FontFamily="Segoe Fluent Icons"
+                                                                Glyph="&#xE7F8;"
+                                                                Foreground="{StaticResource TextSecondary}"
+                                                                Visibility="{x:Bind HasPreview, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                                        </Grid>
+                                                    </Border>
+                                                    <TextBlock
+                                                        Grid.Column="1"
+                                                        Margin="12,0,0,0"
+                                                        Text="{x:Bind ImageUrl, Mode=OneWay}"
+                                                        TextWrapping="WrapWholeWords"
+                                                        VerticalAlignment="Center"
+                                                        Foreground="{StaticResource TextPrimary}" />
+                                                    <Button
+                                                        Grid.Column="2"
+                                                        Margin="8,0,0,0"
+                                                        Style="{StaticResource GhostButtonStyle}"
+                                                        Command="{Binding DataContext.RemoveImageUrlCommand, ElementName=Root}"
+                                                        CommandParameter="{x:Bind ImageUrl}">
+                                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74D;" Foreground="{StaticResource DangerForeground}" />
+                                                    </Button>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                 </StackPanel>
                             </Grid>

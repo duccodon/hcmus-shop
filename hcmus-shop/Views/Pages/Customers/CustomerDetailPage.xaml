@@ -23,7 +23,12 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Spacing="4">
-                                <Button Content="Back to Customers" Style="{StaticResource GhostButtonStyle}" HorizontalAlignment="Left" Command="{x:Bind ViewModel.BackCommand}" />
+                                <Button Style="{StaticResource GhostButtonStyle}" HorizontalAlignment="Left" Command="{x:Bind ViewModel.BackCommand}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE72B;" />
+                                        <TextBlock Text="Back to Customers" />
+                                    </StackPanel>
+                                </Button>
                                 <TextBlock Text="Customer Detail" Style="{StaticResource PageTitleStyle}" />
                                 <TextBlock Text="Full customer profile is available to admin only. Loyalty rank is derived from purchase points." Style="{StaticResource BodySecondaryTextStyle}" TextWrapping="WrapWholeWords" />
                             </StackPanel>

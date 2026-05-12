@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using hcmus_shop.Contracts.Services;
 using hcmus_shop.Views;
 using hcmus_shop.Views.Dashboard;
+using hcmus_shop.Views.Pages.Admin;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -66,8 +67,7 @@ namespace hcmus_shop
             }
             else if (sender == ProductsTip)
             {
-                SettingsTip.Target = SettingsItem;
-                SettingsTip.IsOpen = true;
+                _onboarding.MarkCompleted();
             }
         }
 
@@ -127,14 +127,11 @@ namespace hcmus_shop
                 case "Customers":
                     NavigateOrForbid(typeof(CustomersPage), target);
                     break;
-                case "Reports":
-                    NavigateOrForbid(typeof(ReportsPage), target);
-                    break;
                 case "Settings":
                     NavigateOrForbid(typeof(SettingsPage), target);
                     break;
-                case "Admin":
-                    NavigateOrForbid(typeof(AdminPage), "Admin");
+                case "Users":
+                    NavigateOrForbid(typeof(SalesUsersPage), target);
                     break;
                 case "Logout":
                     _authService.Logout();
@@ -182,7 +179,7 @@ namespace hcmus_shop
             }
 
             var firstAccessible = GetNavigationItems()
-                .Where(item => item.Tag is string tag && tag is not "Dashboard" and not "Admin")
+                .Where(item => item.Tag is string tag && tag is not "Dashboard")
                 .Select(item => new { Item = item, Tag = (string)item.Tag })
                 .FirstOrDefault(entry => CanAccessFeature(entry.Tag));
 
@@ -193,10 +190,10 @@ namespace hcmus_shop
                 return;
             }
 
-            if (CanAccessFeature("Admin"))
+            if (CanAccessFeature("Users"))
             {
-                NavigateTo("Admin");
-                AppNavigationView.SelectedItem = AdminItem;
+                NavigateTo("Users");
+                AppNavigationView.SelectedItem = UsersItem;
                 return;
             }
 

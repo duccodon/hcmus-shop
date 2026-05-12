@@ -4,8 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:hcmus_shop.Views.Dashboard.Components.Controls"
     xmlns:charts="using:hcmus_shop.Views.Dashboard.Components.Charts"
-    xmlns:tables="using:hcmus_shop.Views.Dashboard.Components.Tables"
-    xmlns:local="using:hcmus_shop.Views.Dashboard">
+    xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
+    xmlns:dto="using:hcmus_shop.Models.DTOs"
+    xmlns:local="using:hcmus_shop.Views.Dashboard"
+    x:Name="Root">
 
     <Grid Background="{StaticResource DashboardBackground}">
         <ScrollViewer>
@@ -78,14 +80,99 @@
                         YAxes="{x:Bind ViewModel.SalesYAxes, Mode=OneWay}" />
                 </Grid>
 
-                <tables:RecentInvoicesTable
-                    Grid.Row="3"
-                    ItemsSource="{x:Bind ViewModel.RecentInvoices, Mode=OneWay}" />
+                <Border Grid.Row="3" Background="{StaticResource CardBackground}" CornerRadius="16" Padding="20">
+                    <Grid RowSpacing="14">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
 
-                <tables:ProductSummaryTable
-                    Grid.Row="4"
-                    TopSoldItems="{x:Bind ViewModel.TopSoldProducts, Mode=OneWay}"
-                    LowStockItems="{x:Bind ViewModel.LowStockProducts, Mode=OneWay}" />
+                        <TextBlock Text="Reports" Style="{StaticResource PageTitleStyle}" />
+                        <Border Grid.Row="1" Height="1" Background="{StaticResource DividerBrush}" />
+
+                        <Grid Grid.Row="2" ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <DatePicker Date="{x:Bind ReportViewModel.FromDate, Mode=TwoWay}" />
+                            <DatePicker Grid.Column="1" Date="{x:Bind ReportViewModel.ToDate, Mode=TwoWay}" />
+                            <ComboBox
+                                Grid.Column="2"
+                                Width="120"
+                                Style="{StaticResource FormComboBoxStyle}"
+                                ItemsSource="{x:Bind ReportViewModel.GroupByOptions, Mode=OneWay}"
+                                SelectedItem="{x:Bind ReportViewModel.SelectedGroupBy, Mode=TwoWay}" />
+                            <Button Grid.Column="3" Content="Refresh" Style="{StaticResource PrimaryButtonStyle}" Command="{x:Bind ReportViewModel.RefreshCommand}" />
+                        </Grid>
+
+                        <Grid Grid.Row="3" RowSpacing="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border Background="{StaticResource SelectionHighlight}" CornerRadius="16" Padding="16">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="Products Sold" Style="{StaticResource CardTitleStyle}" />
+                                    <lvc:CartesianChart Height="240" LegendPosition="Top" Series="{x:Bind ReportViewModel.QuantitySeries, Mode=OneWay}" XAxes="{x:Bind ReportViewModel.PeriodAxes, Mode=OneWay}" YAxes="{x:Bind ReportViewModel.QuantityAxes, Mode=OneWay}" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Row="1" Background="{StaticResource SelectionHighlight}" CornerRadius="16" Padding="16">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="Revenue" Style="{StaticResource CardTitleStyle}" />
+                                    <lvc:CartesianChart Height="240" LegendPosition="Top" Series="{x:Bind ReportViewModel.RevenueSeries, Mode=OneWay}" XAxes="{x:Bind ReportViewModel.PeriodAxes, Mode=OneWay}" YAxes="{x:Bind ReportViewModel.CurrencyAxes, Mode=OneWay}" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Row="2" Background="{StaticResource SelectionHighlight}" CornerRadius="16" Padding="16">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="Profit" Style="{StaticResource CardTitleStyle}" />
+                                    <lvc:CartesianChart Height="240" LegendPosition="Top" Series="{x:Bind ReportViewModel.ProfitSeries, Mode=OneWay}" XAxes="{x:Bind ReportViewModel.PeriodAxes, Mode=OneWay}" YAxes="{x:Bind ReportViewModel.CurrencyAxes, Mode=OneWay}" />
+                                </StackPanel>
+                            </Border>
+
+                            <Grid Grid.Row="3" ColumnSpacing="16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="1*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Background="{StaticResource SelectionHighlight}" CornerRadius="16" Padding="16">
+                                    <StackPanel Spacing="12">
+                                        <TextBlock Text="Revenue Share" Style="{StaticResource CardTitleStyle}" />
+                                        <lvc:PieChart Height="240" LegendPosition="Right" Series="{x:Bind ReportViewModel.RevenueShareSeries, Mode=OneWay}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Column="1" Background="{StaticResource SelectionHighlight}" CornerRadius="16" Padding="16">
+                                    <StackPanel Spacing="12">
+                                        <TextBlock Text="Top Products" Style="{StaticResource CardTitleStyle}" />
+                                        <ItemsControl ItemsSource="{x:Bind ReportViewModel.TopProducts, Mode=OneWay}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="dto:TopProductEntryDto">
+                                                    <Grid Margin="0,0,0,8">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{x:Bind Name}" Style="{StaticResource BodyTextStyle}" />
+                                                        <TextBlock Grid.Column="1" Text="{x:Bind TotalSold}" Style="{StaticResource BodySecondaryTextStyle}" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Border>
             </Grid>
         </ScrollViewer>
     </Grid>

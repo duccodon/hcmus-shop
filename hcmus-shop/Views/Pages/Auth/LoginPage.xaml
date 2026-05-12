@@ -116,7 +116,7 @@
                         KeyDown="PasswordInput_KeyDown"
                         PasswordChanged="PasswordInput_PasswordChanged"
                         PlaceholderText="Enter your password"
-                        PasswordRevealMode="Visible"
+                        PasswordRevealMode="Hidden"
                         Style="{StaticResource LoginPasswordBoxStyle}" />
                     <TextBlock
                         Margin="2,6,0,0"

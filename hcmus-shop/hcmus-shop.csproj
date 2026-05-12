@@ -176,7 +176,16 @@
 		<Page Update="Views\Pages\Customers\CustomerDetailPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
+		<Page Update="Views\Pages\Admin\SalesUsersPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
 		<Page Update="Views\Pages\Orders\OrdersPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="Views\Pages\Orders\OrderDetailPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="Views\Pages\Orders\OrderEditorPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 		<Page Update="Views\Pages\Reports\ReportsPage.xaml">

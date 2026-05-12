@@ -27,7 +27,9 @@ using hcmus_shop.Services.Orders;
 using hcmus_shop.Services.Reports;
 using hcmus_shop.Services.Invoices;
 using hcmus_shop.Services.Uploads;
+using hcmus_shop.Services.Users;
 using hcmus_shop.ViewModels;
+using hcmus_shop.ViewModels.Admin;
 using hcmus_shop.ViewModels.Auth;
 using hcmus_shop.ViewModels.Customers;
 using hcmus_shop.ViewModels.Orders;
@@ -101,6 +103,7 @@ namespace hcmus_shop
             services.AddSingleton<IReportService, ReportService>();
             services.AddSingleton<IInvoiceService, InvoiceService>();
             services.AddSingleton<IFileUploadService, FileUploadService>();
+            services.AddSingleton<IUserService, UserService>();
 
             // ViewModels
             services.AddTransient<LoginViewModel>();
@@ -118,6 +121,7 @@ namespace hcmus_shop
             services.AddTransient<ReportsViewModel>();
             services.AddTransient<StoreViewModel>();
             services.AddTransient<StoreDetailViewModel>();
+            services.AddTransient<SalesUsersViewModel>();
 
             Ioc.Default.ConfigureServices(services.BuildServiceProvider());
         }

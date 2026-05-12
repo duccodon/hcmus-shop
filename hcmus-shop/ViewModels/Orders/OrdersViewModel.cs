@@ -41,7 +41,7 @@ namespace hcmus_shop.ViewModels.Orders
         private bool _isEditorBusy;
         private string _errorMessage = string.Empty;
         private string _searchQuery = string.Empty;
-        private string _selectedStatus = string.Empty;
+        private string _selectedStatus = "All";
         private DateTimeOffset _fromDate = DateTimeOffset.Now.AddMonths(-1);
         private DateTimeOffset _toDate = DateTimeOffset.Now;
         private int _selectedPageSize = 10;
@@ -115,7 +115,7 @@ namespace hcmus_shop.ViewModels.Orders
             DecreaseQuantityCommand = new RelayCommand<OrderCartItemViewModel?>(DecreaseQuantity);
             CreateInlineCustomerCommand = new AsyncRelayCommand(CreateInlineCustomerAsync, () => IsEditorOpen && !IsEditorBusy);
 
-            SelectedStatusOptions.Add(string.Empty);
+            SelectedStatusOptions.Add("All");
             SelectedStatusOptions.Add("Created");
             SelectedStatusOptions.Add("Paid");
             SelectedStatusOptions.Add("Cancelled");
@@ -160,6 +160,8 @@ namespace hcmus_shop.ViewModels.Orders
         public IRelayCommand<OrderCartItemViewModel?> IncreaseQuantityCommand { get; }
         public IRelayCommand<OrderCartItemViewModel?> DecreaseQuantityCommand { get; }
         public IAsyncRelayCommand CreateInlineCustomerCommand { get; }
+
+        public event EventHandler? OrderSaved;
 
         public Func<string, Task<string?>>? RequestInvoicePathAsync { get; set; }
         public Func<OrderDto, Task<bool>>? ConfirmDeleteOrderAsync { get; set; }
@@ -575,7 +577,7 @@ namespace hcmus_shop.ViewModels.Orders
         public double EditorFinalAmount => Math.Max(EditorSubtotal - EditorDiscountAmount, 0);
         public bool HasSelectedOrderItems => CartItems.Count > 0;
         public int SelectedItemCount => CartItems.Sum(item => item.Quantity);
-        public string CartSummaryText => $"{SelectedItemCount} sản phẩm";
+        public string CartSummaryText => $"{SelectedItemCount} product(s)";
 
         public bool CanModifySelectedCreatedOrder =>
             SelectedOrder is not null &&
@@ -608,6 +610,72 @@ namespace hcmus_shop.ViewModels.Orders
             IsInitialized = true;
         }
 
+        public async Task PrepareCreateAsync()
+        {
+            if (!IsInitialized)
+            {
+                await InitializeAsync();
+            }
+
+            await BeginCreateOrderAsync();
+        }
+
+        public async Task PrepareEditAsync(string orderId)
+        {
+            if (string.IsNullOrWhiteSpace(orderId))
+            {
+                return;
+            }
+
+            if (!IsInitialized)
+            {
+                await InitializeAsync();
+            }
+
+            var orderResult = await _orderService.GetByIdAsync(orderId);
+            if (!orderResult.IsSuccess || orderResult.Value is null)
+            {
+                ErrorMessage = orderResult.Error ?? "Failed to load order.";
+                return;
+            }
+
+            SelectedOrder = orderResult.Value;
+            await BeginEditOrderAsync();
+        }
+
+        public async Task LoadOrderDetailAsync(string orderId)
+        {
+            if (string.IsNullOrWhiteSpace(orderId))
+            {
+                return;
+            }
+
+            if (!IsInitialized)
+            {
+                await InitializeAsync();
+            }
+
+            IsLoading = true;
+            ErrorMessage = string.Empty;
+
+            try
+            {
+                var result = await _orderService.GetByIdAsync(orderId);
+                if (!result.IsSuccess || result.Value is null)
+                {
+                    SelectedOrder = null;
+                    ErrorMessage = result.Error ?? "Failed to load order details.";
+                    return;
+                }
+
+                SelectedOrder = result.Value;
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
         private async Task LoadCustomersAsync()
         {
             var result = await _customerService.GetAllAsync(new CustomerFilterDto
@@ -638,7 +706,7 @@ namespace hcmus_shop.ViewModels.Orders
             {
                 var result = await _orderService.GetAllAsync(new OrderFilterDto
                 {
-                    Status = string.IsNullOrWhiteSpace(SelectedStatus) ? null : SelectedStatus,
+                    Status = string.Equals(SelectedStatus, "All", StringComparison.OrdinalIgnoreCase) || string.IsNullOrWhiteSpace(SelectedStatus) ? null : SelectedStatus,
                     Search = string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery.Trim(),
                     FromDate = FromDate.ToString("yyyy-MM-dd"),
                     ToDate = ToDate.ToString("yyyy-MM-dd"),
@@ -666,11 +734,7 @@ namespace hcmus_shop.ViewModels.Orders
                 RebuildPageButtons();
                 if (SelectedOrder is not null)
                 {
-                    SelectedOrder = Orders.FirstOrDefault(order => order.OrderId == SelectedOrder.OrderId) ?? Orders.FirstOrDefault();
-                }
-                else
-                {
-                    SelectedOrder = Orders.FirstOrDefault();
+                    SelectedOrder = Orders.FirstOrDefault(order => order.OrderId == SelectedOrder.OrderId);
                 }
 
                 OnPropertyChanged(nameof(ResultText));
@@ -1188,6 +1252,7 @@ namespace hcmus_shop.ViewModels.Orders
                 await ClearDraftAsync(resetRestoredState: true);
                 CancelEditor();
                 await LoadOrdersAsync();
+                OrderSaved?.Invoke(this, EventArgs.Empty);
             }
             finally
             {
