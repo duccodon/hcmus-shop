@@ -19,6 +19,8 @@
             <converters:InvoiceStatusBackgroundConverter x:Key="InvoiceStatusBackgroundConverter" />
             <converters:InvoiceStatusForegroundConverter x:Key="InvoiceStatusForegroundConverter" />
             <converters:InvoiceLegendMarkerConverter x:Key="InvoiceLegendMarkerConverter" />
+            <converters:CustomerRankBackgroundConverter x:Key="CustomerRankBackgroundConverter" />
+            <converters:CustomerRankForegroundConverter x:Key="CustomerRankForegroundConverter" />
             <converters:StringToBooleanConverter x:Key="StringToBooleanConverter" />
             <converters:BooleanToInfoSeverityConverter x:Key="BooleanToInfoSeverityConverter" />
             <converters:RoleVisibilityConverter x:Key="RoleVisibility" />

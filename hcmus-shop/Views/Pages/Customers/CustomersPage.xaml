@@ -5,6 +5,16 @@
     xmlns:components="using:hcmus_shop.Views.Components.Pagination"
     xmlns:dto="using:hcmus_shop.Models.DTOs"
     x:Name="Root">
+    <Page.Resources>
+        <Style x:Key="CustomerTableListViewItemStyle" TargetType="ListViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="UseSystemFocusVisuals" Value="False" />
+        </Style>
+    </Page.Resources>
     <Grid Background="{StaticResource DashboardBackground}">
         <ScrollViewer>
             <Grid Margin="24">
@@ -78,12 +88,13 @@
 
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="1.4*" />
+                                    <ColumnDefinition Width="1.6*" />
                                     <ColumnDefinition Width="1*" />
-                                    <ColumnDefinition Width="1.1*" />
+                                    <ColumnDefinition Width="1.2*" />
                                     <ColumnDefinition Width="0.9*" />
-                                    <ColumnDefinition Width="0.9*" />
+                                    <ColumnDefinition Width="0.8*" />
                                     <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="84" />
                                 </Grid.ColumnDefinitions>
                                 <Border Grid.Column="0" Style="{StaticResource TableHeaderBorderStyle}">
                                     <TextBlock Text="Customer" Style="{StaticResource TableHeaderTextStyle}" />
@@ -101,6 +112,9 @@
                                     <TextBlock Text="Rank" Style="{StaticResource TableHeaderTextStyle}" />
                                 </Border>
                                 <Border Grid.Column="5" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
+                                    <TextBlock Text="Status" Style="{StaticResource TableHeaderTextStyle}" />
+                                </Border>
+                                <Border Grid.Column="6" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
                                     <TextBlock Text="Action" Style="{StaticResource TableHeaderTextStyle}" />
                                 </Border>
                             </Grid>
@@ -108,6 +122,10 @@
                             <ListView Grid.Row="1"
                                       x:Name="CustomersListView"
                                       ItemsSource="{x:Bind ViewModel.Customers, Mode=OneWay}"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      Padding="0"
+                                      ItemContainerStyle="{StaticResource CustomerTableListViewItemStyle}"
                                       IsItemClickEnabled="True"
                                       ItemClick="CustomersListView_ItemClick"
                                       SelectionMode="None">
@@ -115,49 +133,76 @@
                                         <DataTemplate x:DataType="dto:CustomerDto">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="1.4*" />
+                                                    <ColumnDefinition Width="1.6*" />
                                                     <ColumnDefinition Width="1*" />
-                                                    <ColumnDefinition Width="1.1*" />
+                                                    <ColumnDefinition Width="1.2*" />
                                                     <ColumnDefinition Width="0.9*" />
-                                                    <ColumnDefinition Width="0.9*" />
+                                                    <ColumnDefinition Width="0.8*" />
                                                     <ColumnDefinition Width="1*" />
+                                                    <ColumnDefinition Width="84" />
                                                 </Grid.ColumnDefinitions>
                                                 <Border Grid.Column="0" Style="{StaticResource TableRowBorderStyle}">
-                                                    <TextBlock Text="{x:Bind Name}" Style="{StaticResource BodyTextStyle}" />
+                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" Style="{StaticResource BodyTextStyle}" />
                                                 </Border>
                                                 <Border Grid.Column="1" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
-                                                    <TextBlock Text="{x:Bind Phone}" Style="{StaticResource BodyTextStyle}" />
+                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind Phone}" Style="{StaticResource BodyTextStyle}" />
                                                 </Border>
                                                 <Border Grid.Column="2" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
-                                                    <TextBlock Text="{x:Bind Email}" Style="{StaticResource BodyTextStyle}" />
+                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind Email}" Style="{StaticResource BodyTextStyle}" TextTrimming="CharacterEllipsis" />
                                                 </Border>
                                                 <Border Grid.Column="3" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
-                                                    <TextBlock Text="{x:Bind LoyaltyPoints, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
+                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind LoyaltyPoints, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
                                                 </Border>
                                                 <Border Grid.Column="4" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
-                                                    <Border Padding="12,6" CornerRadius="10" Background="{StaticResource SelectionHighlight}" HorizontalAlignment="Left">
-                                                        <TextBlock Text="{x:Bind Rank}" Style="{StaticResource StatusBadgeTextStyle}" Foreground="{StaticResource TextPrimary}" />
+                                                    <Border
+                                                        Padding="12,6"
+                                                        CornerRadius="10"
+                                                        HorizontalAlignment="Left"
+                                                        Background="{x:Bind Rank, Mode=OneWay, Converter={StaticResource CustomerRankBackgroundConverter}}">
+                                                        <TextBlock
+                                                            Text="{x:Bind Rank}"
+                                                            Style="{StaticResource StatusBadgeTextStyle}"
+                                                            Foreground="{x:Bind Rank, Mode=OneWay, Converter={StaticResource CustomerRankForegroundConverter}}" />
                                                     </Border>
                                                 </Border>
                                                 <Border Grid.Column="5" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
-                                                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                                    <Border
+                                                        Padding="12,6"
+                                                        CornerRadius="10"
+                                                        HorizontalAlignment="Left"
+                                                        Background="{StaticResource SelectionHighlight}">
+                                                        <TextBlock
+                                                            Text="Order-ready"
+                                                            Style="{StaticResource StatusBadgeTextStyle}"
+                                                            Foreground="{StaticResource TextSecondary}" />
+                                                    </Border>
+                                                </Border>
+                                                <Border Grid.Column="6" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                         <Button
-                                                            Content="Update"
                                                             Style="{StaticResource GhostButtonStyle}"
                                                             Command="{Binding DataContext.ViewModel.OpenCustomerDetailCommand, ElementName=Root}"
                                                             CommandParameter="{Binding}"
-                                                            Visibility="{Binding DataContext.ViewModel.CanViewCustomerDetails, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                            ToolTipService.ToolTip="Update customer"
+                                                            Visibility="{Binding DataContext.ViewModel.CanViewCustomerDetails, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                            <FontIcon
+                                                                FontFamily="Segoe Fluent Icons"
+                                                                Glyph="&#xE70F;"
+                                                                FontSize="13"
+                                                                Foreground="{StaticResource TextSecondary}" />
+                                                        </Button>
                                                         <Button
                                                             Style="{StaticResource GhostButtonStyle}"
                                                             Command="{Binding DataContext.ViewModel.DeleteCustomerCommand, ElementName=Root}"
                                                             CommandParameter="{Binding}"
+                                                            ToolTipService.ToolTip="Delete customer"
                                                             Visibility="{Binding DataContext.ViewModel.CanDeleteCustomers, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74D;" Foreground="{StaticResource DangerForeground}" />
+                                                            <FontIcon
+                                                                FontFamily="Segoe Fluent Icons"
+                                                                Glyph="&#xE74D;"
+                                                                FontSize="13"
+                                                                Foreground="{StaticResource DangerForeground}" />
                                                         </Button>
-                                                        <TextBlock
-                                                            Text="Order-ready"
-                                                            Style="{StaticResource BodySecondaryTextStyle}"
-                                                            Visibility="{Binding DataContext.ViewModel.CanViewCustomerDetails, ElementName=Root, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                                                     </StackPanel>
                                                 </Border>
                                             </Grid>

@@ -6,6 +6,16 @@
     xmlns:dto="using:hcmus_shop.Models.DTOs"
     xmlns:vm="using:hcmus_shop.ViewModels.Orders"
     x:Name="Root">
+    <Page.Resources>
+        <Style x:Key="OrdersTableListViewItemStyle" TargetType="ListViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="UseSystemFocusVisuals" Value="False" />
+        </Style>
+    </Page.Resources>
     <Grid Background="{StaticResource DashboardBackground}">
         <ScrollViewer>
             <Grid Margin="24">
@@ -77,9 +87,9 @@
 
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="1.1*" />
-                                    <ColumnDefinition Width="1*" />
-                                    <ColumnDefinition Width="1.1*" />
+                                    <ColumnDefinition Width="1.35*" />
+                                    <ColumnDefinition Width="1.05*" />
+                                    <ColumnDefinition Width="1.15*" />
                                     <ColumnDefinition Width="0.9*" />
                                 </Grid.ColumnDefinitions>
                                 <Border Grid.Column="0" Style="{StaticResource TableHeaderBorderStyle}">
@@ -89,11 +99,15 @@
                                     <TextBlock Text="Created" Style="{StaticResource TableHeaderTextStyle}" />
                                 </Border>
                                 <Border Grid.Column="2" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
-                                    <ComboBox
-                                        Width="140"
-                                        Style="{StaticResource FormComboBoxStyle}"
-                                        ItemsSource="{x:Bind ViewModel.SelectedStatusOptions, Mode=OneWay}"
-                                        SelectedItem="{x:Bind ViewModel.SelectedStatus, Mode=TwoWay}" />
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="Status" Style="{StaticResource TableHeaderTextStyle}" />
+                                        <ComboBox
+                                            Width="140"
+                                            HorizontalAlignment="Left"
+                                            Style="{StaticResource FormComboBoxStyle}"
+                                            ItemsSource="{x:Bind ViewModel.SelectedStatusOptions, Mode=OneWay}"
+                                            SelectedItem="{x:Bind ViewModel.SelectedStatus, Mode=TwoWay}" />
+                                    </StackPanel>
                                 </Border>
                                 <Border Grid.Column="3" Style="{StaticResource TableHeaderBorderStyle}" BorderThickness="1,0,0,1">
                                     <TextBlock Text="Amount" Style="{StaticResource TableHeaderTextStyle}" />
@@ -105,30 +119,37 @@
                                 Grid.Row="1"
                                 IsItemClickEnabled="True"
                                 ItemsSource="{x:Bind ViewModel.Orders, Mode=OneWay}"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Padding="0"
+                                ItemContainerStyle="{StaticResource OrdersTableListViewItemStyle}"
                                 ItemClick="OrdersListView_ItemClick"
                                 SelectionMode="None">
                                 <ListView.ItemTemplate>
                                     <DataTemplate x:DataType="dto:OrderDto">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="1.1*" />
-                                                <ColumnDefinition Width="1*" />
-                                                <ColumnDefinition Width="1.1*" />
+                                                <ColumnDefinition Width="1.35*" />
+                                                <ColumnDefinition Width="1.05*" />
+                                                <ColumnDefinition Width="1.15*" />
                                                 <ColumnDefinition Width="0.9*" />
                                             </Grid.ColumnDefinitions>
                                             <Border Grid.Column="0" Style="{StaticResource TableRowBorderStyle}">
-                                                <TextBlock VerticalAlignment="Center" Text="{x:Bind DisplayCustomerName}" Style="{StaticResource BodyTextStyle}" />
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="{x:Bind DisplayCustomerName}" Style="{StaticResource BodyTextStyle}" />
+                                                    <TextBlock Text="{x:Bind OrderId}" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                                                </StackPanel>
                                             </Border>
                                             <Border Grid.Column="1" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
                                                 <TextBlock VerticalAlignment="Center" Text="{x:Bind vm:OrdersViewModel.FormatDate(CreatedAt)}" Style="{StaticResource BodyTextStyle}" />
                                             </Border>
                                             <Border Grid.Column="2" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">
                                                 <Border
-                                                    Padding="10,5"
+                                                    Padding="12,6"
                                                     VerticalAlignment="Center"
                                                     HorizontalAlignment="Left"
                                                     Background="{Binding Status, Converter={StaticResource InvoiceStatusBackgroundConverter}}"
-                                                    CornerRadius="8">
+                                                    CornerRadius="10">
                                                     <TextBlock
                                                         Foreground="{Binding Status, Converter={StaticResource InvoiceStatusForegroundConverter}}"
                                                         Style="{StaticResource StatusBadgeTextStyle}"
