@@ -178,9 +178,40 @@
                                         <TextBlock Text="{x:Bind ViewModel.WarrantyDisplay, Mode=OneWay}" Style="{StaticResource BodyTextStyle}" />
                                     </StackPanel>
 
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="Raw Specifications" Style="{StaticResource FieldLabelStyle}" />
-                                        <TextBlock Text="{x:Bind ViewModel.SpecificationsDisplay, Mode=OneWay}" Style="{StaticResource BodySecondaryTextStyle}" TextWrapping="WrapWholeWords" />
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Text="Technical Specifications" Style="{StaticResource FieldLabelStyle}" />
+                                        <Border
+                                            Background="{StaticResource SelectionHighlight}"
+                                            BorderBrush="{StaticResource DividerBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="12"
+                                            Padding="0">
+                                            <Grid>
+                                                <ItemsControl ItemsSource="{x:Bind ViewModel.Specifications, Mode=OneWay}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:StoreSpecificationEntryViewModel">
+                                                            <Border Padding="14,12" BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,0,0,1">
+                                                                <Grid ColumnSpacing="18">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="170" />
+                                                                        <ColumnDefinition Width="*" />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <TextBlock Text="{x:Bind Key}" Style="{StaticResource FieldLabelStyle}" TextWrapping="WrapWholeWords" />
+                                                                    <TextBlock Grid.Column="1" Text="{x:Bind Value}" Style="{StaticResource BodyTextStyle}" TextWrapping="WrapWholeWords" />
+                                                                </Grid>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Text="No technical specifications provided."
+                                                    Style="{StaticResource BodySecondaryTextStyle}"
+                                                    Visibility="{x:Bind ViewModel.HasSpecifications, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                            </Grid>
+                                        </Border>
                                     </StackPanel>
                                 </StackPanel>
                             </ScrollViewer>

@@ -10,6 +10,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace hcmus_shop.ViewModels.Reports
@@ -23,6 +24,9 @@ namespace hcmus_shop.ViewModels.Reports
         private DateTimeOffset _fromDate = DateTimeOffset.Now.AddMonths(-1);
         private DateTimeOffset _toDate = DateTimeOffset.Now;
         private string _selectedGroupBy = "day";
+        private string _lastUpdatedText = "Not updated yet";
+        private CancellationTokenSource? _refreshDebounceCts;
+        private bool _pendingRefresh;
 
         public ReportsViewModel(IReportService reportService)
         {
@@ -93,19 +97,43 @@ namespace hcmus_shop.ViewModels.Reports
         public DateTimeOffset FromDate
         {
             get => _fromDate;
-            set => SetProperty(ref _fromDate, value);
+            set
+            {
+                if (SetProperty(ref _fromDate, value))
+                {
+                    QueueRefresh();
+                }
+            }
         }
 
         public DateTimeOffset ToDate
         {
             get => _toDate;
-            set => SetProperty(ref _toDate, value);
+            set
+            {
+                if (SetProperty(ref _toDate, value))
+                {
+                    QueueRefresh();
+                }
+            }
         }
 
         public string SelectedGroupBy
         {
             get => _selectedGroupBy;
-            set => SetProperty(ref _selectedGroupBy, value);
+            set
+            {
+                if (SetProperty(ref _selectedGroupBy, value))
+                {
+                    QueueRefresh();
+                }
+            }
+        }
+
+        public string LastUpdatedText
+        {
+            get => _lastUpdatedText;
+            private set => SetProperty(ref _lastUpdatedText, value);
         }
 
         private async Task InitializeAsync()
@@ -115,17 +143,30 @@ namespace hcmus_shop.ViewModels.Reports
                 return;
             }
 
-            await RefreshAsync();
             IsInitialized = true;
+            await RefreshAsync();
         }
 
         private async Task RefreshAsync()
         {
+            if (IsLoading)
+            {
+                _pendingRefresh = true;
+                return;
+            }
+
             IsLoading = true;
+            _pendingRefresh = false;
             ErrorMessage = string.Empty;
 
             try
             {
+                if (FromDate > ToDate)
+                {
+                    ErrorMessage = "Start date cannot be later than end date.";
+                    return;
+                }
+
                 var from = FromDate.ToString("yyyy-MM-dd");
                 var to = ToDate.ToString("yyyy-MM-dd");
 
@@ -158,10 +199,44 @@ namespace hcmus_shop.ViewModels.Reports
 
                 ApplySalesEntries(salesTask.Result.Value);
                 ApplyTopProducts(topProductsTask.Result.Value);
+                LastUpdatedText = $"Last updated: {DateTime.Now:dd/MM/yyyy HH:mm:ss}";
             }
             finally
             {
                 IsLoading = false;
+                if (_pendingRefresh)
+                {
+                    QueueRefresh();
+                }
+            }
+        }
+
+        private void QueueRefresh()
+        {
+            if (!IsInitialized)
+            {
+                return;
+            }
+
+            _pendingRefresh = true;
+            _refreshDebounceCts?.Cancel();
+            _refreshDebounceCts?.Dispose();
+            _refreshDebounceCts = new CancellationTokenSource();
+            _ = DebouncedRefreshAsync(_refreshDebounceCts.Token);
+        }
+
+        private async Task DebouncedRefreshAsync(CancellationToken token)
+        {
+            try
+            {
+                await Task.Delay(250, token);
+                if (!token.IsCancellationRequested && _pendingRefresh)
+                {
+                    await RefreshAsync();
+                }
+            }
+            catch (TaskCanceledException)
+            {
             }
         }
 

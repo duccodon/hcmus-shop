@@ -31,6 +31,7 @@ namespace hcmus_shop.ViewModels.Store
         public ObservableCollection<StoreGalleryImageViewModel> Images { get; } = [];
         public ObservableCollection<string> HighlightLines { get; } = [];
         public ObservableCollection<string> CategoryChips { get; } = [];
+        public ObservableCollection<StoreSpecificationEntryViewModel> Specifications { get; } = [];
 
         public IRelayCommand<StoreGalleryImageViewModel?> SelectImageCommand { get; }
 
@@ -86,7 +87,7 @@ namespace hcmus_shop.ViewModels.Store
         public string StockDisplay => _product is null ? string.Empty : $"{_product.StockQuantity} units available";
         public string WarrantyDisplay => _product is null ? string.Empty : $"{_product.WarrantyMonths} month warranty";
         public string Description => string.IsNullOrWhiteSpace(_product?.Description) ? "No product description provided." : _product!.Description!;
-        public string SpecificationsDisplay => FormatSpecifications(_product?.Specifications);
+        public bool HasSpecifications => Specifications.Count > 0;
 
         public async Task LoadAsync(int productId)
         {
@@ -102,6 +103,7 @@ namespace hcmus_shop.ViewModels.Store
                     Images.Clear();
                     HighlightLines.Clear();
                     CategoryChips.Clear();
+                    Specifications.Clear();
                     SelectedImage = null;
                     ErrorMessage = result.Error ?? "Failed to load product details.";
                     NotifyProductChanged();
@@ -144,6 +146,12 @@ namespace hcmus_shop.ViewModels.Store
             foreach (var category in product.Categories.Select(item => item.Name))
             {
                 CategoryChips.Add(category);
+            }
+
+            Specifications.Clear();
+            foreach (var specification in BuildSpecifications(product.Specifications))
+            {
+                Specifications.Add(specification);
             }
         }
 
@@ -192,7 +200,7 @@ namespace hcmus_shop.ViewModels.Store
             OnPropertyChanged(nameof(StockDisplay));
             OnPropertyChanged(nameof(WarrantyDisplay));
             OnPropertyChanged(nameof(Description));
-            OnPropertyChanged(nameof(SpecificationsDisplay));
+            OnPropertyChanged(nameof(HasSpecifications));
             OnPropertyChanged(nameof(HasProduct));
         }
 
@@ -241,19 +249,93 @@ namespace hcmus_shop.ViewModels.Store
             return false;
         }
 
-        private static string FormatSpecifications(object? specifications)
+        private static IReadOnlyList<StoreSpecificationEntryViewModel> BuildSpecifications(object? specifications)
         {
             if (specifications is null)
             {
-                return "No technical specifications provided.";
+                return [];
             }
 
             if (specifications is JsonElement jsonElement)
             {
-                return jsonElement.ToString();
+                if (jsonElement.ValueKind != JsonValueKind.Object)
+                {
+                    return [];
+                }
+
+                return
+                [
+                    .. jsonElement.EnumerateObject()
+                        .Select(property => new StoreSpecificationEntryViewModel(
+                            FormatSpecificationKey(property.Name),
+                            FormatSpecificationValue(property.Value)))
+                        .Where(entry => !string.IsNullOrWhiteSpace(entry.Value))
+                ];
             }
 
-            return specifications.ToString() ?? "No technical specifications provided.";
+            if (specifications is IDictionary<string, object?> dictionary)
+            {
+                return
+                [
+                    .. dictionary
+                        .Select(pair => new StoreSpecificationEntryViewModel(
+                            FormatSpecificationKey(pair.Key),
+                            FormatScalarSpecificationValue(pair.Value)))
+                        .Where(entry => !string.IsNullOrWhiteSpace(entry.Value))
+                ];
+            }
+
+            return [];
+        }
+
+        private static string FormatSpecificationKey(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                return "Specification";
+            }
+
+            var normalized = key.Replace("_", " ").Replace("-", " ").Trim();
+            if (normalized.Length == 0)
+            {
+                return "Specification";
+            }
+
+            return char.ToUpperInvariant(normalized[0]) + normalized[1..];
+        }
+
+        private static string FormatSpecificationValue(JsonElement value)
+        {
+            return value.ValueKind switch
+            {
+                JsonValueKind.Array => string.Join(", ", value.EnumerateArray().Select(FormatSpecificationValue)),
+                JsonValueKind.Object => string.Join(", ", value.EnumerateObject().Select(property => $"{FormatSpecificationKey(property.Name)}: {FormatSpecificationValue(property.Value)}")),
+                JsonValueKind.String => value.GetString() ?? string.Empty,
+                JsonValueKind.Number => value.ToString(),
+                JsonValueKind.True => "Yes",
+                JsonValueKind.False => "No",
+                JsonValueKind.Null => string.Empty,
+                _ => value.ToString()
+            };
+        }
+
+        private static string FormatScalarSpecificationValue(object? value)
+        {
+            if (value is null)
+            {
+                return string.Empty;
+            }
+
+            if (value is IEnumerable<object?> values && value is not string)
+            {
+                return string.Join(", ", values.Select(FormatScalarSpecificationValue).Where(item => !string.IsNullOrWhiteSpace(item)));
+            }
+
+            return value switch
+            {
+                bool boolValue => boolValue ? "Yes" : "No",
+                _ => Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty
+            };
         }
     }
 
@@ -267,5 +349,17 @@ namespace hcmus_shop.ViewModels.Store
 
         public int ImageId { get; }
         public Uri ImageUri { get; }
+    }
+
+    public class StoreSpecificationEntryViewModel
+    {
+        public StoreSpecificationEntryViewModel(string key, string value)
+        {
+            Key = key;
+            Value = value;
+        }
+
+        public string Key { get; }
+        public string Value { get; }
     }
 }
