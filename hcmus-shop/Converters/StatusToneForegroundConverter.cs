@@ -14,8 +14,11 @@ namespace hcmus_shop.Converters
 
             return tone switch
             {
-                "Published" => Application.Current.Resources["SuccessForeground"] as Brush ?? new SolidColorBrush(ColorHelper.FromArgb(255, 21, 128, 61)),
-                "Inactive" => Application.Current.Resources["DangerForeground"] as Brush ?? new SolidColorBrush(ColorHelper.FromArgb(255, 185, 28, 28)),
+                "Published" or "Active" => Application.Current.Resources["SuccessForeground"] as Brush ?? new SolidColorBrush(ColorHelper.FromArgb(255, 21, 128, 61)),
+                "Scheduled" => new SolidColorBrush(ColorHelper.FromArgb(255, 29, 78, 137)),
+                "Expired" => Application.Current.Resources["WarningForeground"] as Brush ?? new SolidColorBrush(ColorHelper.FromArgb(255, 161, 98, 7)),
+                "Inactive" => new SolidColorBrush(ColorHelper.FromArgb(255, 55, 65, 81)),
+                "StockOut" => Application.Current.Resources["DangerForeground"] as Brush ?? new SolidColorBrush(ColorHelper.FromArgb(255, 185, 28, 28)),
                 _ => Application.Current.Resources["WarningForeground"] as Brush ?? new SolidColorBrush(ColorHelper.FromArgb(255, 161, 98, 7)),
             };
         }

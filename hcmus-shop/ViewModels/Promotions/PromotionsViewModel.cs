@@ -64,6 +64,8 @@ namespace hcmus_shop.ViewModels.Promotions
             SortDirectionOptions.Add(new PromotionTableOption("desc", "Descending"));
             StatusFilterOptions.Add("All");
             StatusFilterOptions.Add("Active");
+            StatusFilterOptions.Add("Scheduled");
+            StatusFilterOptions.Add("Expired");
             StatusFilterOptions.Add("Inactive");
             SelectedSortField = SortFieldOptions.FirstOrDefault(option => option.Key == "createdAt") ?? SortFieldOptions.FirstOrDefault();
             SelectedSortDirection = SortDirectionOptions.FirstOrDefault(option => option.Key == "desc") ?? SortDirectionOptions.FirstOrDefault();
@@ -491,8 +493,10 @@ namespace hcmus_shop.ViewModels.Promotions
 
             query = SelectedStatusFilter switch
             {
-                "Active" => query.Where(item => item.IsActive),
-                "Inactive" => query.Where(item => !item.IsActive),
+                "Active" => query.Where(item => GetPromotionStatus(item) == "Active"),
+                "Scheduled" => query.Where(item => GetPromotionStatus(item) == "Scheduled"),
+                "Expired" => query.Where(item => GetPromotionStatus(item) == "Expired"),
+                "Inactive" => query.Where(item => GetPromotionStatus(item) == "Inactive"),
                 _ => query
             };
 
@@ -518,6 +522,30 @@ namespace hcmus_shop.ViewModels.Promotions
             };
 
             return query;
+        }
+
+        private string GetPromotionStatus(PromotionDto promotion)
+        {
+            if (!promotion.IsActive)
+            {
+                return "Inactive";
+            }
+
+            var startDate = ParsePromotionDate(promotion.StartDate).ToUniversalTime();
+            var endDate = ParsePromotionDate(promotion.EndDate).ToUniversalTime();
+            var now = DateTime.UtcNow;
+
+            if (startDate > now)
+            {
+                return "Scheduled";
+            }
+
+            if (endDate < now)
+            {
+                return "Expired";
+            }
+
+            return "Active";
         }
 
         private void DebounceSearch()

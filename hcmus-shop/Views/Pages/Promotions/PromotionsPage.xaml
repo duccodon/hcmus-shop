@@ -164,12 +164,12 @@
                                                     <Border
                                                         Padding="12,6"
                                                         CornerRadius="10"
-                                                        Background="{StaticResource SelectionHighlight}"
+                                                        Background="{x:Bind StatusTone, Mode=OneWay, Converter={StaticResource StatusToneBackgroundConverter}}"
                                                         HorizontalAlignment="Left">
                                                         <TextBlock
                                                             Text="{x:Bind StatusText}"
                                                             Style="{StaticResource StatusBadgeTextStyle}"
-                                                            Foreground="{StaticResource TextPrimary}" />
+                                                            Foreground="{x:Bind StatusTone, Mode=OneWay, Converter={StaticResource StatusToneForegroundConverter}}" />
                                                     </Border>
                                                 </Border>
                                                 <Border Grid.Column="6" Style="{StaticResource TableRowBorderStyle}" BorderThickness="1,0,0,1">

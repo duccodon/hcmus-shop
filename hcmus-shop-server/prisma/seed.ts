@@ -576,7 +576,7 @@ async function main() {
       minimumCustomerRank: "Gold",
       startDate: new Date("2025-01-01T00:00:00.000Z"),
       endDate: new Date("2025-12-31T23:59:59.999Z"),
-      isActive: false,
+      isActive: true,
     },
     {
       code: "JUNEFLASH8",
@@ -586,6 +586,15 @@ async function main() {
       startDate: new Date("2026-06-01T00:00:00.000Z"),
       endDate: new Date("2026-06-30T23:59:59.999Z"),
       isActive: true,
+    },
+    {
+      code: "PAUSEDVIP5",
+      discountPercent: 5,
+      discountAmount: null,
+      minimumCustomerRank: "Silver",
+      startDate: new Date("2026-04-01T00:00:00.000Z"),
+      endDate: new Date("2026-08-31T23:59:59.999Z"),
+      isActive: false,
     },
   ];
 
@@ -620,35 +629,35 @@ async function main() {
       name: "Nguyen Minh Anh",
       phone: "0901000101",
       email: "minh.anh.demo@hcmus-shop.local",
-      loyaltyPoints: 320,
+      loyaltyPoints: 320000,
     },
     {
       customerId: "00000000-0000-0000-0000-000000000102",
       name: "Tran Bao Chau",
       phone: "0901000102",
       email: "bao.chau.demo@hcmus-shop.local",
-      loyaltyPoints: 1450,
+      loyaltyPoints: 1250000,
     },
     {
       customerId: "00000000-0000-0000-0000-000000000103",
       name: "Le Hoang Long",
       phone: "0901000103",
       email: "hoang.long.demo@hcmus-shop.local",
-      loyaltyPoints: 5620,
+      loyaltyPoints: 2450000,
     },
     {
       customerId: "00000000-0000-0000-0000-000000000104",
       name: "Pham Gia Han",
       phone: "0901000104",
       email: "gia.han.demo@hcmus-shop.local",
-      loyaltyPoints: 11850,
+      loyaltyPoints: 3750000,
     },
     {
       customerId: "00000000-0000-0000-0000-000000000105",
       name: "Do Quoc Viet",
       phone: "0901000105",
       email: "quoc.viet.demo@hcmus-shop.local",
-      loyaltyPoints: 780,
+      loyaltyPoints: 780000,
     },
   ];
 
@@ -797,6 +806,7 @@ async function main() {
   await resetDemoOrders(demoOrders);
   await createDemoOrders(demoOrders, { admin, sale });
   await recalculateProductStock();
+  await applyDemoStatusCoverage();
   console.log(`Orders seeded: ${demoOrders.length}`);
 
   console.log("Seed completed!");
@@ -1010,6 +1020,46 @@ async function recalculateProductStock() {
       where: { productId: product.productId },
       data: {
         stockQuantity: countByProductId.get(product.productId) ?? 0,
+      },
+    });
+  }
+}
+
+async function applyDemoStatusCoverage() {
+  const inactiveSku = "HP-OMEN-16-2026";
+  const stockOutSku = "ACER-SWIFT-GO-14";
+
+  const products = await prisma.product.findMany({
+    where: {
+      sku: { in: [inactiveSku, stockOutSku] },
+    },
+    select: {
+      productId: true,
+      sku: true,
+    },
+  });
+
+  const inactiveProduct = products.find((product) => product.sku === inactiveSku);
+  const stockOutProduct = products.find((product) => product.sku === stockOutSku);
+
+  if (inactiveProduct) {
+    await prisma.product.update({
+      where: { productId: inactiveProduct.productId },
+      data: { isActive: false },
+    });
+  }
+
+  if (stockOutProduct) {
+    await prisma.productInstance.updateMany({
+      where: { productId: stockOutProduct.productId },
+      data: { status: "Sold" },
+    });
+
+    await prisma.product.update({
+      where: { productId: stockOutProduct.productId },
+      data: {
+        isActive: true,
+        stockQuantity: 0,
       },
     });
   }

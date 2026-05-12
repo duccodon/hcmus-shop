@@ -44,6 +44,30 @@ namespace hcmus_shop.ViewModels.Promotions
         public string EndDateDisplay => EndDate.ToString("dd/MM/yyyy HH:mm");
         public string DateRangeDisplay => $"{StartDate:dd/MM/yyyy HH:mm} - {EndDate:dd/MM/yyyy HH:mm}";
         public string EligibilityDisplay => string.IsNullOrWhiteSpace(MinimumCustomerRank) ? "All ranks" : $"{MinimumCustomerRank}+";
-        public string StatusText => IsActive ? "Active" : "Inactive";
+        public string StatusText
+        {
+            get
+            {
+                if (!IsActive)
+                {
+                    return "Inactive";
+                }
+
+                var now = DateTime.UtcNow;
+                if (StartDate.ToUniversalTime() > now)
+                {
+                    return "Scheduled";
+                }
+
+                if (EndDate.ToUniversalTime() < now)
+                {
+                    return "Expired";
+                }
+
+                return "Active";
+            }
+        }
+
+        public string StatusTone => StatusText;
     }
 }

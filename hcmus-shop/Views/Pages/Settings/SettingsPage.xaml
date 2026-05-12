@@ -9,7 +9,8 @@
     Background="{StaticResource DashboardBackground}">
 
     <ScrollViewer VerticalScrollMode="Auto" HorizontalScrollMode="Disabled">
-        <Grid Margin="32" RowSpacing="20" MaxWidth="800" HorizontalAlignment="Stretch">
+        <Grid Margin="32" HorizontalAlignment="Center">
+        <Grid RowSpacing="20" MaxWidth="800" HorizontalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -128,6 +129,7 @@
                         Content="Save changes"
                         Style="{StaticResource AccentButtonStyle}" />
             </Grid>
+        </Grid>
         </Grid>
     </ScrollViewer>
 </Page>
