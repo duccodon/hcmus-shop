@@ -22,6 +22,7 @@ namespace hcmus_shop.ViewModels.Orders
     public class OrdersViewModel : ObservableObject
     {
         private const string DraftStorageKey = "CreateOrderDraft";
+        private const int DefaultPageSize = 10;
 
         private readonly IOrderService _orderService;
         private readonly ICustomerService _customerService;
@@ -29,6 +30,7 @@ namespace hcmus_shop.ViewModels.Orders
         private readonly IInvoiceService _invoiceService;
         private readonly IAuthService _authService;
         private readonly IConfigService _configService;
+        private readonly ISettingsService _settingsService;
         private readonly DispatcherTimer _autoSaveTimer;
         private readonly List<ProductInstanceDto> _availableInstancesCache = [];
         private CancellationTokenSource? _searchDebounceCts;
@@ -70,7 +72,8 @@ namespace hcmus_shop.ViewModels.Orders
             IPromotionService promotionService,
             IInvoiceService invoiceService,
             IAuthService authService,
-            IConfigService configService)
+            IConfigService configService,
+            ISettingsService settingsService)
         {
             _orderService = orderService;
             _customerService = customerService;
@@ -78,6 +81,13 @@ namespace hcmus_shop.ViewModels.Orders
             _invoiceService = invoiceService;
             _authService = authService;
             _configService = configService;
+            _settingsService = settingsService;
+            _selectedPageSize = NormalizePageSize(_settingsService.PageSize);
+            if (_settingsService.PageSize != _selectedPageSize)
+            {
+                _settingsService.PageSize = _selectedPageSize;
+            }
+            _settingsService.SettingsChanged += OnSettingsChanged;
 
             _autoSaveTimer = new DispatcherTimer
             {
@@ -125,7 +135,7 @@ namespace hcmus_shop.ViewModels.Orders
         public ObservableCollection<CustomerDto> Customers { get; } = [];
         public ObservableCollection<OrderProductSuggestionViewModel> ProductSuggestions { get; } = [];
         public ObservableCollection<OrderCartItemViewModel> CartItems { get; } = [];
-        public ObservableCollection<int> PageSizeOptions { get; } = [10, 20, 50];
+        public ObservableCollection<int> PageSizeOptions { get; } = [5, 10, 15, 20];
         public ObservableCollection<PageButtonItem> PageButtons { get; } = [];
         public ObservableCollection<string> SelectedStatusOptions { get; } = [];
         public ObservableCollection<OrderTableOption> SortFieldOptions { get; } = [];
@@ -301,8 +311,10 @@ namespace hcmus_shop.ViewModels.Orders
             get => _selectedPageSize;
             set
             {
-                if (SetProperty(ref _selectedPageSize, value))
+                var normalizedValue = NormalizePageSize(value);
+                if (SetProperty(ref _selectedPageSize, normalizedValue))
                 {
+                    _settingsService.PageSize = normalizedValue;
                     _currentPage = 1;
                     _ = LoadOrdersAsync();
                 }
@@ -727,11 +739,7 @@ namespace hcmus_shop.ViewModels.Orders
             StartAutoSave();
             await LoadAvailableInstancesAsync();
 
-            var restored = await TryRestoreDraftAsync();
-            if (!restored && string.IsNullOrWhiteSpace(EditorCustomerId))
-            {
-                EditorCustomerId = Customers.FirstOrDefault()?.CustomerId ?? string.Empty;
-            }
+            await TryRestoreDraftAsync();
 
             UpdateSuggestionsFromCache();
             NotifyEditorTotalsChanged();
@@ -1123,12 +1131,6 @@ namespace hcmus_shop.ViewModels.Orders
         {
             EditorErrorMessage = string.Empty;
 
-            if (string.IsNullOrWhiteSpace(EditorCustomerId))
-            {
-                EditorErrorMessage = "Customer is required.";
-                return;
-            }
-
             if (CartItems.Count == 0)
             {
                 EditorErrorMessage = "Select at least one product.";
@@ -1154,7 +1156,7 @@ namespace hcmus_shop.ViewModels.Orders
                 {
                     var updateResult = await _orderService.UpdateAsync(SelectedOrder.OrderId, new UpdateOrderInput
                     {
-                        CustomerId = EditorCustomerId,
+                        CustomerId = string.IsNullOrWhiteSpace(EditorCustomerId) ? null : EditorCustomerId,
                         PromotionCode = string.IsNullOrWhiteSpace(EditorPromotionCode) ? null : EditorPromotionCode.Trim(),
                         Notes = string.IsNullOrWhiteSpace(EditorNotes) ? null : EditorNotes.Trim(),
                         Items = orderItems
@@ -1170,7 +1172,7 @@ namespace hcmus_shop.ViewModels.Orders
                 {
                     var createResult = await _orderService.CreateAsync(new CreateOrderInput
                     {
-                        CustomerId = EditorCustomerId,
+                        CustomerId = string.IsNullOrWhiteSpace(EditorCustomerId) ? null : EditorCustomerId,
                         PromotionCode = string.IsNullOrWhiteSpace(EditorPromotionCode) ? null : EditorPromotionCode.Trim(),
                         Notes = string.IsNullOrWhiteSpace(EditorNotes) ? null : EditorNotes.Trim(),
                         Items = orderItems
@@ -1477,7 +1479,7 @@ namespace hcmus_shop.ViewModels.Orders
             _isRestoringDraft = true;
             try
             {
-                EditorCustomerId = draft.CustomerId ?? Customers.FirstOrDefault()?.CustomerId ?? string.Empty;
+                EditorCustomerId = draft.CustomerId ?? string.Empty;
                 EditorPromotionCode = draft.PromotionCode ?? string.Empty;
                 EditorNotes = draft.Notes ?? string.Empty;
 
@@ -1541,7 +1543,7 @@ namespace hcmus_shop.ViewModels.Orders
             if (IsEditorOpen && !IsEditMode)
             {
                 _isRestoringDraft = true;
-                EditorCustomerId = Customers.FirstOrDefault()?.CustomerId ?? string.Empty;
+                EditorCustomerId = string.Empty;
                 EditorPromotionCode = string.Empty;
                 EditorNotes = string.Empty;
                 EditorErrorMessage = string.Empty;
@@ -1616,6 +1618,24 @@ namespace hcmus_shop.ViewModels.Orders
             });
         }
 
+        private void OnSettingsChanged(object? sender, EventArgs e)
+        {
+            var normalizedValue = NormalizePageSize(_settingsService.PageSize);
+            if (_selectedPageSize == normalizedValue)
+            {
+                return;
+            }
+
+            _selectedPageSize = normalizedValue;
+            OnPropertyChanged(nameof(SelectedPageSize));
+            OnPropertyChanged(nameof(ResultText));
+            _currentPage = 1;
+            if (IsInitialized)
+            {
+                _ = LoadOrdersAsync();
+            }
+        }
+
         private static IEnumerable<int> BuildPageNumbers(int currentPage, int totalPages)
         {
             var pages = new SortedSet<int> { 1, totalPages };
@@ -1629,6 +1649,11 @@ namespace hcmus_shop.ViewModels.Orders
             }
 
             return pages;
+        }
+
+        private static int NormalizePageSize(int value)
+        {
+            return value is 5 or 10 or 15 or 20 ? value : DefaultPageSize;
         }
     }
 

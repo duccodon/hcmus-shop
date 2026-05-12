@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { Context, requireAdmin } from "../../common/context";
+import { Context, requireAdmin, requireAuth } from "../../common/context";
 import {
   CreateOrderDto,
   OrderFilterDto,
@@ -28,11 +28,18 @@ export const orderResolver = {
   },
 
   Query: {
-    orders: (_: unknown, args: OrderFilterDto) => orderService.findAll(args),
-    order: (_: unknown, { orderId }: { orderId: string }) =>
-      orderService.findById(orderId),
-    availableProductInstances: (_: unknown, args: ProductInstanceFilterDto) =>
-      orderService.findAvailableProductInstances(args),
+    orders: (_: unknown, args: OrderFilterDto, context: Context) => {
+      requireAuth(context);
+      return orderService.findAll(args);
+    },
+    order: (_: unknown, { orderId }: { orderId: string }, context: Context) => {
+      requireAuth(context);
+      return orderService.findById(orderId);
+    },
+    availableProductInstances: (_: unknown, args: ProductInstanceFilterDto, context: Context) => {
+      requireAuth(context);
+      return orderService.findAvailableProductInstances(args);
+    },
   },
 
   Mutation: {
@@ -43,8 +50,12 @@ export const orderResolver = {
     ) => orderService.create(input, context),
     updateOrder: (
       _: unknown,
-      { orderId, input }: { orderId: string; input: UpdateOrderDto }
-    ) => orderService.update(orderId, input),
+      { orderId, input }: { orderId: string; input: UpdateOrderDto },
+      context: Context
+    ) => {
+      requireAuth(context);
+      return orderService.update(orderId, input);
+    },
     updateOrderStatus: (
       _: unknown,
       { orderId, status }: { orderId: string; status: string },

@@ -5,7 +5,7 @@ import {
   UpdatePromotionDto,
 } from "./promotion.dto";
 import { promotionService } from "./promotion.service";
-import { Context, requireAdmin } from "../../common/context";
+import { Context, requireAdmin, requireAuth } from "../../common/context";
 
 export const promotionResolver = {
   Promotion: {
@@ -21,14 +21,22 @@ export const promotionResolver = {
   },
 
   Query: {
-    promotions: (_: unknown, args: PromotionFilterDto) =>
-      promotionService.findAll(args),
-    promotion: (_: unknown, { promotionId }: { promotionId: number }) =>
-      promotionService.findById(promotionId),
+    promotions: (_: unknown, args: PromotionFilterDto, context: Context) => {
+      requireAuth(context);
+      return promotionService.findAll(args);
+    },
+    promotion: (_: unknown, { promotionId }: { promotionId: number }, context: Context) => {
+      requireAuth(context);
+      return promotionService.findById(promotionId);
+    },
     validatePromotion: (
       _: unknown,
-      { code, customerRank }: { code: string; customerRank?: string | null }
-    ) => promotionService.validatePromotion(code, customerRank),
+      { code, customerRank }: { code: string; customerRank?: string | null },
+      context: Context
+    ) => {
+      requireAuth(context);
+      return promotionService.validatePromotion(code, customerRank);
+    },
   },
 
   Mutation: {

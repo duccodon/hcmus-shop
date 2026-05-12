@@ -23,10 +23,14 @@ export class ReportRepository {
       orderBy: { createdAt: "asc" },
     });
 
-    const grouped = new Map<
-      string,
-      { quantity: number; revenue: number; profit: number }
-    >();
+    const grouped = new Map<string, { quantity: number; revenue: number; profit: number }>();
+    for (const period of buildPeriodKeys(fromDate, toDate, groupBy)) {
+      grouped.set(period, {
+        quantity: 0,
+        revenue: 0,
+        profit: 0,
+      });
+    }
 
     for (const order of orders) {
       const period = getPeriodKey(order.createdAt, groupBy);
@@ -106,6 +110,19 @@ export class ReportRepository {
   }
 }
 
+function buildPeriodKeys(fromDate: Date, toDate: Date, groupBy: ReportGroupBy) {
+  const keys: string[] = [];
+  const cursor = normalizeCursor(fromDate, groupBy);
+  const end = normalizeCursor(toDate, groupBy);
+
+  while (cursor.getTime() <= end.getTime()) {
+    keys.push(getPeriodKey(cursor, groupBy));
+    advanceCursor(cursor, groupBy);
+  }
+
+  return keys;
+}
+
 function getPeriodKey(date: Date, groupBy: ReportGroupBy) {
   const utcDate = new Date(date);
   if (groupBy === "day") {
@@ -129,6 +146,48 @@ function getIsoWeekNumber(date: Date) {
   target.setUTCDate(target.getUTCDate() + 4 - dayNumber);
   const yearStart = new Date(Date.UTC(target.getUTCFullYear(), 0, 1));
   return Math.ceil((((target.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+}
+
+function normalizeCursor(date: Date, groupBy: ReportGroupBy) {
+  const normalized = new Date(date);
+  normalized.setUTCHours(0, 0, 0, 0);
+
+  if (groupBy === "week") {
+    const dayNumber = normalized.getUTCDay() || 7;
+    normalized.setUTCDate(normalized.getUTCDate() - (dayNumber - 1));
+    return normalized;
+  }
+
+  if (groupBy === "month") {
+    normalized.setUTCDate(1);
+    return normalized;
+  }
+
+  if (groupBy === "year") {
+    normalized.setUTCMonth(0, 1);
+    return normalized;
+  }
+
+  return normalized;
+}
+
+function advanceCursor(cursor: Date, groupBy: ReportGroupBy) {
+  if (groupBy === "day") {
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+    return;
+  }
+
+  if (groupBy === "week") {
+    cursor.setUTCDate(cursor.getUTCDate() + 7);
+    return;
+  }
+
+  if (groupBy === "month") {
+    cursor.setUTCMonth(cursor.getUTCMonth() + 1, 1);
+    return;
+  }
+
+  cursor.setUTCFullYear(cursor.getUTCFullYear() + 1, 0, 1);
 }
 
 export const reportRepository = new ReportRepository();

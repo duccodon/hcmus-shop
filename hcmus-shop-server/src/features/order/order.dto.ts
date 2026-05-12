@@ -20,14 +20,14 @@ export interface OrderItemInputDto {
 }
 
 export interface CreateOrderDto {
-  customerId: string;
+  customerId?: string | null;
   promotionCode?: string;
   items: OrderItemInputDto[];
   notes?: string;
 }
 
 export interface UpdateOrderDto {
-  customerId?: string;
+  customerId?: string | null;
   promotionCode?: string | null;
   items?: OrderItemInputDto[];
   notes?: string | null;

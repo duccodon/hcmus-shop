@@ -162,7 +162,7 @@ model Promotion {
 
 model Order {
   orderId        String    @id @default(uuid()) @db.Uuid
-  customerId     String    @db.Uuid
+  customerId     String?   @db.Uuid
   userId         String    @db.Uuid
   promotionId    Int?
   subtotal       Decimal   @db.Decimal(18, 2)
@@ -173,7 +173,7 @@ model Order {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime? @updatedAt
 
-  customer   Customer   @relation(fields: [customerId], references: [customerId])
+  customer   Customer?  @relation(fields: [customerId], references: [customerId], onDelete: SetNull)
   user       User       @relation(fields: [userId], references: [userId])
   promotion  Promotion? @relation(fields: [promotionId], references: [promotionId])
   orderItems OrderItem[]

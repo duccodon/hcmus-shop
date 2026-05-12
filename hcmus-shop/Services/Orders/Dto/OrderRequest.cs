@@ -28,7 +28,7 @@ namespace hcmus_shop.Services.Orders.Dto
 
     public class CreateOrderInput
     {
-        public string CustomerId { get; set; } = string.Empty;
+        public string? CustomerId { get; set; }
         public string? PromotionCode { get; set; }
         public List<OrderItemInput> Items { get; set; } = new();
         public string? Notes { get; set; }

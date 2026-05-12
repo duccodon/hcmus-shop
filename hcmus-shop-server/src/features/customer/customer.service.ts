@@ -16,6 +16,8 @@ export class CustomerService {
       throw new Error("Customer name is required.");
     }
 
+    await this.ensureNoDuplicate(name, input.phone);
+
     return customerRepository.create({
       name,
       phone: normalizeOptionalText(input.phone),
@@ -35,6 +37,8 @@ export class CustomerService {
       throw new Error("Customer name is required.");
     }
 
+    await this.ensureNoDuplicate(name, input.phone, customerId);
+
     return customerRepository.update(customerId, {
       name,
       phone: normalizeOptionalText(input.phone) ?? null,
@@ -48,12 +52,20 @@ export class CustomerService {
       throw new Error("Customer not found.");
     }
 
-    const orderCount = await customerRepository.countOrders(customerId);
-    if (orderCount > 0) {
-      throw new Error("Cannot delete a customer with existing orders.");
+    return customerRepository.delete(customerId);
+  }
+
+  private async ensureNoDuplicate(name: string, phone?: string | null, excludeCustomerId?: string) {
+    const duplicate = await customerRepository.findDuplicate(name, phone, excludeCustomerId);
+    if (!duplicate) {
+      return;
     }
 
-    return customerRepository.delete(customerId);
+    if (phone?.trim() && duplicate.phone?.trim() === phone.trim()) {
+      throw new Error("Customer phone already exists.");
+    }
+
+    throw new Error("Customer name already exists.");
   }
 }
 

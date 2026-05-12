@@ -30,6 +30,12 @@ namespace hcmus_shop.ViewModels
         private string password = string.Empty;
 
         [ObservableProperty]
+        private string? usernameError;
+
+        [ObservableProperty]
+        private string? passwordError;
+
+        [ObservableProperty]
         private bool rememberMe;
 
         [ObservableProperty]
@@ -61,10 +67,38 @@ namespace hcmus_shop.ViewModels
         }
 
         public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
+        public bool HasUsernameError => !string.IsNullOrWhiteSpace(UsernameError);
+        public bool HasPasswordError => !string.IsNullOrWhiteSpace(PasswordError);
 
         partial void OnErrorMessageChanged(string? value)
         {
             OnPropertyChanged(nameof(HasError));
+        }
+
+        partial void OnUsernameErrorChanged(string? value)
+        {
+            OnPropertyChanged(nameof(HasUsernameError));
+        }
+
+        partial void OnPasswordErrorChanged(string? value)
+        {
+            OnPropertyChanged(nameof(HasPasswordError));
+        }
+
+        partial void OnUsernameChanged(string value)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                UsernameError = null;
+            }
+        }
+
+        partial void OnPasswordChanged(string value)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                PasswordError = null;
+            }
         }
 
         /// <summary>
@@ -98,10 +132,11 @@ namespace hcmus_shop.ViewModels
             }
 
             ErrorMessage = null;
+            UsernameError = null;
+            PasswordError = null;
 
-            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
+            if (!ValidateCredentials())
             {
-                ErrorMessage = "Please enter username and password.";
                 return;
             }
 
@@ -126,6 +161,25 @@ namespace hcmus_shop.ViewModels
             {
                 IsBusy = false;
             }
+        }
+
+        private bool ValidateCredentials()
+        {
+            var isValid = true;
+
+            if (string.IsNullOrWhiteSpace(Username))
+            {
+                UsernameError = "Username is required.";
+                isValid = false;
+            }
+
+            if (string.IsNullOrWhiteSpace(Password))
+            {
+                PasswordError = "Password is required.";
+                isValid = false;
+            }
+
+            return isValid;
         }
 
         [RelayCommand]

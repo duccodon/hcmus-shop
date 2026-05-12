@@ -63,6 +63,7 @@ namespace hcmus_shop.ViewModels.Products
             _configService = configService;
             _settingsService = settingsService;
             _authService = authService;
+            _settingsService.SettingsChanged += OnSettingsChanged;
 
             _selectedPageSize = NormalizePageSize(_settingsService.PageSize);
             if (_settingsService.PageSize != _selectedPageSize)
@@ -1230,6 +1231,24 @@ namespace hcmus_shop.ViewModels.Products
                 1 => selectedNames[0],
                 _ => $"{selectedNames.Count} selected",
             };
+        }
+
+        private void OnSettingsChanged(object? sender, EventArgs e)
+        {
+            var normalizedValue = NormalizePageSize(_settingsService.PageSize);
+            if (_selectedPageSize == normalizedValue)
+            {
+                return;
+            }
+
+            _selectedPageSize = normalizedValue;
+            OnPropertyChanged(nameof(SelectedPageSize));
+            OnPropertyChanged(nameof(ResultText));
+            _currentPage = 1;
+            if (IsInitialized)
+            {
+                _ = LoadProductsAsync();
+            }
         }
     }
 }

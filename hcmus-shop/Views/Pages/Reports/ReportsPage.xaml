@@ -57,21 +57,21 @@
                             <Border Background="{StaticResource SelectionHighlight}" CornerRadius="16" Padding="16">
                                 <StackPanel Spacing="12">
                                     <TextBlock Text="Products Sold" Style="{StaticResource CardTitleStyle}" />
-                                    <lvc:CartesianChart Height="240" LegendPosition="Hidden" Series="{x:Bind ViewModel.QuantitySeries, Mode=OneWay}" XAxes="{x:Bind ViewModel.PeriodAxes, Mode=OneWay}" YAxes="{x:Bind ViewModel.QuantityAxes, Mode=OneWay}" />
+                                    <lvc:CartesianChart Height="240" LegendPosition="Top" Series="{x:Bind ViewModel.QuantitySeries, Mode=OneWay}" XAxes="{x:Bind ViewModel.PeriodAxes, Mode=OneWay}" YAxes="{x:Bind ViewModel.QuantityAxes, Mode=OneWay}" />
                                 </StackPanel>
                             </Border>
 
                             <Border Grid.Row="1" Background="{StaticResource SelectionHighlight}" CornerRadius="16" Padding="16">
                                 <StackPanel Spacing="12">
                                     <TextBlock Text="Revenue" Style="{StaticResource CardTitleStyle}" />
-                                    <lvc:CartesianChart Height="240" LegendPosition="Hidden" Series="{x:Bind ViewModel.RevenueSeries, Mode=OneWay}" XAxes="{x:Bind ViewModel.PeriodAxes, Mode=OneWay}" YAxes="{x:Bind ViewModel.CurrencyAxes, Mode=OneWay}" />
+                                    <lvc:CartesianChart Height="240" LegendPosition="Top" Series="{x:Bind ViewModel.RevenueSeries, Mode=OneWay}" XAxes="{x:Bind ViewModel.PeriodAxes, Mode=OneWay}" YAxes="{x:Bind ViewModel.CurrencyAxes, Mode=OneWay}" />
                                 </StackPanel>
                             </Border>
 
                             <Border Grid.Row="2" Background="{StaticResource SelectionHighlight}" CornerRadius="16" Padding="16">
                                 <StackPanel Spacing="12">
                                     <TextBlock Text="Profit" Style="{StaticResource CardTitleStyle}" />
-                                    <lvc:CartesianChart Height="240" LegendPosition="Hidden" Series="{x:Bind ViewModel.ProfitSeries, Mode=OneWay}" XAxes="{x:Bind ViewModel.PeriodAxes, Mode=OneWay}" YAxes="{x:Bind ViewModel.CurrencyAxes, Mode=OneWay}" />
+                                    <lvc:CartesianChart Height="240" LegendPosition="Top" Series="{x:Bind ViewModel.ProfitSeries, Mode=OneWay}" XAxes="{x:Bind ViewModel.PeriodAxes, Mode=OneWay}" YAxes="{x:Bind ViewModel.CurrencyAxes, Mode=OneWay}" />
                                 </StackPanel>
                             </Border>
 

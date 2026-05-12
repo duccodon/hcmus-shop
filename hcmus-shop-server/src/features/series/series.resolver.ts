@@ -1,3 +1,4 @@
+import { Context, requireAdmin, requireAuth } from "../../common/context";
 import { seriesService } from "./series.service";
 
 export const seriesResolver = {
@@ -7,10 +8,14 @@ export const seriesResolver = {
   },
 
   Query: {
-    seriesByBrand: (_: unknown, { brandId }: { brandId: number }) =>
-      seriesService.findByBrand(brandId),
-    series: (_: unknown, { seriesId }: { seriesId: number }) =>
-      seriesService.findById(seriesId),
+    seriesByBrand: (_: unknown, { brandId }: { brandId: number }, context: Context) => {
+      requireAuth(context);
+      return seriesService.findByBrand(brandId);
+    },
+    series: (_: unknown, { seriesId }: { seriesId: number }, context: Context) => {
+      requireAuth(context);
+      return seriesService.findById(seriesId);
+    },
   },
 
   Mutation: {
@@ -21,8 +26,10 @@ export const seriesResolver = {
         name: string;
         description?: string;
         targetSegment?: string;
-      }
+      },
+      context: Context
     ) => {
+      requireAdmin(context);
       return seriesService.create(args);
     },
 
@@ -36,15 +43,19 @@ export const seriesResolver = {
         name?: string;
         description?: string;
         targetSegment?: string;
-      }
+      },
+      context: Context
     ) => {
+      requireAdmin(context);
       return seriesService.update(seriesId, data);
     },
 
     deleteSeries: (
       _: unknown,
-      { seriesId }: { seriesId: number }
+      { seriesId }: { seriesId: number },
+      context: Context
     ) => {
+      requireAdmin(context);
       return seriesService.delete(seriesId);
     },
   },

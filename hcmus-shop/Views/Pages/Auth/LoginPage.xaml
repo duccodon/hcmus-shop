@@ -99,6 +99,12 @@
                         PlaceholderText="Enter your username"
                         Style="{StaticResource LoginTextBoxStyle}"
                         Text="{Binding Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock
+                        Margin="2,6,0,0"
+                        Foreground="{StaticResource LoginErrorBrush}"
+                        Style="{StaticResource CaptionSecondaryTextStyle}"
+                        Text="{Binding UsernameError}"
+                        Visibility="{Binding HasUsernameError, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                     <!--  Password  -->
                     <TextBlock
@@ -107,9 +113,17 @@
                         Text="Password" />
                     <PasswordBox
                         x:Name="PasswordInput"
+                        KeyDown="PasswordInput_KeyDown"
                         PasswordChanged="PasswordInput_PasswordChanged"
                         PlaceholderText="Enter your password"
+                        PasswordRevealMode="Visible"
                         Style="{StaticResource LoginPasswordBoxStyle}" />
+                    <TextBlock
+                        Margin="2,6,0,0"
+                        Foreground="{StaticResource LoginErrorBrush}"
+                        Style="{StaticResource CaptionSecondaryTextStyle}"
+                        Text="{Binding PasswordError}"
+                        Visibility="{Binding HasPasswordError, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                     <!--  Remember me  -->
                     <CheckBox

@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { Context, requireAdmin } from "../../common/context";
+import { Context, requireAdmin, requireAuth } from "../../common/context";
 import { productService } from "./product.service";
 import {
   ProductFilterDto,
@@ -36,10 +36,14 @@ export const productResolver = {
   },
 
   Query: {
-    products: (_: unknown, args: ProductFilterDto) =>
-      productService.findAll(args),
-    product: (_: unknown, { productId }: { productId: number }) =>
-      productService.findById(productId),
+    products: (_: unknown, args: ProductFilterDto, context: Context) => {
+      requireAuth(context);
+      return productService.findAll(args);
+    },
+    product: (_: unknown, { productId }: { productId: number }, context: Context) => {
+      requireAuth(context);
+      return productService.findById(productId);
+    },
   },
 
   Mutation: {

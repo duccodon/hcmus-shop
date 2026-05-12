@@ -6,6 +6,7 @@ namespace hcmus_shop.Contracts.Services
     /// </summary>
     public interface ISettingsService
     {
+        event System.EventHandler? SettingsChanged;
         int PageSize { get; set; }
         bool RememberLastScreen { get; set; }
         string? LastScreen { get; set; }

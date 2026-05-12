@@ -6,6 +6,9 @@ using hcmus_shop.Services.Auth.Dto;
 using hcmus_shop.Services.GraphQL;
 using System;
 using System.Threading.Tasks;
+using Windows.Security.Cryptography;
+using Windows.Security.Cryptography.DataProtection;
+using Windows.Storage.Streams;
 using Windows.Storage;
 
 namespace hcmus_shop.Services.Auth
@@ -13,6 +16,7 @@ namespace hcmus_shop.Services.Auth
     public class AuthService : IAuthService
     {
         private const string TokenKey = "auth_token";
+        private const string TokenProtectionDescriptor = "LOCAL=user";
         private readonly IGraphQLClientService _graphQL;
 
         public AuthService(IGraphQLClientService graphQL)
@@ -67,7 +71,7 @@ namespace hcmus_shop.Services.Auth
             // Otherwise the session is ephemeral — closing the app forces re-login.
             if (rememberMe)
             {
-                SaveToken(Token);
+                await SaveTokenAsync(Token);
             }
             else
             {
@@ -82,7 +86,7 @@ namespace hcmus_shop.Services.Auth
         // ========================
         public async Task<bool> TryAutoLoginAsync()
         {
-            var savedToken = LoadToken();
+            var savedToken = await LoadTokenAsync();
             if (string.IsNullOrEmpty(savedToken))
                 return false;
 
@@ -134,14 +138,40 @@ namespace hcmus_shop.Services.Auth
         // ========================
         // TOKEN STORAGE
         // ========================
-        private void SaveToken(string token)
+        private async Task SaveTokenAsync(string token)
         {
-            ApplicationData.Current.LocalSettings.Values[TokenKey] = token;
+            var provider = new DataProtectionProvider(TokenProtectionDescriptor);
+            var plainBuffer = CryptographicBuffer.ConvertStringToBinary(token, BinaryStringEncoding.Utf8);
+            var protectedBuffer = await provider.ProtectAsync(plainBuffer);
+            ApplicationData.Current.LocalSettings.Values[TokenKey] = CryptographicBuffer.EncodeToBase64String(protectedBuffer);
         }
 
-        private string? LoadToken()
+        private async Task<string?> LoadTokenAsync()
         {
-            return ApplicationData.Current.LocalSettings.Values[TokenKey] as string;
+            if (ApplicationData.Current.LocalSettings.Values[TokenKey] is not string storedValue
+                || string.IsNullOrWhiteSpace(storedValue))
+            {
+                return null;
+            }
+
+            if (storedValue.Contains('.', StringComparison.Ordinal))
+            {
+                // Legacy plain-text JWT from earlier builds. Accept once, then re-encrypt on success.
+                return storedValue;
+            }
+
+            try
+            {
+                var provider = new DataProtectionProvider();
+                IBuffer protectedBuffer = CryptographicBuffer.DecodeFromBase64String(storedValue);
+                var plainBuffer = await provider.UnprotectAsync(protectedBuffer);
+                return CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, plainBuffer);
+            }
+            catch
+            {
+                ClearToken();
+                return null;
+            }
         }
 
         private void ClearToken()

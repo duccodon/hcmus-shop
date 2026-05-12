@@ -42,6 +42,7 @@ namespace hcmus_shop.Models.DTOs
         public string? Notes { get; set; }
         public string CreatedAt { get; set; } = string.Empty;
         public string? UpdatedAt { get; set; }
+        public string DisplayCustomerName => Customer?.Name ?? "Walk-in";
     }
 
     public class OrderPageDto

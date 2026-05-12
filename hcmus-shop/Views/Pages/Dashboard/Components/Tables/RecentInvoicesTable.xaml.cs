@@ -1,3 +1,5 @@
+using CommunityToolkit.Mvvm.DependencyInjection;
+using hcmus_shop.Contracts.Services;
 using hcmus_shop.ViewModels;
 using hcmus_shop.ViewModels.Products;
 using CommunityToolkit.Mvvm.Input;
@@ -51,6 +53,7 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
 
         private readonly List<RecentInvoiceItem> _allItems = [];
         private readonly List<RecentInvoiceItem> _filteredSortedItems = [];
+        private readonly ISettingsService? _settingsService;
 
         private string _sortColumn = DefaultSortColumn;
         private bool _sortAscending = true; // default: ascending for No
@@ -63,7 +66,7 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
 
         public ObservableCollection<RecentInvoiceItem> PagedItems { get; } = [];
         public ObservableCollection<PageButtonItem> PageButtons { get; } = [];
-        public ObservableCollection<int> PageSizeOptions { get; } = [5, 10, 20, 50];
+        public ObservableCollection<int> PageSizeOptions { get; } = [5, 10, 15, 20];
         public IRelayCommand<int> PageButtonClickCommand { get; }
 
         // ──────────────────────────────────────────────
@@ -82,6 +85,10 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
                 }
 
                 _selectedPageSize = value;
+                if (_settingsService is not null)
+                {
+                    _settingsService.PageSize = value;
+                }
                 _currentPage = 1;
                 RebuildPagedItems();
                 NotifyPagingChanged();
@@ -133,6 +140,18 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
         public RecentInvoicesTable()
         {
             InitializeComponent();
+            _settingsService = Ioc.Default.GetService<ISettingsService>();
+            if (_settingsService is not null)
+            {
+                _selectedPageSize = NormalizePageSize(_settingsService.PageSize);
+                if (_settingsService.PageSize != _selectedPageSize)
+                {
+                    _settingsService.PageSize = _selectedPageSize;
+                }
+
+                _settingsService.SettingsChanged += OnSettingsChanged;
+            }
+
             PageButtonClickCommand = new RelayCommand<int>(OnPageButtonCommandExecute);
         }
 
@@ -158,6 +177,26 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
             }
         }
 
+        private void OnSettingsChanged(object? sender, EventArgs e)
+        {
+            if (_settingsService is null)
+            {
+                return;
+            }
+
+            var normalizedValue = NormalizePageSize(_settingsService.PageSize);
+            if (_selectedPageSize == normalizedValue)
+            {
+                return;
+            }
+
+            _selectedPageSize = normalizedValue;
+            _currentPage = 1;
+            RebuildPagedItems();
+            NotifyPagingChanged();
+            OnPropertyChanged(nameof(SelectedPageSize));
+        }
+
         // ──────────────────────────────────────────────
         // Event Handlers – Search
         // ──────────────────────────────────────────────
@@ -178,6 +217,11 @@ namespace hcmus_shop.Views.Dashboard.Components.Tables
             DateSearchPanel.Visibility = isDateField ? Visibility.Visible : Visibility.Collapsed;
 
             ApplyFilterAndSort(resetPage: true);
+        }
+
+        private static int NormalizePageSize(int value)
+        {
+            return value is 5 or 10 or 15 or 20 ? value : DefaultPageSize;
         }
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)

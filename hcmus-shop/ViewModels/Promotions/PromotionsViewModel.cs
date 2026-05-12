@@ -17,8 +17,10 @@ namespace hcmus_shop.ViewModels.Promotions
 {
     public class PromotionsViewModel : ObservableObject
     {
+        private const int DefaultPageSize = 10;
         private readonly IPromotionService _promotionService;
         private readonly IAuthService _authService;
+        private readonly ISettingsService _settingsService;
         private CancellationTokenSource? _searchDebounceCts;
         private string _searchQuery = string.Empty;
         private bool _isLoading;
@@ -31,10 +33,17 @@ namespace hcmus_shop.ViewModels.Promotions
         private PromotionTableOption? _selectedSortDirection;
         private string _selectedStatusFilter = "All";
 
-        public PromotionsViewModel(IPromotionService promotionService, IAuthService authService)
+        public PromotionsViewModel(IPromotionService promotionService, IAuthService authService, ISettingsService settingsService)
         {
             _promotionService = promotionService;
             _authService = authService;
+            _settingsService = settingsService;
+            _selectedPageSize = NormalizePageSize(_settingsService.PageSize);
+            if (_settingsService.PageSize != _selectedPageSize)
+            {
+                _settingsService.PageSize = _selectedPageSize;
+            }
+            _settingsService.SettingsChanged += OnSettingsChanged;
 
             PageSizeOptions.Add(5);
             PageSizeOptions.Add(10);
@@ -195,8 +204,10 @@ namespace hcmus_shop.ViewModels.Promotions
             get => _selectedPageSize;
             set
             {
-                if (SetProperty(ref _selectedPageSize, value))
+                var normalizedValue = NormalizePageSize(value);
+                if (SetProperty(ref _selectedPageSize, normalizedValue))
                 {
+                    _settingsService.PageSize = normalizedValue;
                     _currentPage = 1;
                     _ = LoadPromotionsAsync();
                 }
@@ -530,6 +541,29 @@ namespace hcmus_shop.ViewModels.Promotions
             catch (TaskCanceledException)
             {
             }
+        }
+
+        private void OnSettingsChanged(object? sender, EventArgs e)
+        {
+            var normalizedValue = NormalizePageSize(_settingsService.PageSize);
+            if (_selectedPageSize == normalizedValue)
+            {
+                return;
+            }
+
+            _selectedPageSize = normalizedValue;
+            OnPropertyChanged(nameof(SelectedPageSize));
+            OnPropertyChanged(nameof(ResultText));
+            _currentPage = 1;
+            if (IsInitialized)
+            {
+                _ = LoadPromotionsAsync();
+            }
+        }
+
+        private static int NormalizePageSize(int value)
+        {
+            return value is 5 or 10 or 15 or 20 ? value : DefaultPageSize;
         }
 
         private void NotifyPagingChanged()

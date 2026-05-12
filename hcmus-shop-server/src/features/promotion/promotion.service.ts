@@ -362,10 +362,14 @@ export class PromotionService {
       return true;
     }
 
-    const normalizedRequiredRank = this.normalizeCustomerRank(requiredRank);
-    const normalizedCurrentRank = this.normalizeCustomerRank(currentRank ?? null) ?? "Bronze";
+    if (!currentRank?.trim()) {
+      return false;
+    }
 
-    return CUSTOMER_RANKS.indexOf(normalizedCurrentRank) >= CUSTOMER_RANKS.indexOf(normalizedRequiredRank!);
+    const normalizedRequiredRank = this.normalizeCustomerRank(requiredRank);
+    const normalizedCurrentRank = this.normalizeCustomerRank(currentRank ?? null);
+
+    return CUSTOMER_RANKS.indexOf(normalizedCurrentRank!) >= CUSTOMER_RANKS.indexOf(normalizedRequiredRank!);
   }
 }
 

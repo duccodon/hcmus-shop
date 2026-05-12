@@ -4,7 +4,7 @@ import {
   UpdateCustomerDto,
 } from "./customer.dto";
 import { customerService, getCustomerRank } from "./customer.service";
-import { Context, requireAdmin } from "../../common/context";
+import { Context, requireAdmin, requireAuth } from "../../common/context";
 
 export const customerResolver = {
   Customer: {
@@ -12,8 +12,10 @@ export const customerResolver = {
       getCustomerRank(parent.loyaltyPoints),
   },
   Query: {
-    customers: (_: unknown, args: CustomerFilterDto) =>
-      customerService.findAll(args),
+    customers: (_: unknown, args: CustomerFilterDto, context: Context) => {
+      requireAuth(context);
+      return customerService.findAll(args);
+    },
     customer: (
       _: unknown,
       { customerId }: { customerId: string },
@@ -25,8 +27,10 @@ export const customerResolver = {
   },
 
   Mutation: {
-    createCustomer: (_: unknown, { input }: { input: CreateCustomerDto }) =>
-      customerService.create(input),
+    createCustomer: (_: unknown, { input }: { input: CreateCustomerDto }, context: Context) => {
+      requireAuth(context);
+      return customerService.create(input);
+    },
     updateCustomer: (
       _: unknown,
       { customerId, input }: { customerId: string; input: UpdateCustomerDto },

@@ -15,8 +15,10 @@ namespace hcmus_shop.ViewModels.Customers
 {
     public class CustomersViewModel : ObservableObject
     {
+        private const int DefaultPageSize = 10;
         private readonly ICustomerService _customerService;
         private readonly IAuthService _authService;
+        private readonly ISettingsService _settingsService;
         private CancellationTokenSource? _searchDebounceCts;
         private bool _isInitialized;
         private bool _isLoading;
@@ -28,10 +30,17 @@ namespace hcmus_shop.ViewModels.Customers
         private CustomerSortOption? _selectedSortField;
         private CustomerSortOption? _selectedSortDirection;
 
-        public CustomersViewModel(ICustomerService customerService, IAuthService authService)
+        public CustomersViewModel(ICustomerService customerService, IAuthService authService, ISettingsService settingsService)
         {
             _customerService = customerService;
             _authService = authService;
+            _settingsService = settingsService;
+            _selectedPageSize = NormalizePageSize(_settingsService.PageSize);
+            if (_settingsService.PageSize != _selectedPageSize)
+            {
+                _settingsService.PageSize = _selectedPageSize;
+            }
+            _settingsService.SettingsChanged += OnSettingsChanged;
 
             InitializeCommand = new AsyncRelayCommand(InitializeAsync, () => !IsInitialized && !IsLoading);
             RefreshCommand = new AsyncRelayCommand(LoadCustomersAsync, () => !IsLoading);
@@ -56,7 +65,7 @@ namespace hcmus_shop.ViewModels.Customers
         }
 
         public ObservableCollection<CustomerDto> Customers { get; } = [];
-        public ObservableCollection<int> PageSizeOptions { get; } = [10, 20, 50];
+        public ObservableCollection<int> PageSizeOptions { get; } = [5, 10, 15, 20];
         public ObservableCollection<PageButtonItem> PageButtons { get; } = [];
         public ObservableCollection<CustomerSortOption> SortFieldOptions { get; } = [];
         public ObservableCollection<CustomerSortOption> SortDirectionOptions { get; } = [];
@@ -169,8 +178,10 @@ namespace hcmus_shop.ViewModels.Customers
             get => _selectedPageSize;
             set
             {
-                if (SetProperty(ref _selectedPageSize, value))
+                var normalizedValue = NormalizePageSize(value);
+                if (SetProperty(ref _selectedPageSize, normalizedValue))
                 {
+                    _settingsService.PageSize = normalizedValue;
                     _currentPage = 1;
                     _ = LoadCustomersAsync();
                 }
@@ -398,6 +409,29 @@ namespace hcmus_shop.ViewModels.Customers
             catch (TaskCanceledException)
             {
             }
+        }
+
+        private void OnSettingsChanged(object? sender, EventArgs e)
+        {
+            var normalizedValue = NormalizePageSize(_settingsService.PageSize);
+            if (_selectedPageSize == normalizedValue)
+            {
+                return;
+            }
+
+            _selectedPageSize = normalizedValue;
+            OnPropertyChanged(nameof(SelectedPageSize));
+            OnPropertyChanged(nameof(ResultText));
+            _currentPage = 1;
+            if (IsInitialized)
+            {
+                _ = LoadCustomersAsync();
+            }
+        }
+
+        private static int NormalizePageSize(int value)
+        {
+            return value is 5 or 10 or 15 or 20 ? value : DefaultPageSize;
         }
 
         private void RebuildPageButtons()

@@ -17,10 +17,12 @@ namespace hcmus_shop.ViewModels.Store
 {
     public class StoreViewModel : ObservableObject
     {
+        private const int DefaultPageSize = 10;
         private readonly IProductService _productService;
         private readonly IBrandService _brandService;
         private readonly ICategoryService _categoryService;
         private readonly IConfigService _configService;
+        private readonly ISettingsService _settingsService;
         private CancellationTokenSource? _searchDebounceCts;
         private bool _isInitialized;
         private bool _isLoading;
@@ -39,12 +41,20 @@ namespace hcmus_shop.ViewModels.Store
             IProductService productService,
             IBrandService brandService,
             ICategoryService categoryService,
-            IConfigService configService)
+            IConfigService configService,
+            ISettingsService settingsService)
         {
             _productService = productService;
             _brandService = brandService;
             _categoryService = categoryService;
             _configService = configService;
+            _settingsService = settingsService;
+            _selectedPageSize = NormalizePageSize(_settingsService.PageSize);
+            if (_settingsService.PageSize != _selectedPageSize)
+            {
+                _settingsService.PageSize = _selectedPageSize;
+            }
+            _settingsService.SettingsChanged += OnSettingsChanged;
 
             InitializeCommand = new AsyncRelayCommand(InitializeAsync, () => !IsInitialized && !IsLoading);
             RefreshCommand = new AsyncRelayCommand(LoadProductsAsync, () => !IsLoading);
@@ -67,7 +77,7 @@ namespace hcmus_shop.ViewModels.Store
         public ObservableCollection<StoreFilterOption> CategoryOptions { get; } = [];
         public ObservableCollection<StoreSortOption> SortFieldOptions { get; } = [];
         public ObservableCollection<StoreSortOption> SortDirectionOptions { get; } = [];
-        public ObservableCollection<int> PageSizeOptions { get; } = [8, 12, 16];
+        public ObservableCollection<int> PageSizeOptions { get; } = [5, 10, 15, 20];
         public ObservableCollection<PageButtonItem> PageButtons { get; } = [];
 
         public IAsyncRelayCommand InitializeCommand { get; }
@@ -205,8 +215,10 @@ namespace hcmus_shop.ViewModels.Store
             get => _selectedPageSize;
             set
             {
-                if (SetProperty(ref _selectedPageSize, value))
+                var normalizedValue = NormalizePageSize(value);
+                if (SetProperty(ref _selectedPageSize, normalizedValue))
                 {
+                    _settingsService.PageSize = normalizedValue;
                     CurrentPage = 1;
                     _ = LoadProductsAsync();
                 }
@@ -404,6 +416,29 @@ namespace hcmus_shop.ViewModels.Store
             catch (TaskCanceledException)
             {
             }
+        }
+
+        private void OnSettingsChanged(object? sender, EventArgs e)
+        {
+            var normalizedValue = NormalizePageSize(_settingsService.PageSize);
+            if (_selectedPageSize == normalizedValue)
+            {
+                return;
+            }
+
+            _selectedPageSize = normalizedValue;
+            OnPropertyChanged(nameof(SelectedPageSize));
+            OnPropertyChanged(nameof(ResultText));
+            CurrentPage = 1;
+            if (IsInitialized)
+            {
+                _ = LoadProductsAsync();
+            }
+        }
+
+        private static int NormalizePageSize(int value)
+        {
+            return value is 5 or 10 or 15 or 20 ? value : DefaultPageSize;
         }
 
         private Uri? NormalizeImageUri(string? imageUrl)
@@ -621,5 +656,6 @@ namespace hcmus_shop.ViewModels.Store
             property = default;
             return false;
         }
+
     }
 }

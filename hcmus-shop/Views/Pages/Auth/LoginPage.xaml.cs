@@ -4,7 +4,9 @@ using hcmus_shop.ViewModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using System;
+using Windows.System;
 
 namespace hcmus_shop.Views
 {
@@ -48,6 +50,20 @@ namespace hcmus_shop.Views
         private void PasswordInput_PasswordChanged(object sender, RoutedEventArgs e)
         {
             ViewModel.Password = PasswordInput.Password;
+        }
+
+        private void PasswordInput_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key != VirtualKey.Enter)
+            {
+                return;
+            }
+
+            if (ViewModel.LoginCommand.CanExecute(null))
+            {
+                ViewModel.LoginCommand.Execute(null);
+                e.Handled = true;
+            }
         }
 
         private void OnLoginSucceeded(object? sender, EventArgs e)

@@ -43,6 +43,23 @@ export class CustomerRepository {
     return prisma.customer.create({ data });
   }
 
+  findDuplicate(name: string, phone?: string | null, excludeCustomerId?: string) {
+    const conditions: Prisma.CustomerWhereInput[] = [
+      { name: { equals: name, mode: "insensitive" } },
+    ];
+
+    if (phone?.trim()) {
+      conditions.push({ phone: phone.trim() });
+    }
+
+    return prisma.customer.findFirst({
+      where: {
+        ...(excludeCustomerId ? { NOT: { customerId: excludeCustomerId } } : {}),
+        OR: conditions,
+      },
+    });
+  }
+
   update(customerId: string, data: Prisma.CustomerUpdateInput) {
     return prisma.customer.update({ where: { customerId }, data });
   }
@@ -50,10 +67,6 @@ export class CustomerRepository {
   async delete(customerId: string) {
     await prisma.customer.delete({ where: { customerId } });
     return true;
-  }
-
-  countOrders(customerId: string) {
-    return prisma.order.count({ where: { customerId } });
   }
 }
 

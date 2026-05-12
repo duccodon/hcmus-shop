@@ -44,7 +44,9 @@ export class OrderService {
 
     return prisma.order.create({
       data: {
-        customer: { connect: { customerId: payload.customerId } },
+        ...(payload.customerId
+          ? { customer: { connect: { customerId: payload.customerId } } }
+          : {}),
         user: { connect: { userId: user.userId } },
         promotion:
           payload.promotionId != null
@@ -84,7 +86,7 @@ export class OrderService {
     }
 
     const payload = await this.prepareOrderPayload({
-      customerId: input.customerId ?? existing.customerId,
+      customerId: input.customerId !== undefined ? input.customerId : existing.customerId,
       promotionCode: input.promotionCode ?? undefined,
       items:
         input.items && input.items.length > 0
@@ -102,7 +104,10 @@ export class OrderService {
       await tx.order.update({
         where: { orderId },
         data: {
-          customer: { connect: { customerId: payload.customerId } },
+          customer:
+            payload.customerId != null
+              ? { connect: { customerId: payload.customerId } }
+              : { disconnect: true },
           promotion:
             payload.promotionId != null
               ? { connect: { promotionId: payload.promotionId } }
@@ -250,7 +255,7 @@ export class OrderService {
       });
 
       const earnedPoints = calculateEarnedPoints(Number(freshOrder.finalAmount));
-      if (earnedPoints > 0) {
+      if (earnedPoints > 0 && freshOrder.customerId) {
         await tx.customer.update({
           where: { customerId: freshOrder.customerId },
           data: {
@@ -291,16 +296,14 @@ export class OrderService {
   }
 
   private async prepareOrderPayload(input: CreateOrderDto) {
-    const customerId = input.customerId?.trim();
-    if (!customerId) {
-      throw new Error("Customer is required.");
-    }
-
-    const customer = await prisma.customer.findUnique({
-      where: { customerId },
-      select: { customerId: true, loyaltyPoints: true },
-    });
-    if (!customer) {
+    const customerId = input.customerId?.trim() || null;
+    const customer = customerId
+      ? await prisma.customer.findUnique({
+          where: { customerId },
+          select: { customerId: true, loyaltyPoints: true },
+        })
+      : null;
+    if (customerId && !customer) {
       throw new Error("Customer not found.");
     }
 
@@ -346,7 +349,7 @@ export class OrderService {
       const promotion = await promotionService.getValidPromotionByCode(
         normalizedCode,
         new Date(),
-        getCustomerRank(customer.loyaltyPoints)
+        customer ? getCustomerRank(customer.loyaltyPoints) : null
       );
       if (!promotion) {
         throw new Error("Promotion code is invalid, inactive, or expired.");
