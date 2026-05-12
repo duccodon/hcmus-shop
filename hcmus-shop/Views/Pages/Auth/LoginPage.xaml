@@ -111,13 +111,39 @@
                         Margin="0,14,0,4"
                         Style="{StaticResource FieldLabelStyle}"
                         Text="Password" />
-                    <PasswordBox
-                        x:Name="PasswordInput"
-                        KeyDown="PasswordInput_KeyDown"
-                        PasswordChanged="PasswordInput_PasswordChanged"
-                        PlaceholderText="Enter your password"
-                        PasswordRevealMode="Hidden"
-                        Style="{StaticResource LoginPasswordBoxStyle}" />
+                    <Grid>
+                        <PasswordBox
+                            x:Name="PasswordInput"
+                            KeyDown="PasswordInput_KeyDown"
+                            PasswordChanged="PasswordInput_PasswordChanged"
+                            PlaceholderText="Enter your password"
+                            Style="{StaticResource LoginPasswordBoxStyle}" />
+                        <TextBox
+                            x:Name="PasswordRevealInput"
+                            KeyDown="PasswordInput_KeyDown"
+                            TextChanged="PasswordRevealInput_TextChanged"
+                            PlaceholderText="Enter your password"
+                            Style="{StaticResource LoginTextBoxStyle}"
+                            Visibility="Collapsed" />
+                        <Button
+                            x:Name="PasswordRevealButton"
+                            Width="36"
+                            Height="36"
+                            Padding="0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Click="PasswordRevealButton_Click"
+                            ToolTipService.ToolTip="Show or hide password">
+                            <FontIcon
+                                x:Name="PasswordRevealIcon"
+                                FontFamily="Segoe Fluent Icons"
+                                Glyph="&#xE890;"
+                                FontSize="14"
+                                Foreground="{StaticResource TextSecondary}" />
+                        </Button>
+                    </Grid>
                     <TextBlock
                         Margin="2,6,0,0"
                         Foreground="{StaticResource LoginErrorBrush}"

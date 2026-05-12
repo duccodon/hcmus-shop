@@ -101,6 +101,7 @@ namespace hcmus_shop.Views
             }
 
             var picker = new FileOpenPicker();
+            picker.FileTypeFilter.Add(".csv");
             picker.FileTypeFilter.Add(".xlsx");
             picker.FileTypeFilter.Add(".xlsm");
             InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(window));

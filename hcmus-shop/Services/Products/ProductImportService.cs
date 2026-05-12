@@ -34,13 +34,13 @@ namespace hcmus_shop.Services.Products
             {
                 if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
                 {
-                    return Result<ProductImportSummary>.Failure("Excel file not found.");
+                    return Result<ProductImportSummary>.Failure("Import file not found.");
                 }
 
                 var rows = ReadRows(filePath);
                 if (rows.Count == 0)
                 {
-                    return Result<ProductImportSummary>.Failure("The Excel file is empty.");
+                    return Result<ProductImportSummary>.Failure("The import file is empty.");
                 }
 
                 var brandsResult = await _brandService.GetAllAsync();
@@ -165,6 +165,12 @@ namespace hcmus_shop.Services.Products
 
         private static List<ImportedProductRow> ReadRows(string filePath)
         {
+            var extension = Path.GetExtension(filePath);
+            if (string.Equals(extension, ".csv", StringComparison.OrdinalIgnoreCase))
+            {
+                return ReadCsvRows(filePath);
+            }
+
             using var archive = ZipFile.OpenRead(filePath);
             var sharedStrings = ReadSharedStrings(archive);
             var sheetEntry = archive.GetEntry("xl/worksheets/sheet1.xml")
@@ -185,6 +191,42 @@ namespace hcmus_shop.Services.Products
             foreach (var row in rows.Skip(1))
             {
                 var values = ReadRowValues(row, ns, sharedStrings);
+                if (values.Values.All(string.IsNullOrWhiteSpace))
+                {
+                    continue;
+                }
+
+                result.Add(ParseRow(headers, values));
+            }
+
+            return result;
+        }
+
+        private static List<ImportedProductRow> ReadCsvRows(string filePath)
+        {
+            var lines = File.ReadAllLines(filePath);
+            if (lines.Length == 0)
+            {
+                return [];
+            }
+
+            var headerValues = ParseCsvLine(lines[0]);
+            var headers = headerValues
+                .Select((value, index) => new { value, index })
+                .ToDictionary(item => item.index, item => NormalizeHeader(item.value));
+
+            var result = new List<ImportedProductRow>();
+            foreach (var rawLine in lines.Skip(1))
+            {
+                if (string.IsNullOrWhiteSpace(rawLine))
+                {
+                    continue;
+                }
+
+                var values = ParseCsvLine(rawLine)
+                    .Select((value, index) => new { value, index })
+                    .ToDictionary(item => item.index, item => item.value);
+
                 if (values.Values.All(string.IsNullOrWhiteSpace))
                 {
                     continue;
@@ -299,6 +341,48 @@ namespace hcmus_shop.Services.Products
         private static string NormalizeHeader(string header)
         {
             return new string(header.Trim().ToLowerInvariant().Where(ch => !char.IsWhiteSpace(ch) && ch != '_' && ch != '-').ToArray());
+        }
+
+        private static List<string> ParseCsvLine(string line)
+        {
+            var values = new List<string>();
+            var current = new System.Text.StringBuilder();
+            var inQuotes = false;
+
+            for (var index = 0; index < line.Length; index++)
+            {
+                var ch = line[index];
+
+                if (ch == '"')
+                {
+                    if (inQuotes && index + 1 < line.Length && line[index + 1] == '"')
+                    {
+                        current.Append('"');
+                        index++;
+                        continue;
+                    }
+
+                    inQuotes = !inQuotes;
+                    continue;
+                }
+
+                if (ch == ',' && !inQuotes)
+                {
+                    values.Add(current.ToString().Trim());
+                    current.Clear();
+                    continue;
+                }
+
+                current.Append(ch);
+            }
+
+            values.Add(current.ToString().Trim());
+            if (values.Count > 0)
+            {
+                values[0] = values[0].TrimStart('\uFEFF');
+            }
+
+            return values;
         }
 
         private static string RequireValue(string value, string error)

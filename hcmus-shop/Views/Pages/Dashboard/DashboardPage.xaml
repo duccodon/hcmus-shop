@@ -105,7 +105,6 @@
                             <DatePicker Grid.Column="1" Date="{x:Bind ReportViewModel.FromDate, Mode=TwoWay}" />
                             <DatePicker Grid.Column="2" Date="{x:Bind ReportViewModel.ToDate, Mode=TwoWay}" />
                             <TextBlock Grid.Column="3" VerticalAlignment="Center" Text="Group by" Style="{StaticResource BodySecondaryTextStyle}" />
-                            <DatePicker Date="{x:Bind ReportViewModel.FromDate, Mode=TwoWay}" />
                             <ComboBox
                                 Grid.Column="4"
                                 Width="120"

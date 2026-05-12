@@ -12,6 +12,9 @@ namespace hcmus_shop.Views
 {
     public sealed partial class LoginPage : Page
     {
+        private bool _isPasswordVisible;
+        private bool _isSynchronizingPasswordInputs;
+
         public LoginViewModel ViewModel { get; }
         public string VersionText { get; }
         public string ServerUrlText { get; }
@@ -49,7 +52,28 @@ namespace hcmus_shop.Views
 
         private void PasswordInput_PasswordChanged(object sender, RoutedEventArgs e)
         {
+            if (_isSynchronizingPasswordInputs)
+            {
+                return;
+            }
+
+            _isSynchronizingPasswordInputs = true;
+            PasswordRevealInput.Text = PasswordInput.Password;
+            _isSynchronizingPasswordInputs = false;
             ViewModel.Password = PasswordInput.Password;
+        }
+
+        private void PasswordRevealInput_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_isSynchronizingPasswordInputs)
+            {
+                return;
+            }
+
+            _isSynchronizingPasswordInputs = true;
+            PasswordInput.Password = PasswordRevealInput.Text;
+            _isSynchronizingPasswordInputs = false;
+            ViewModel.Password = PasswordRevealInput.Text;
         }
 
         private void PasswordInput_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -77,6 +101,28 @@ namespace hcmus_shop.Views
         private void OnOpenConfigRequested(object? sender, EventArgs e)
         {
             ConfigRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void PasswordRevealButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isPasswordVisible = !_isPasswordVisible;
+
+            if (_isPasswordVisible)
+            {
+                PasswordRevealInput.Text = PasswordInput.Password;
+                PasswordInput.Visibility = Visibility.Collapsed;
+                PasswordRevealInput.Visibility = Visibility.Visible;
+                PasswordRevealInput.Focus(FocusState.Programmatic);
+                PasswordRevealInput.SelectionStart = PasswordRevealInput.Text.Length;
+                PasswordRevealIcon.Glyph = "\uE891";
+                return;
+            }
+
+            PasswordInput.Password = PasswordRevealInput.Text;
+            PasswordRevealInput.Visibility = Visibility.Collapsed;
+            PasswordInput.Visibility = Visibility.Visible;
+            PasswordInput.Focus(FocusState.Programmatic);
+            PasswordRevealIcon.Glyph = "\uE890";
         }
     }
 }

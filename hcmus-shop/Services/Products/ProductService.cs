@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace hcmus_shop.Services.Products
@@ -73,10 +74,29 @@ namespace hcmus_shop.Services.Products
 
         public async Task<Result<ProductDto>> CreateAsync(CreateProductInput input)
         {
+            var payload = new
+            {
+                input = new
+                {
+                    input.Sku,
+                    input.Name,
+                    input.BrandId,
+                    input.SeriesId,
+                    input.ImportPrice,
+                    input.SellingPrice,
+                    input.StockQuantity,
+                    Specifications = NormalizeSpecifications(input.Specifications),
+                    input.Description,
+                    input.WarrantyMonths,
+                    input.CategoryIds,
+                    input.ImageUrls
+                }
+            };
+
             var result = await _graphQL.SafeExecuteAsync(() =>
                     _graphQL.MutateAsync<CreateProductResponse>(
                         ProductQueries.Create,
-                        new { input }
+                        payload
                     ));
 
             if (!result.IsSuccess)
@@ -172,6 +192,24 @@ namespace hcmus_shop.Services.Products
         {
             var normalized = value.Replace("\"", "\"\"");
             return $"\"{normalized}\"";
+        }
+
+        private static object? NormalizeSpecifications(string? specifications)
+        {
+            if (string.IsNullOrWhiteSpace(specifications))
+            {
+                return null;
+            }
+
+            try
+            {
+                using var document = JsonDocument.Parse(specifications);
+                return document.RootElement.Clone();
+            }
+            catch (JsonException)
+            {
+                return specifications;
+            }
         }
     }
 }

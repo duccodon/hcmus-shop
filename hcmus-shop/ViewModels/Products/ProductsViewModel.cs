@@ -464,7 +464,7 @@ namespace hcmus_shop.ViewModels.Products
 
             IsLoading = true;
             ErrorMessage = string.Empty;
-            StatusMessage = "Importing products from Excel...";
+            StatusMessage = "Importing products...";
 
             try
             {
@@ -476,7 +476,7 @@ namespace hcmus_shop.ViewModels.Products
                     return;
                 }
 
-                StatusMessage = $"Imported {result.Value.ImportedCount} products. Failed: {result.Value.FailedCount}.";
+                StatusMessage = $"Import successfully {result.Value.ImportedCount}";
                 if (result.Value.Messages.Count > 0 && result.Value.FailedCount > 0)
                 {
                     ErrorMessage = string.Join(Environment.NewLine, result.Value.Messages.Take(5));

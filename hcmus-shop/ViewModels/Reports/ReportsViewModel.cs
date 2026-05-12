@@ -27,6 +27,9 @@ namespace hcmus_shop.ViewModels.Reports
         private string _lastUpdatedText = "Not updated yet";
         private CancellationTokenSource? _refreshDebounceCts;
         private bool _pendingRefresh;
+        private int _selectedMonthNumber = DateTime.Now.Month;
+        private int _selectedYear = DateTime.Now.Year;
+        private bool _isSynchronizingDateState;
 
         public ReportsViewModel(IReportService reportService)
         {
@@ -38,11 +41,23 @@ namespace hcmus_shop.ViewModels.Reports
             GroupByOptions.Add("week");
             GroupByOptions.Add("month");
             GroupByOptions.Add("year");
+
+            foreach (var month in Enumerable.Range(1, 12))
+            {
+                MonthOptions.Add(new ReportMonthOption(month, CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(month)));
+            }
+
+            foreach (var year in Enumerable.Range(DateTime.Now.Year - 10, 12).Reverse())
+            {
+                YearOptions.Add(year);
+            }
         }
 
         public ObservableCollection<SalesReportEntryDto> SalesEntries { get; } = [];
         public ObservableCollection<TopProductEntryDto> TopProducts { get; } = [];
         public ObservableCollection<string> GroupByOptions { get; } = [];
+        public ObservableCollection<ReportMonthOption> MonthOptions { get; } = [];
+        public ObservableCollection<int> YearOptions { get; } = [];
         public ObservableCollection<ISeries> QuantitySeries { get; } = [];
         public ObservableCollection<ISeries> RevenueSeries { get; } = [];
         public ObservableCollection<ISeries> ProfitSeries { get; } = [];
@@ -93,6 +108,11 @@ namespace hcmus_shop.ViewModels.Reports
 
         public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
         public bool IsEmpty => !IsLoading && SalesEntries.Count == 0 && !HasError;
+        public bool IsDayMode => string.Equals(SelectedGroupBy, "day", StringComparison.OrdinalIgnoreCase);
+        public bool IsWeekMode => string.Equals(SelectedGroupBy, "week", StringComparison.OrdinalIgnoreCase);
+        public bool IsMonthMode => string.Equals(SelectedGroupBy, "month", StringComparison.OrdinalIgnoreCase);
+        public bool IsYearMode => string.Equals(SelectedGroupBy, "year", StringComparison.OrdinalIgnoreCase);
+        public string DayRangeDisplay => $"{FromDate:dd MMM yyyy} - {ToDate:dd MMM yyyy}";
 
         public DateTimeOffset FromDate
         {
@@ -101,6 +121,8 @@ namespace hcmus_shop.ViewModels.Reports
             {
                 if (SetProperty(ref _fromDate, value))
                 {
+                    SyncSelectorsFromDateRange();
+                    OnPropertyChanged(nameof(DayRangeDisplay));
                     QueueRefresh();
                 }
             }
@@ -113,6 +135,8 @@ namespace hcmus_shop.ViewModels.Reports
             {
                 if (SetProperty(ref _toDate, value))
                 {
+                    SyncSelectorsFromDateRange();
+                    OnPropertyChanged(nameof(DayRangeDisplay));
                     QueueRefresh();
                 }
             }
@@ -125,7 +149,42 @@ namespace hcmus_shop.ViewModels.Reports
             {
                 if (SetProperty(ref _selectedGroupBy, value))
                 {
-                    QueueRefresh();
+                    OnPropertyChanged(nameof(IsDayMode));
+                    OnPropertyChanged(nameof(IsWeekMode));
+                    OnPropertyChanged(nameof(IsMonthMode));
+                    OnPropertyChanged(nameof(IsYearMode));
+                    ApplySelectionModeDefaults();
+                }
+            }
+        }
+
+        public int SelectedMonthNumber
+        {
+            get => _selectedMonthNumber;
+            set
+            {
+                if (SetProperty(ref _selectedMonthNumber, value) && IsMonthMode && !_isSynchronizingDateState)
+                {
+                    ApplyMonthSelection();
+                }
+            }
+        }
+
+        public int SelectedYear
+        {
+            get => _selectedYear;
+            set
+            {
+                if (SetProperty(ref _selectedYear, value) && !_isSynchronizingDateState)
+                {
+                    if (IsMonthMode)
+                    {
+                        ApplyMonthSelection();
+                    }
+                    else if (IsYearMode)
+                    {
+                        ApplyYearSelection();
+                    }
                 }
             }
         }
@@ -144,6 +203,7 @@ namespace hcmus_shop.ViewModels.Reports
             }
 
             IsInitialized = true;
+            ApplySelectionModeDefaults();
             await RefreshAsync();
         }
 
@@ -240,6 +300,76 @@ namespace hcmus_shop.ViewModels.Reports
             }
         }
 
+        private void ApplySelectionModeDefaults()
+        {
+            var today = DateTimeOffset.Now.Date;
+
+            if (IsDayMode)
+            {
+                SetDateRange(today, today);
+                return;
+            }
+
+            if (IsWeekMode)
+            {
+                var weekStart = today.AddDays(-(int)(today.DayOfWeek == DayOfWeek.Sunday ? 6 : today.DayOfWeek - DayOfWeek.Monday));
+                SetDateRange(weekStart, today);
+                return;
+            }
+
+            if (IsMonthMode)
+            {
+                _isSynchronizingDateState = true;
+                SelectedMonthNumber = today.Month;
+                SelectedYear = today.Year;
+                _isSynchronizingDateState = false;
+                ApplyMonthSelection();
+                return;
+            }
+
+            _isSynchronizingDateState = true;
+            SelectedYear = today.Year;
+            _isSynchronizingDateState = false;
+            ApplyYearSelection();
+        }
+
+        private void ApplyMonthSelection()
+        {
+            var monthStart = new DateTimeOffset(SelectedYear, SelectedMonthNumber, 1, 0, 0, 0, TimeSpan.Zero);
+            var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+            SetDateRange(monthStart, monthEnd);
+        }
+
+        private void ApplyYearSelection()
+        {
+            var yearStart = new DateTimeOffset(SelectedYear, 1, 1, 0, 0, 0, TimeSpan.Zero);
+            var yearEnd = new DateTimeOffset(SelectedYear, 12, 31, 0, 0, 0, TimeSpan.Zero);
+            SetDateRange(yearStart, yearEnd);
+        }
+
+        private void SyncSelectorsFromDateRange()
+        {
+            _isSynchronizingDateState = true;
+            SelectedMonthNumber = FromDate.Month;
+            SelectedYear = FromDate.Year;
+            _isSynchronizingDateState = false;
+        }
+
+        private void SetDateRange(DateTimeOffset from, DateTimeOffset to)
+        {
+            _isSynchronizingDateState = true;
+            var fromChanged = SetProperty(ref _fromDate, from, nameof(FromDate));
+            var toChanged = SetProperty(ref _toDate, to, nameof(ToDate));
+            _isSynchronizingDateState = false;
+
+            if (fromChanged || toChanged)
+            {
+                OnPropertyChanged(nameof(DayRangeDisplay));
+                SyncSelectorsFromDateRange();
+                QueueRefresh();
+            }
+        }
+
         private void ApplySalesEntries(System.Collections.Generic.List<SalesReportEntryDto> entries)
         {
             SalesEntries.Clear();
@@ -313,5 +443,17 @@ namespace hcmus_shop.ViewModels.Reports
         {
             return value.ToString("N0", CultureInfo.InvariantCulture) + " VND";
         }
+    }
+
+    public class ReportMonthOption
+    {
+        public ReportMonthOption(int monthNumber, string displayName)
+        {
+            MonthNumber = monthNumber;
+            DisplayName = displayName;
+        }
+
+        public int MonthNumber { get; }
+        public string DisplayName { get; }
     }
 }
