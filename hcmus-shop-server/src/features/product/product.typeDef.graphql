@@ -81,6 +81,8 @@ extend type Query {
     brandIds: [Int!]
     minPrice: Float
     maxPrice: Float
+    minStock: Int
+    maxStock: Int
     inStockOnly: Boolean
     includeInactive: Boolean
     sorts: [ProductSortInput!]

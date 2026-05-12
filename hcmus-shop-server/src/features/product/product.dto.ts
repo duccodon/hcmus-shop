@@ -13,6 +13,8 @@ export interface ProductFilterDto {
   brandIds?: number[];
   minPrice?: number;
   maxPrice?: number;
+  minStock?: number;
+  maxStock?: number;
   inStockOnly?: boolean;
   includeInactive?: boolean;
   sorts?: ProductSortDto[];

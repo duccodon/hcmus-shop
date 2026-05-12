@@ -67,8 +67,21 @@ export class ProductRepository {
         where.sellingPrice.lte = filter.maxPrice;
     }
 
-    if (filter.inStockOnly) {
-      where.stockQuantity = { gt: 0 };
+    if (
+      filter.inStockOnly ||
+      filter.minStock !== undefined ||
+      filter.maxStock !== undefined
+    ) {
+      where.stockQuantity = {};
+      if (filter.inStockOnly) {
+        where.stockQuantity.gt = 0;
+      }
+      if (filter.minStock !== undefined) {
+        where.stockQuantity.gte = filter.minStock;
+      }
+      if (filter.maxStock !== undefined) {
+        where.stockQuantity.lte = filter.maxStock;
+      }
     }
 
     const sorts = filter.sorts?.length

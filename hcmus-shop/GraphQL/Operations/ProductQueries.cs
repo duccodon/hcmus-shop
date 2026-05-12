@@ -13,6 +13,8 @@ namespace hcmus_shop.GraphQL.Operations
                 $brandIds: [Int!]
                 $minPrice: Float
                 $maxPrice: Float
+                $minStock: Int
+                $maxStock: Int
                 $inStockOnly: Boolean
                 $includeInactive: Boolean
                 $sorts: [ProductSortInput!]
@@ -31,6 +33,8 @@ namespace hcmus_shop.GraphQL.Operations
                     brandIds: $brandIds
                     minPrice: $minPrice
                     maxPrice: $maxPrice
+                    minStock: $minStock
+                    maxStock: $maxStock
                     inStockOnly: $inStockOnly
                     includeInactive: $includeInactive
                     sorts: $sorts

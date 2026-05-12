@@ -19,6 +19,8 @@ namespace hcmus_shop.Services.Products.Dto
         public List<int>? BrandIds { get; set; }
         public double? MinPrice { get; set; }
         public double? MaxPrice { get; set; }
+        public int? MinStock { get; set; }
+        public int? MaxStock { get; set; }
         public bool? InStockOnly { get; set; }
         public bool? IncludeInactive { get; set; }
         public List<ProductSortCriterionDto>? Sorts { get; set; }
@@ -71,6 +73,8 @@ namespace hcmus_shop.Services.Products.Dto
         public List<int>? BrandIds { get; set; }
         public double? MinPrice { get; set; }
         public double? MaxPrice { get; set; }
+        public int? MinStock { get; set; }
+        public int? MaxStock { get; set; }
         public bool? InStockOnly { get; set; }
         public bool? IncludeInactive { get; set; }
         public List<ProductSortCriterionDto>? Sorts { get; set; }

@@ -28,7 +28,11 @@ namespace hcmus_shop.ViewModels.Store
         private bool _isLoading;
         private string _errorMessage = string.Empty;
         private string _searchQuery = string.Empty;
-        private bool _inStockOnly = true;
+        private string _minPriceText = string.Empty;
+        private string _maxPriceText = string.Empty;
+        private string _minStockText = string.Empty;
+        private string _maxStockText = string.Empty;
+        private bool _inStockOnly;
         private int _currentPage = 1;
         private int _selectedPageSize = 12;
         private int _totalCount;
@@ -64,8 +68,8 @@ namespace hcmus_shop.ViewModels.Store
             OpenProductCommand = new RelayCommand<StoreProductCardViewModel?>(OpenProduct);
 
             SortFieldOptions.Add(new StoreSortOption("name", "Name"));
-            SortFieldOptions.Add(new StoreSortOption("price", "Price"));
-            SortFieldOptions.Add(new StoreSortOption("stock", "Stock"));
+            SortFieldOptions.Add(new StoreSortOption("sellingPrice", "Price"));
+            SortFieldOptions.Add(new StoreSortOption("stockQuantity", "Stock"));
             SortFieldOptions.Add(new StoreSortOption("createdAt", "Newest"));
 
             SortDirectionOptions.Add(new StoreSortOption("asc", "Ascending"));
@@ -154,6 +158,58 @@ namespace hcmus_shop.ViewModels.Store
                 {
                     CurrentPage = 1;
                     _ = LoadProductsAsync();
+                }
+            }
+        }
+
+        public string MinPriceText
+        {
+            get => _minPriceText;
+            set
+            {
+                if (SetProperty(ref _minPriceText, value) && IsInitialized)
+                {
+                    CurrentPage = 1;
+                    DebounceSearch();
+                }
+            }
+        }
+
+        public string MaxPriceText
+        {
+            get => _maxPriceText;
+            set
+            {
+                if (SetProperty(ref _maxPriceText, value) && IsInitialized)
+                {
+                    CurrentPage = 1;
+                    DebounceSearch();
+                }
+            }
+        }
+
+        public string MinStockText
+        {
+            get => _minStockText;
+            set
+            {
+                if (SetProperty(ref _minStockText, value) && IsInitialized)
+                {
+                    CurrentPage = 1;
+                    DebounceSearch();
+                }
+            }
+        }
+
+        public string MaxStockText
+        {
+            get => _maxStockText;
+            set
+            {
+                if (SetProperty(ref _maxStockText, value) && IsInitialized)
+                {
+                    CurrentPage = 1;
+                    DebounceSearch();
                 }
             }
         }
@@ -301,6 +357,10 @@ namespace hcmus_shop.ViewModels.Store
                     Search = string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery.Trim(),
                     BrandId = SelectedBrand?.Id,
                     CategoryId = SelectedCategory?.Id,
+                    MinPrice = ParseNullableDouble(MinPriceText),
+                    MaxPrice = ParseNullableDouble(MaxPriceText),
+                    MinStock = ParseNullableInt(MinStockText),
+                    MaxStock = ParseNullableInt(MaxStockText),
                     InStockOnly = InStockOnly,
                     SortBy = SelectedSortField?.Key ?? "name",
                     SortOrder = SelectedSortDirection?.Key ?? "asc",
@@ -509,6 +569,30 @@ namespace hcmus_shop.ViewModels.Store
                 IsEnabled = CurrentPage < TotalPages,
                 IsCurrent = false
             });
+        }
+
+        private static double? ParseNullableDouble(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            return double.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var parsed)
+                ? parsed
+                : null;
+        }
+
+        private static int? ParseNullableInt(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
+                ? parsed
+                : null;
         }
 
         private static IEnumerable<int> BuildPageNumbers(int currentPage, int totalPages)

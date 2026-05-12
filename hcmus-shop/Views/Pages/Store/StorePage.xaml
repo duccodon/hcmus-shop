@@ -38,48 +38,83 @@
                         <Border Grid.Row="1" Height="1" Background="{StaticResource DividerBrush}" />
 
                         <Border Grid.Row="2" Background="{StaticResource SelectionHighlight}" CornerRadius="12" Padding="14">
-                            <Grid ColumnSpacing="10">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="160" />
-                                    <ColumnDefinition Width="170" />
-                                    <ColumnDefinition Width="150" />
-                                    <ColumnDefinition Width="150" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBox
-                                    PlaceholderText="Search products..."
-                                    Style="{StaticResource SearchTextBoxStyle}"
-                                    Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                <ComboBox
-                                    Grid.Column="1"
-                                    Style="{StaticResource FormComboBoxStyle}"
-                                    ItemsSource="{x:Bind ViewModel.BrandOptions, Mode=OneWay}"
-                                    SelectedItem="{x:Bind ViewModel.SelectedBrand, Mode=TwoWay}"
-                                    DisplayMemberPath="Name" />
-                                <ComboBox
-                                    Grid.Column="2"
-                                    Style="{StaticResource FormComboBoxStyle}"
-                                    ItemsSource="{x:Bind ViewModel.CategoryOptions, Mode=OneWay}"
-                                    SelectedItem="{x:Bind ViewModel.SelectedCategory, Mode=TwoWay}"
-                                    DisplayMemberPath="Name" />
-                                <ComboBox
-                                    Grid.Column="3"
-                                    Style="{StaticResource FormComboBoxStyle}"
-                                    ItemsSource="{x:Bind ViewModel.SortFieldOptions, Mode=OneWay}"
-                                    SelectedItem="{x:Bind ViewModel.SelectedSortField, Mode=TwoWay}"
-                                    DisplayMemberPath="Label" />
-                                <ComboBox
-                                    Grid.Column="4"
-                                    Style="{StaticResource FormComboBoxStyle}"
-                                    ItemsSource="{x:Bind ViewModel.SortDirectionOptions, Mode=OneWay}"
-                                    SelectedItem="{x:Bind ViewModel.SelectedSortDirection, Mode=TwoWay}"
-                                    DisplayMemberPath="Label" />
-                                <ToggleSwitch
-                                    Grid.Column="5"
-                                    Header="In stock only"
-                                    IsOn="{x:Bind ViewModel.InStockOnly, Mode=TwoWay}"
-                                    VerticalAlignment="Center" />
+                            <Grid RowSpacing="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="160" />
+                                        <ColumnDefinition Width="170" />
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox
+                                        PlaceholderText="Search products..."
+                                        Style="{StaticResource SearchTextBoxStyle}"
+                                        Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <ComboBox
+                                        Grid.Column="1"
+                                        Style="{StaticResource FormComboBoxStyle}"
+                                        ItemsSource="{x:Bind ViewModel.BrandOptions, Mode=OneWay}"
+                                        SelectedItem="{x:Bind ViewModel.SelectedBrand, Mode=TwoWay}"
+                                        DisplayMemberPath="Name" />
+                                    <ComboBox
+                                        Grid.Column="2"
+                                        Style="{StaticResource FormComboBoxStyle}"
+                                        ItemsSource="{x:Bind ViewModel.CategoryOptions, Mode=OneWay}"
+                                        SelectedItem="{x:Bind ViewModel.SelectedCategory, Mode=TwoWay}"
+                                        DisplayMemberPath="Name" />
+                                    <ComboBox
+                                        Grid.Column="3"
+                                        Style="{StaticResource FormComboBoxStyle}"
+                                        ItemsSource="{x:Bind ViewModel.SortFieldOptions, Mode=OneWay}"
+                                        SelectedItem="{x:Bind ViewModel.SelectedSortField, Mode=TwoWay}"
+                                        DisplayMemberPath="Label" />
+                                    <ComboBox
+                                        Grid.Column="4"
+                                        Style="{StaticResource FormComboBoxStyle}"
+                                        ItemsSource="{x:Bind ViewModel.SortDirectionOptions, Mode=OneWay}"
+                                        SelectedItem="{x:Bind ViewModel.SelectedSortDirection, Mode=TwoWay}"
+                                        DisplayMemberPath="Label" />
+                                    <ToggleSwitch
+                                        Grid.Column="5"
+                                        Header="In stock only"
+                                        IsOn="{x:Bind ViewModel.InStockOnly, Mode=TwoWay}"
+                                        VerticalAlignment="Center" />
+                                </Grid>
+
+                                <Grid Grid.Row="1" ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="160" />
+                                        <ColumnDefinition Width="160" />
+                                        <ColumnDefinition Width="160" />
+                                        <ColumnDefinition Width="160" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox
+                                        PlaceholderText="Min price"
+                                        Style="{StaticResource SearchTextBoxStyle}"
+                                        Text="{x:Bind ViewModel.MinPriceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBox
+                                        Grid.Column="1"
+                                        PlaceholderText="Max price"
+                                        Style="{StaticResource SearchTextBoxStyle}"
+                                        Text="{x:Bind ViewModel.MaxPriceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBox
+                                        Grid.Column="2"
+                                        PlaceholderText="Min stock"
+                                        Style="{StaticResource SearchTextBoxStyle}"
+                                        Text="{x:Bind ViewModel.MinStockText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBox
+                                        Grid.Column="3"
+                                        PlaceholderText="Max stock"
+                                        Style="{StaticResource SearchTextBoxStyle}"
+                                        Text="{x:Bind ViewModel.MaxStockText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                </Grid>
                             </Grid>
                         </Border>
 

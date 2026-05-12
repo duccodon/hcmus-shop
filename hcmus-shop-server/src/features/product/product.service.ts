@@ -17,6 +17,14 @@ export class ProductService {
       throw new Error("Minimum price cannot be greater than maximum price.");
     }
 
+    if (
+      filter.minStock !== undefined &&
+      filter.maxStock !== undefined &&
+      filter.minStock > filter.maxStock
+    ) {
+      throw new Error("Minimum stock cannot be greater than maximum stock.");
+    }
+
     if (filter.sorts?.length) {
       for (const sort of filter.sorts) {
         this.validateSort(sort);
