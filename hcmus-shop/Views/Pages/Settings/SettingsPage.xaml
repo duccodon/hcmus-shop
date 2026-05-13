@@ -80,7 +80,8 @@
             <!-- Backup section -->
             <Border Grid.Row="3" CornerRadius="12" Padding="20"
                     Background="{StaticResource CardBackground}"
-                    BorderBrush="{StaticResource DividerBrush}" BorderThickness="1">
+                    BorderBrush="{StaticResource DividerBrush}" BorderThickness="1"
+                    Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel Spacing="12">
                     <TextBlock FontSize="16" FontWeight="SemiBold"
                                Foreground="{StaticResource TextPrimary}"
