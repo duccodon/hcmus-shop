@@ -13,6 +13,7 @@ namespace hcmus_shop.ViewModels.Settings
     {
         private readonly ISettingsService _settings;
         private readonly IBackupService _backup;
+        private readonly IAuthService _authService;
 
         [ObservableProperty]
         private int _pageSize;
@@ -30,14 +31,16 @@ namespace hcmus_shop.ViewModels.Settings
         private bool _isBusy;
 
         public ObservableCollection<int> PageSizeOptions { get; } = new() { 5, 10, 15, 20 };
+        public bool IsAdmin => _authService.HasRole("Admin");
 
         /// <summary>Set by SettingsPage so FilePicker can be parented properly.</summary>
         public IntPtr WindowHandle { get; set; }
 
-        public SettingsViewModel(ISettingsService settings, IBackupService backup)
+        public SettingsViewModel(ISettingsService settings, IBackupService backup, IAuthService authService)
         {
             _settings = settings;
             _backup = backup;
+            _authService = authService;
             _pageSize = settings.PageSize;
             _rememberLastScreen = settings.RememberLastScreen;
         }
